@@ -1,191 +1,207 @@
-define(['backbone'], function(Backbone) {
+define(['backbone', 'SocketConnection', 'commandsMap'], function (Backbone, SocketConnection, commandsMap) {
 
-	return Backbone.Model.extend({
+    return Backbone.Model.extend({
 
-	  defaults: {
-	  	isRunning : false
-	  },
+        defaults: {
+            isRunning: false
+        },
 
-		initialize: function(atts, vals) {
+        initialize: function (atts, vals) {
 
-			this.app = vals.app;
-			var ws = vals.workspace;
-			this.workspace = ws;
+            this.socket = new SocketConnection();
+            this.app = vals.app;
+            var ws = vals.workspace;
+            this.workspace = ws;
 
-			this.set('id', ws.get('_id') );
+            this.set('id', ws.get('_id'));
 
-			this.reset();
+            this.reset();
 
-			vals.workspace.get('connections').on('add', this.addConnection, this );
-			vals.workspace.get('connections').on('remove', this.removeConnection, this );
+            vals.workspace.get('connections').on('add', this.addConnection, this);
+            vals.workspace.get('connections').on('remove', this.removeConnection, this);
 
-			vals.workspace.get('nodes').on('add', this.addNode, this );
-			vals.workspace.get('nodes').on('remove', this.removeNode, this );
+            vals.workspace.get('nodes').on('add', this.addNode, this);
+            vals.workspace.get('nodes').on('remove', this.removeNode, this);
 
-			this.runCount = 0;
-			this.averageRunTime = 0;
+            this.runCount = 0;
+            this.averageRunTime = 0;
 
-	  },
+        },
 
-	  post: function(data, quiet){
+        post: function (data, quiet) {
 
-	  	data.workspace_id = this.workspace.get('_id');
-	  	this.worker.postMessage(data);
+            data.workspace_id = this.workspace.get('_id');
+            this.worker.postMessage(data);
 
-	  	if (quiet) return;
+            if (quiet) return;
 
-	  	this.trigger('post', data );
+            this.trigger('post', data);
 
-	  },
+        },
 
-	  onWorkerMessage: function(data){
+        onWorkerMessage: function (data) {
 
-	  	var cb = this["on_" + data.kind];
-	  	if ( cb ) cb.call(this, data);
-			
-	  },
+            var cb = this["on_" + data.kind];
+            if (cb) cb.call(this, data);
 
-	  initWorker: function(){
+        },
 
-	  	this.worker = new Worker("scripts/lib/flood/flood_runner.js");
+        initWorker: function () {
 
-	  	var that = this;
+            this.worker = new Worker('scripts/lib/flood/flood_runner.js');
 
-			this.worker.addEventListener('message', function(e) {
-				return that.onWorkerMessage.call(that, e.data);	
-			}, false);
+            var that = this;
 
-	  },
+            this.worker.addEventListener('message', function (e) {
+                //TO DO: Send actual commands in JSON format which can be parsed by server
+                if (commandsMap.hasOwnProperty(e.data.kind)) {
+                    var inst = new commandsMap[e.data.kind]({}, e.data);
+                    if (inst instanceof Backbone.Collection) {
+                        inst.fromDataObject(e.data);
+                        inst.each(function(obj) {
+                            var str = JSON.stringify(obj);
+                            that.socket.send(str);
+                        });
+                    }
+                    else {
+                        var str = JSON.stringify(inst);
+                        that.socket.send(str);
+                    }
+                }
 
-	  initWorkspace: function(){
+                return that.onWorkerMessage.call(that, e.data);
+            }, false);
 
-	  	this.post({kind: 'addWorkspace'});
+        },
 
-	  	var wsc = this.workspace.toJSON();
-	  	var ncb = function(){ this.updateNode( node ); };
+        initWorkspace: function () {
 
-	  	var that = this;
-	  	this.workspace.get('nodes').each(function(x){
-	  		that.watchNodeEvents.call(that, x);
-	  	});
+            this.post({ kind: 'addWorkspace' });
 
-	  	wsc.kind = "setWorkspaceContents";
-  	  this.post( wsc );
+            var wsc = this.workspace.toJSON();
+            var ncb = function () { this.updateNode(node); };
 
-	  },
+            var that = this;
+            this.workspace.get('nodes').each(function (x) {
+                that.watchNodeEvents.call(that, x);
+            });
 
-	  on_nodeEvalComplete: function(data){
+            wsc.kind = "setWorkspaceContents";
+            this.post(wsc);
 
-	  	var node = this.workspace.get('nodes').get( data._id );
-	  	if (node)
-	  		node.onEvalComplete( data.isNew, data.value, data.prettyValue );
+        },
 
-	  },
+        on_nodeEvalComplete: function (data) {
 
-	 	on_nodeEvalFailed: function(data){
+            var node = this.workspace.get('nodes').get(data._id);
+            if (node)
+                node.onEvalComplete(data.isNew, data.value, data.prettyValue);
 
-	 		var node = this.workspace.get('nodes').get( data._id );
-	  	if (node)
-	  		this.workspace.get('nodes').get( data._id ).onEvalFailed(data.exception);
+        },
 
-	  },
+        on_nodeEvalFailed: function (data) {
 
-	 	on_nodeEvalBegin: function(data){
+            var node = this.workspace.get('nodes').get(data._id);
+            if (node)
+                this.workspace.get('nodes').get(data._id).onEvalFailed(data.exception);
+        },
 
-	 		var node = this.workspace.get('nodes').get( data._id );
-	  	if (node)
-	  		this.workspace.get('nodes').get( data._id ).onEvalBegin( data.isNew );
+        on_nodeEvalBegin: function (data) {
 
-	  },
+            var node = this.workspace.get('nodes').get(data._id);
+            if (node)
+                this.workspace.get('nodes').get(data._id).onEvalBegin(data.isNew);
 
-	  on_run: function(data){
+        },
 
-	  	console.log( data );
-	  	this.set('isRunning', false);
-	  	this.runCount++;
+        on_run: function (data) {
 
-	  },
+            console.log(data);
+            this.set('isRunning', false);
+            this.runCount++;
 
-	  cancel: function(){
+        },
 
-	  	this.set('isRunning', false);
-	  	this.worker.terminate();
-	  	this.reset();
+        cancel: function () {
 
-	  },
+            this.set('isRunning', false);
+            this.worker.terminate();
+            this.reset();
 
-	  runQueued : false,
+        },
 
-	  run: _.throttle(function( bottomIds ){
+        runQueued: false,
 
-	  	this.post({ kind: "run", bottom_ids: bottomIds });
-	  	this.set('isRunning', true);
+        run: _.throttle(function (bottomIds) {
 
-	  }, 120),
+            this.post({ kind: "run", bottom_ids: bottomIds });
+            this.set('isRunning', true);
 
-	  watchNodeEvents: function( node ){
+        }, 120),
 
-	  	var u = function(){ this.updateNode( node ); };
-	  	node.on('change:replication', u, this );
-      node.on('change:ignoreDefaults', u, this);
-  		node.on('updateRunner', u, this );
+        watchNodeEvents: function (node) {
 
-	  },
+            var u = function () { this.updateNode(node); };
+            node.on('change:replication', u, this);
+            node.on('change:ignoreDefaults', u, this);
+            node.on('updateRunner', u, this);
 
-	  updateNode: function( node ){
+        },
 
-	  	var n = node.serialize();
-	  	n.kind = "updateNode";
+        updateNode: function (node) {
 
-	  	this.post( n );
+            var n = node.serialize();
+            n.kind = "updateNode";
 
-	  },
+            this.post(n);
 
-	  addNode: function(node){
+        },
 
-	  	var n = node.serialize();
-	  	n.kind = "addNode";
-	  	this.watchNodeEvents( node );
+        addNode: function (node) {
 
-	  	this.post(n);
+            var n = node.serialize();
+            n.kind = "addNode";
+            this.watchNodeEvents(node);
 
-	  },
+            this.post(n);
 
-	  removeNode: function(node){
+        },
 
-	  	var n = node.serialize();
-	  	n.kind = "removeNode";
-	  	this.post( n );
+        removeNode: function (node) {
 
-	  },
+            var n = node.serialize();
+            n.kind = "removeNode";
+            this.post(n);
 
-	  addConnection: function(connection){
+        },
 
-	  	var c = connection.toJSON();
-	  	c.kind = "addConnection";
-	  	c.id = connection.get('_id');
+        addConnection: function (connection) {
 
-	  	this.post(c);
+            var c = connection.toJSON();
+            c.kind = "addConnection";
+            c.id = connection.get('_id');
 
-	  },
+            this.post(c);
 
-	  removeConnection: function(connection){
+        },
 
-	  	var c = connection.toJSON();
-	  	c.kind = "removeConnection";
-	  	c.id = connection.get('endNodeId');
-	  	c.portIndex = connection.get('endPortIndex');
+        removeConnection: function (connection) {
 
-	  	this.post( c );
+            var c = connection.toJSON();
+            c.kind = "removeConnection";
+            c.id = connection.get('endNodeId');
+            c.portIndex = connection.get('endPortIndex');
 
-	  },	
+            this.post(c);
 
-	  reset: function(){
+        },
 
-	  	this.initWorker();
-	  	this.initWorkspace();
+        reset: function () {
 
-	  }
+            this.initWorker();
+            this.initWorkspace();
 
-	});
+        }
+
+    });
 });

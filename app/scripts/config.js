@@ -1,4 +1,5 @@
 /*global require*/
+//TO DO: Move this use strict directive inside modules, because this ising is not correct and has influence on 3-rd party JS modules
 'use strict';
 
 require.config({
@@ -96,13 +97,13 @@ require.config({
         }
     },
     paths: {
-
         // backbone collections
         Connections: 'collections/Connections',
         SearchElements: 'collections/SearchElements',
         Nodes: 'collections/Nodes',
         Workspaces: 'collections/Workspaces',
         WorkspaceBrowserElements: 'collections/WorkspaceBrowserElements',
+        MakeConnectionPair: 'collections/MakeConnectionPair',
 
         // backbone models
         App: 'models/App',
@@ -116,6 +117,20 @@ require.config({
         Login: 'models/Login',
         WorkspaceBrowserElement: 'models/WorkspaceBrowserElement',
         WorkspaceBrowser: 'models/WorkspaceBrowser',
+        SocketConnection: 'models/SocketConnection',
+
+        CreateNodeCommand: 'models/commands/CreateNodeCommand',
+        CreateNoteCommand: 'models/commands/CreateNoteCommand',
+        DeleteModelCommand: 'models/commands/DeleteModelCommand',
+        MakeConnectionCommand: 'models/commands/MakeConnectionCommand',
+        ModelEventCommand: 'models/commands/ModelEventCommand',
+        RecordableCommand: 'models/commands/RecordableCommand',
+        RunCancelCommand: 'models/commands/RunCancelCommand',
+        UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
+
+        //helpers
+        commandsMap: 'helpers/CommandsMap',
+        staticHelpers: 'helpers/StaticHelpers',
 
         // backbone views
         AppView: 'views/AppView',
@@ -129,7 +144,7 @@ require.config({
         LoginView: 'views/LoginView',
         WorkspaceBrowserElementView: 'views/WorkspaceBrowserElementView',
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
-        
+
         // node backbone views
         NodeViewTypes: 'views/NodeViews/NodeViews',
         BaseNodeView: 'views/NodeViews/Base',

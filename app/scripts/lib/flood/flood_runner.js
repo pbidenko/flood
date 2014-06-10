@@ -173,7 +173,7 @@ on_addConnection = function(data){
 
 	en.inputs[ei].connect( sn, si );
 
-	return success({ kind: "addConnection" }, data.silent);
+	return success({ kind: "addConnection", startNodeId: data.startNodeId, startPortIndex: data.startPortIndex, endNodeId: data.endNodeId, endPortIndex: data.endPortIndex}, data.silent);
 
 };
 
@@ -218,7 +218,7 @@ on_updateNode = function(data){
 
 	node.setDirty();
 
-	return success({ kind: "updateNode", workspace_id: data.workspace_id, _id: data._id }, data.silent);
+	return success({ kind: "updateNode", workspace_id: data.workspace_id, _id: data._id, newValue: data.extra }, data.silent);
 
 };
 
@@ -250,7 +250,7 @@ on_addNode = function(data){
 
 	ws.nodes.push(node);
 
-	return success({ kind: "addNode", workspace_id: data.workspace_id, _id: data._id }, data.silent);
+	return success({ kind: "addNode", workspace_id: data.workspace_id, _id: data._id, nodeName: data.typeName, x: data.position[0], y: data.position[1] }, data.silent);
 
 };
 
