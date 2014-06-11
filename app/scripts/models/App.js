@@ -81,10 +81,6 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     newNodePosition: [0,0],
 
-    makeId: function(){
-      return Math.floor(Math.random() * 1e9);
-    },
-
     getCurrentWorkspace: function(){
       return this.get('workspaces').get( this.get('currentWorkspace') );
     },

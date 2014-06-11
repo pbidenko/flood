@@ -8,7 +8,7 @@ define(['RecordableCommand'], function (RecordableCommand) {
             nodeName: '',
             x: 0,
             y: 0,
-            defaultPosition: true,
+            defaultPosition: false,
             transformCoordinates: false
         },
 
