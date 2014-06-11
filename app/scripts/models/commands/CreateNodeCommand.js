@@ -1,4 +1,4 @@
-define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, staticHelpers) {
+define(['RecordableCommand'], function (RecordableCommand) {
     'use strict';
 
     return RecordableCommand.extend({
@@ -13,8 +13,7 @@ define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, stat
         },
 
         initialize : function (attr, options) {
-            //TO DO: Resolve issue with id's (server requires GUID, client int
-            this.set('nodeId', staticHelpers.guid());
+            this.set('nodeId', options._id);
             this.set('nodeName', options.nodeName);
             this.set('x', options.x);
             this.set('y', options.y);
