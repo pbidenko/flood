@@ -1,5 +1,5 @@
 /*global require*/
-//TO DO: Move this use strict directive inside modules, because this ising is not correct and has influence on 3-rd party JS modules
+//TO DO: Move this use strict directive inside modules, because this using is not correct and has influence on 3-rd party JS modules
 'use strict';
 
 require.config({
@@ -103,7 +103,6 @@ require.config({
         Nodes: 'collections/Nodes',
         Workspaces: 'collections/Workspaces',
         WorkspaceBrowserElements: 'collections/WorkspaceBrowserElements',
-        MakeConnectionPair: 'collections/MakeConnectionPair',
 
         // backbone models
         App: 'models/App',
@@ -112,7 +111,9 @@ require.config({
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
-        Runner: 'models/Runner',
+        AbstractRunner: 'models/Runner',
+        //Use DynamoRunner class in case of websocket connection, otherwise use FloodRunner
+        Runner: 'models/DynamoRunner', // 'models/FloodRunner'
         Help: 'models/Help',
         Login: 'models/Login',
         WorkspaceBrowserElement: 'models/WorkspaceBrowserElement',
@@ -127,6 +128,8 @@ require.config({
         RecordableCommand: 'models/commands/RecordableCommand',
         RunCancelCommand: 'models/commands/RunCancelCommand',
         UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
+
+        Message: 'models/messages/Message',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',
@@ -174,9 +177,8 @@ require.config({
         jqueryuiwidget: '../bower_components/jquery.ui/ui/jquery.ui.widget',
         jquery: '../bower_components/jquery/jquery',
         backbone: '../bower_components/backbone-amd/backbone',
-        underscore: '../bower_components/underscore-amd/underscore',
+        underscore: '../bower_components/underscore-amd/underscore'
     }
-
 });
 
 

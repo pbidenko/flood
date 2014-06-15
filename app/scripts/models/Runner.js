@@ -1,4 +1,4 @@
-define(['backbone', 'SocketConnection', 'commandsMap'], function (Backbone, SocketConnection, commandsMap) {
+define(['backbone'], function (Backbone) {
 
     return Backbone.Model.extend({
 
@@ -8,7 +8,6 @@ define(['backbone', 'SocketConnection', 'commandsMap'], function (Backbone, Sock
 
         initialize: function (atts, vals) {
 
-            this.socket = new SocketConnection();
             this.app = vals.app;
             var ws = vals.workspace;
             this.workspace = ws;
@@ -28,49 +27,17 @@ define(['backbone', 'SocketConnection', 'commandsMap'], function (Backbone, Sock
 
         },
 
-        post: function (data, quiet) {
-
-            data.workspace_id = this.workspace.get('_id');
-            this.worker.postMessage(data);
+        postMessage: function(data, quiet) {
 
             if (quiet) return;
 
             this.trigger('post', data);
-
         },
 
-        onWorkerMessage: function (data) {
+        post: function (data, quiet) {
 
-            var cb = this["on_" + data.kind];
-            if (cb) cb.call(this, data);
-
-        },
-
-        initWorker: function () {
-
-            this.worker = new Worker('scripts/lib/flood/flood_runner.js');
-
-            var that = this;
-
-            this.worker.addEventListener('message', function (e) {
-                //TO DO: Send actual commands in JSON format which can be parsed by server
-                if (commandsMap.hasOwnProperty(e.data.kind)) {
-                    var inst = new commandsMap[e.data.kind]({}, e.data);
-                    if (inst instanceof Backbone.Collection) {
-                        inst.fromDataObject(e.data);
-                        inst.each(function(obj) {
-                            var str = JSON.stringify(obj);
-                            that.socket.send(str);
-                        });
-                    }
-                    else {
-                        var str = JSON.stringify(inst);
-                        that.socket.send(str);
-                    }
-                }
-
-                return that.onWorkerMessage.call(that, e.data);
-            }, false);
+            data.workspace_id = this.workspace.get('_id');
+            this.postMessage(data, quiet);
 
         },
 
@@ -88,7 +55,6 @@ define(['backbone', 'SocketConnection', 'commandsMap'], function (Backbone, Sock
 
             wsc.kind = "setWorkspaceContents";
             this.post(wsc);
-
         },
 
         on_nodeEvalComplete: function (data) {
@@ -125,7 +91,6 @@ define(['backbone', 'SocketConnection', 'commandsMap'], function (Backbone, Sock
         cancel: function () {
 
             this.set('isRunning', false);
-            this.worker.terminate();
             this.reset();
 
         },
@@ -197,10 +162,7 @@ define(['backbone', 'SocketConnection', 'commandsMap'], function (Backbone, Sock
         },
 
         reset: function () {
-
-            this.initWorker();
             this.initWorkspace();
-
         }
 
     });
