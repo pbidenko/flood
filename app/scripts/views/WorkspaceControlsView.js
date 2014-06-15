@@ -20,7 +20,10 @@ define(['backbone', 'List', 'SearchElementView'], function(Backbone, List, Searc
       'click #undo-button': 'undoClick',
       'click #redo-button': 'redoClick',
       'click #copy-button': 'copyClick',
-      'click #paste-button': 'pasteClick'
+      'click #paste-button': 'pasteClick',
+      'click #zoomin-button': 'zoominClick',
+      'click #zoomout-button': 'zoomoutClick',
+      'click #zoomreset-button': 'zoomresetClick'
     },
 
     render: function(arg) {
@@ -88,13 +91,26 @@ define(['backbone', 'List', 'SearchElementView'], function(Backbone, List, Searc
       this.currentWorkspace().redo();
     },
 
+    zoomresetClick: function(){
+      this.currentWorkspace().set('zoom', 1.0);
+    },
+
+    zoominClick: function(){
+      this.currentWorkspace().set('zoom', this.currentWorkspace().get('zoom') + 0.035);
+    },
+
+    zoomoutClick: function(){
+      this.currentWorkspace().set('zoom', this.currentWorkspace().get('zoom') - 0.035);
+    },
+
     getWorkspaceCenter: function(){
       var w = this.appView.currentWorkspaceView.$el.width()
         , h = this.appView.currentWorkspaceView.$el.height()
         , ho = this.appView.currentWorkspaceView.$el.scrollTop()
-        , wo = this.appView.currentWorkspaceView.$el.scrollLeft();
+        , wo = this.appView.currentWorkspaceView.$el.scrollLeft()
+        , zoom = 1 / this.currentWorkspace().get('zoom');
 
-      return [wo + w / 2, ho + h / 2];
+      return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
     },
 
     addNode: function(name){

@@ -13,6 +13,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
       this.app = this.model.app;
 
       this.$workspace = $('<div/>', {class: 'workspace'});
+
       this.$workspace_back = $('<div/>', {class: 'workspace_back'});
       this.$workspace_canvas = $('<svg class="workspace_canvas" xmlns="http://www.w3.org/2000/svg" version="1.1" />');
 
@@ -25,6 +26,8 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
       this.listenTo(this.model, 'change:connections', function() {
         that.cleanup().renderConnections();
       });
+
+      this.model.on('change:zoom', this.updateZoom, this );
 
       this.model.on('change:isRunning', this.renderRunnerStatus, this);
 
@@ -43,10 +46,6 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
       
     },
 
-    onChangeCurrent: function() {
-
-    },
-
     events: {
       'click .workspace_back':  'deselectAll',
       'dblclick .workspace_back':  'showNodeSearch'
@@ -59,7 +58,17 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
               .renderNodes()
               .renderConnections()
               .renderNodes()
-              .renderRunnerStatus();
+              .renderRunnerStatus()
+              .updateZoom();
+
+    },
+
+    updateZoom: function(){
+
+      this.$workspace.css('transform', 'scale(' + this.model.get('zoom') + ')' );
+      this.$workspace.css('transform-origin', '0 0');
+
+      return this;
 
     },
 
@@ -67,17 +76,8 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
     runnerTemplate : _.template( $('#workspace-runner-status-template').html() ),
     renderRunnerStatus: function(){
 
-      if ( !this.$runnerStatus ){
-        this.$runnerStatus = $('<div/>', {class: 'workspace-runner-status'});
-        this.$runnerStatus.html( this.runnerTemplate({}) );
-        this.$el.append( this.$runnerStatus );
-      }
-
-      if ( this.model.get('isRunning') ){
-        this.$runnerStatus.show();
-      } else {
-        this.$runnerStatus.hide();
-      }
+      // placeholder for future work
+      return this;
 
     },
 
@@ -99,7 +99,9 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
 
     proxyDrag: function(event){
       var offset = this.$workspace.offset()
-        , posInWorkspace = [event.pageX - offset.left, event.pageY - offset.top];
+        , zoom = this.model.get('zoom')
+        , posInWorkspace = [ (1 / zoom) * (event.pageX - offset.left), (1 / zoom) * ( event.pageY - offset.top) ];
+
       this.model.proxyConnection.set('endProxyPosition', posInWorkspace);
     },
 
