@@ -45,7 +45,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.set('connections', new Connections( atts.connections, { workspace: this}) );
 
       // tell all nodes about connections
-      _.each( this.get('connections').where({startProxy: false, endProxy: false}), function(ele, i) {
+      _.each( this.get('connections').where({startProxy: false, endProxy: false}), function(ele) {
         this.get('nodes').get(ele.get('startNodeId')).connectPort( ele.get('startPortIndex'), true, ele);
         this.get('nodes').get(ele.get('endNodeId')).connectPort(ele.get('endPortIndex'), false, ele);
       }, this);
@@ -119,7 +119,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     parse : function(resp) {
       resp.nodes = new Nodes( resp.nodes );
-      resp.connections = new Connections( resp.connections )
+      resp.connections = new Connections( resp.connections );
       return resp;
     },
 
@@ -137,7 +137,6 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
     removeSelected: function(){
 
       // get all selected nodes
-      var that = this;
       var nodeFound = false;
       var nodesToRemove = {};
       this.get('nodes')
@@ -190,7 +189,6 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
     copy: function(){
 
       // get all selected nodes
-      var that = this;
       var nodeFound = false;
       var copyNodes = {};
       this.get('nodes')
@@ -221,7 +219,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
           }
         });
 
-        console.log(connCount, " connections copied")
+        console.log(connCount, " connections copied");
 
       this.app.set('clipboard', { nodes: copyNodes, connections: copyConns });
 
@@ -390,10 +388,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       },
 
       addNode: function(data){
-
         var node = new Node( data, { workspace: this });
         this.get('nodes').add( node );
-
       },
 
       removeNode: function(data){
