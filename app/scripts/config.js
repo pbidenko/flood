@@ -1,4 +1,5 @@
 /*global require*/
+//TO DO: Move this use strict directive inside modules, because this using is not correct and has influence on 3-rd party JS modules
 'use strict';
 
 require.config({
@@ -96,7 +97,6 @@ require.config({
         }
     },
     paths: {
-
         // backbone collections
         Connections: 'collections/Connections',
         SearchElements: 'collections/SearchElements',
@@ -112,11 +112,29 @@ require.config({
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
-        Runner: 'models/Runner',
+        AbstractRunner: 'models/Runner',
+        //Use DynamoRunner class in case of websocket connection, otherwise use FloodRunner
+        Runner: 'models/DynamoRunner', // 'models/FloodRunner'
         Help: 'models/Help',
         Login: 'models/Login',
         WorkspaceBrowserElement: 'models/WorkspaceBrowserElement',
         WorkspaceBrowser: 'models/WorkspaceBrowser',
+        SocketConnection: 'models/SocketConnection',
+
+        CreateNodeCommand: 'models/commands/CreateNodeCommand',
+        CreateNoteCommand: 'models/commands/CreateNoteCommand',
+        DeleteModelCommand: 'models/commands/DeleteModelCommand',
+        MakeConnectionCommand: 'models/commands/MakeConnectionCommand',
+        ModelEventCommand: 'models/commands/ModelEventCommand',
+        RecordableCommand: 'models/commands/RecordableCommand',
+        RunCancelCommand: 'models/commands/RunCancelCommand',
+        UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
+
+        Message: 'models/messages/Message',
+
+        //helpers
+        commandsMap: 'helpers/CommandsMap',
+        staticHelpers: 'helpers/StaticHelpers',
 
         // backbone views
         AppView: 'views/AppView',
@@ -131,7 +149,7 @@ require.config({
         LoginView: 'views/LoginView',
         WorkspaceBrowserElementView: 'views/WorkspaceBrowserElementView',
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
-        
+
         // node backbone views
         NodeViewTypes: 'views/NodeViews/NodeViews',
         BaseNodeView: 'views/NodeViews/Base',
@@ -161,9 +179,8 @@ require.config({
         jqueryuiwidget: '../bower_components/jquery.ui/ui/jquery.ui.widget',
         jquery: '../bower_components/jquery/jquery',
         backbone: '../bower_components/backbone-amd/backbone',
-        underscore: '../bower_components/underscore-amd/underscore',
+        underscore: '../bower_components/underscore-amd/underscore'
     }
-
 });
 
 
