@@ -36,7 +36,15 @@ body {
 	z-index: 100;
 }
 
-#workspace-search-input-container {
+.workspace-server-search {
+    bottom: 0px;
+    left: 600px;
+    font-size: 11px;
+    position: absolute;
+    z-index: 100;
+}
+
+#workspace-search-input-container #workspace-server-search-input-container{
 	padding-left: 10px;
 }
 

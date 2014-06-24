@@ -131,6 +131,11 @@ require.config({
         UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
 
         Message: 'models/messages/Message',
+        ModelsListMessage: 'models/messages/ModelsListMessage',
+
+        //Responses
+        ComputationResponse: 'models/responses/ComputationResponse',
+        ContentResponse: 'models/responses/ContentResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',

@@ -29,7 +29,22 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
       if ( atts.typeName != null && FLOOD.nodeTypes[atts.typeName] != undefined){
         this.set( 'type', new FLOOD.nodeTypes[ atts.typeName ]() );
       } else {
-        this.set( 'type', new FLOOD.nodeTypes.Add() );
+
+        var elems = vals.workspace.app.SearchElements.where({ name: atts.typeName });
+        if (elems.length > 0) {
+          var inPort = elems[0].get('inPort');
+          var outPort = elems[0].get('outPort');
+        }
+        // Create dummy ports if no connection with server established.
+        else if (atts.ignoreDefaults){
+          var inPort = new Array();
+
+          var a = "A";
+          for (var i = a.charCodeAt(0); i < a.charCodeAt(0) + atts.ignoreDefaults.length; i++) {
+            inPort.push(String.fromCharCode(i));
+          }
+        }
+        this.set( 'type', new FLOOD.nodeTypes.ServerNode(inPort, outPort) );
       }
 
       if (atts.extra){
@@ -182,7 +197,7 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
         , ports = isOutput ? type.outputs : type.inputs;
 
       if ( ports.length > index )
-        return ports[index].type
+        return ports[index].type;
 
       return null;
 

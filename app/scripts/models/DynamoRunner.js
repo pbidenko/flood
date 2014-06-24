@@ -1,20 +1,23 @@
-define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateNodeCommand', 'MakeConnectionCommand'],
-    function (AbstractRunner, SocketConnection, commandsMap, Message, CreateNodeCommand, MakeConnectionCommand) {
+define(['AbstractRunner', 'commandsMap', 'Message', 'CreateNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
+    function (AbstractRunner, commandsMap, Message, CreateNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
+
+    var app;
+
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
+            app = vals.workspace.app;
             AbstractRunner.prototype.initialize.call(this, attrs, vals);
         },
 
         postMessage: function (data, quiet) {
             if (commands.hasOwnProperty(data.kind)) {
-                this.socket.send(commands[data.kind].call(this, data));
+                app.socket.send(commands[data.kind].call(this, data));
             }
 
             AbstractRunner.prototype.postMessage.call(this, data, quiet);
         },
 
         reset: function () {
-            this.socket = new SocketConnection();
             AbstractRunner.prototype.reset.call(this);
         }
     });
@@ -42,6 +45,7 @@ define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateN
                 commands = [];
             for( ; i < len; i++ ){
                 commands.push(new CreateNodeCommand( {}, data.nodes[i] ));
+                Array.prototype.push.apply(commands, new UpdateModelValueCommand( {}, data.nodes[i] ));
             }
 
             for( i = 0, len = data.connections.length; i < len; i++ ){

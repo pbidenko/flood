@@ -1,4 +1,4 @@
-﻿define(['backbone'], function (Backbone) {
+﻿define(['backbone', 'ComputationResponse', 'ContentResponse'], function (Backbone, ComputationResponse, ContentResponse) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -9,7 +9,11 @@
             pingTimeout: 1000,
             url: 'ws://127.0.0.1:2100'
         },
-        messageStack = [];
+        messageStack = [],
+        responseMap = {
+            'DynamoWebServer.Responses.ContentResponse, DynamoWebServer': ContentResponse,
+            'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': ComputationResponse
+        };
 
     return Backbone.Model.extend({
 
@@ -33,7 +37,14 @@
                 };
 
                 socket.onmessage = function (event) {
-                    console.log('Socket success: ' + event.data);
+                    //console.log('Socket success: ' + event.data);
+                    var response = JSON.parse( event.data )
+                    if(responseMap.hasOwnProperty(response.$type)){
+                        new responseMap[response.$type](response);
+                    }
+                    else{
+                        console.log('Socket received: '+ event.data);
+                    }
                 };
 
                 socket.onerror = function (event) {
