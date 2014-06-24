@@ -1,5 +1,5 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node'], 
-    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node', 'Marquee'], 
+    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node, Marquee) {
 
   return Backbone.Model.extend({
 
@@ -18,6 +18,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       isPublic: false,
       isRunning: false,
       lastSaved: Date.now(),
+      offset: [20000, 20000],
 
       // undo/redo stack
       undoStack: [],
@@ -25,8 +26,14 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       clipBoard: []
     },
 
+    // connection creation
     draggingProxy: false,
     proxyConnection: null,
+
+    // marquee selection
+    dragSelect: false,
+
+
     runAllowed: false,
 
     initialize: function(atts, arr) {
@@ -73,6 +80,10 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         endProxyPosition: [0,0],
         hidden: true }, { workspace: this });
 
+      this.marquee = new Marquee({
+        _id: -1, 
+        hidden: true }, { workspace: this });
+
       this.runAllowed = true;
 
       // run the workspace for the first time
@@ -105,6 +116,26 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this._isSerializing = false;
 
         return json;
+    },
+
+    zoomIn: function(){
+
+      if ( this.get('zoom') > 4 ){
+        return;
+      }
+
+      this.set('zoom', this.get('zoom') + 0.05);
+
+    },
+
+    zoomOut: function(){
+
+      if ( this.get('zoom') < 0.2 ){
+        return;
+      }
+
+      this.set('zoom', this.get('zoom') - 0.05);
+
     },
 
     parse : function(resp) {
@@ -223,7 +254,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       var that = this;
 
       var nodes = {};
-      var nodeOffset = Math.min( 20, Math.abs( 40 * Math.random() ) );
+      var nodeOffset = Math.min( 20, Math.abs( 80 * Math.random() ) );
+
+      var nodeCount = 0;
 
       _.each(cb.nodes, function(x){
 
@@ -231,8 +264,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         nodes[x._id] = x;
         nodes[x._id].position = [ x.position[0] + nodeOffset, x.position[1] + nodeOffset ];
         nodes[x._id]._id = that.makeId();
+        nodeCount++;
 
       });
+
+      if (nodeCount > 0) this.get('nodes').deselectAll();
 
       var connections = {};
 
@@ -556,6 +592,22 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       this.runner.run( bottomNodes );
 
+    },
+
+    startMarqueeSelect: function(startPosition) {
+
+      this.set('marqueeStart', startPosition );
+      this.set('marqueeEnd', startPosition );
+      this.set('marqueeSelectEnabled', true);
+
+      return this;
+    },
+
+    endMarqueeSelect: function() {
+
+      this.set('marqueeSelectEnabled', false);
+  
+      return this;
     },
 
     startProxyConnection: function(startNodeId, nodePort, startPosition) {

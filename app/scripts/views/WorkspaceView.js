@@ -1,4 +1,4 @@
-define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Backbone, Workspace, ConnectionView, NodeViewTypes){
+define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes'], function(Backbone, Workspace, ConnectionView, MarqueeView, NodeViewTypes){
 
   return Backbone.View.extend({
 
@@ -28,6 +28,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
       });
 
       this.model.on('change:zoom', this.updateZoom, this );
+      this.model.on('change:offset', this.updateOffset, this );
 
       this.model.on('change:isRunning', this.renderRunnerStatus, this);
 
@@ -41,13 +42,15 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
       this.listenTo(this.model, 'endProxyDrag', this.endProxyDrag);
 
       this.renderProxyConnection();
+      this.renderMarquee();
 
       this.renderRunnerStatus();
       
     },
 
     events: {
-      'click .workspace_back':  'deselectAll',
+      'mousedown .workspace_back':  'deselectAll',
+      'mousedown .workspace_back':  'startMarqueeDrag',
       'dblclick .workspace_back':  'showNodeSearch'
     },
 
@@ -59,14 +62,111 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
               .renderConnections()
               .renderNodes()
               .renderRunnerStatus()
-              .updateZoom();
+              .updateZoom()
+              .updateOffset();
+
+    },
+
+    startMarqueeDrag: function(event){
+
+      this.deselectAll();
+
+      var offset = this.$workspace.offset()
+        , zoom = this.model.get('zoom')
+        , posInWorkspace = [ (1 / zoom) * (event.pageX - offset.left), (1 / zoom) * ( event.pageY - offset.top) ];
+
+      this.model.marquee.setStartCorner( posInWorkspace );
+      
+      this.$workspace.bind('mousemove', $.proxy( this.marqueeDrag, this) );
+      this.$workspace.bind('mouseup', $.proxy( this.endMarqueeDrag, this) );
+    },
+
+    endMarqueeDrag: function(event){
+      this.model.marquee.set('hidden', true);
+      this.$workspace.unbind('mousemove', this.marqueeDrag);
+      this.$workspace.unbind('mouseup', this.endMarqueeDrag);
+    },
+
+    marqueeDrag: function(event){
+
+      this.model.marquee.set('hidden', false);
+
+      var offset = this.$workspace.offset()
+        , zoom = this.model.get('zoom')
+        , posInWorkspace = [ (1 / zoom) * (event.pageX - offset.left), (1 / zoom) * ( event.pageY - offset.top) ];
+
+      this.model.marquee.setEndCorner( posInWorkspace );
+      this.doMarqueeSelect();
+
+    },
+
+    doMarqueeSelect: function(){
+
+      var x1 = this.model.marquee.get('x')
+        , y1 = this.model.marquee.get('y')
+        , x2 = this.model.marquee.get('x') + this.model.marquee.get('width')
+        , y2 = this.model.marquee.get('y') + this.model.marquee.get('height');
+
+      for (var nodeId in this.nodeViews ){ 
+
+        var node = this.nodeViews[nodeId];
+
+        var w = node.$el.width();
+        var h = node.$el.height();
+
+        var px = node.model.get('position');
+        var x = px[0], y = px[1];
+
+        var corners = [ [x, y], [x + w, y], [x + w, y + h], [x, y + h] ];
+
+        var cornerIn = false;
+
+        corners.forEach(function(c){
+
+          var cx = c[0], cy = c[1];
+          if ( cx < x2 && cx > x1 && cy > y1 && cy < y2 ) {
+            cornerIn = true;
+          }
+
+        });
+
+        if (cornerIn && !node.model.get('selected') ){
+          node.model.set('selected', true);
+        } else if ( !cornerIn && node.model.get('selected') ){
+          node.model.set('selected', false);
+        }
+
+      }
+
+    },
+
+    getCenter: function(){
+
+      var w = this.$el.width()
+        , h = this.$el.height()
+        , ho = this.$el.scrollTop()
+        , wo = this.$el.scrollLeft()
+        , zoom = 1 / this.model.get('zoom');
+
+      return [wo + w / 2, ho + h / 2];
 
     },
 
     updateZoom: function(){
 
+      var center = this.getCenter();
+
       this.$workspace.css('transform', 'scale(' + this.model.get('zoom') + ')' );
-      this.$workspace.css('transform-origin', '0 0');
+      this.$workspace.css('transform-origin', "0 0" );
+
+      return this;
+
+    },
+
+    updateOffset: function(){
+
+      // this.$el.scrollLeft( this.model.get('offset')[0] );
+      // this.$el.scrollTop( this.model.get('offset')[1] );
 
       return this;
 
@@ -83,7 +183,12 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
 
     showNodeSearch: function(e){
       this.app.set('showingSearch', true);
-      this.app.newNodePosition = [e.offsetX, e.offsetY];
+
+      var z = this.model.get('zoom');
+      var offX  = z * (e.offsetX || e.clientX - $(e.target).offset().left);
+      var offY  = z * (e.offsetY || e.clientY - $(e.target).offset().top);
+
+      this.app.newNodePosition = [offX, offY];
     },
 
     startProxyDrag: function(event){
@@ -112,6 +217,19 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
         workspaceView: this, 
         workspace: this.model, 
         isProxy: true
+      });
+
+      view.render();
+      this.$workspace_canvas.prepend( view.el );
+
+    },
+
+    renderMarquee: function() {
+
+      var view = new MarqueeView({ 
+        model: this.model.marquee, 
+        workspaceView: this, 
+        workspace: this.model
       });
 
       view.render();
@@ -158,17 +276,32 @@ define(['backbone', 'Workspace', 'ConnectionView', 'NodeViewTypes'], function(Ba
 
     },
 
-    // called by AppView
     keydownHandler: function(e){
 
-      if ( !(e.metaKey || e.ctrlKey) ) return;
+      var isBackspaceOrDelete = e.keyCode === 46 || e.keyCode === 8;
+
+      if ( !(e.metaKey || e.ctrlKey) && !isBackspaceOrDelete ) return;
 
       // do not capture from input
-      if (e.originalEvent.srcElement.nodeName === "INPUT") return;
+      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "INPUT") return;
+      if (e.target.nodeName === "INPUT") return;
+
+      // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
 
       switch (e.keyCode) {
-        case 68:
+        case 8:
           this.model.removeSelected();
+          return e.preventDefault();
+        case 46:
+          this.model.removeSelected();
+          return e.preventDefault();
+        case 61:
+        case 187:
+          this.model.zoomIn();
+          return e.preventDefault();
+        case 189:
+        case 173:
+          this.model.zoomOut();
           return e.preventDefault();
         case 67:
           this.model.copy();

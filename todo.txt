@@ -1,9 +1,15 @@
 CURRENT
 
-set exact number
+node port heights are messed up when zoomed
+save zoom when changed
 
 POLISH
 
+share workspaces
+fork a workspace
+OBJ export
+example workspaces
+initial user walkthrough of interface
 formula node input should change width based on how much user inputs, allow multiple lines
 desktop zoom is too slow
 login/signup sucks should work with oauth - initially
@@ -20,16 +26,11 @@ optimize css:
 	eliminate inline css 
 	get rid of excess bootstrap css, jquery.ui css
 
-add a new library of nodes
-
 FEATURE
 
 before release
 
-	share workspaces
-	fork a workspace
-	OBJ export
-
+easily add a new library of nodes
 custom nodes
 archive workspaces
 describe workspace
@@ -38,7 +39,6 @@ curves - whats the minimum requirement - line - polyline?
 transforms?
 canvas marquee selection
 arbitrary javascript node - better than formula
-zoom in the workspace
 NURBS in flood
 
 run execution in ui thread, make calls to ui thread from worker

@@ -1,4 +1,4 @@
-define(['backbone', 'jqueryuidraggable'], function(Backbone, jqueryuidraggable) {
+define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jqueryuidraggable, bootstrap) {
 
   return Backbone.View.extend({
 
@@ -96,11 +96,13 @@ define(['backbone', 'jqueryuidraggable'], function(Backbone, jqueryuidraggable) 
           that.workspace.get('nodes').moveSelected([ ui.position.left - that.initPos[0], ui.position.top - that.initPos[1]], that);
 
           that.model.set('position', [ ui.position.left, ui.position.top ]);
+
         },
         start : function(startEvent) {
 
-          if (!startEvent.shiftKey)
-            that.workspace.get('nodes').deselectAll();
+          if ( !that.model.get('selected') ){
+            that.model.workspace.get('nodes').deselectAll();
+          }
 
           that.model.set('selected', true );
           that.workspace.get('nodes').startDragging(that);
@@ -108,7 +110,7 @@ define(['backbone', 'jqueryuidraggable'], function(Backbone, jqueryuidraggable) 
           var zoom = 1 / that.model.workspace.get('zoom');
           var pos = that.model.get('position');
 
-          that.initPos = [ pos[0] * zoom, pos[1] * zoom ];
+          that.initPos = [ pos[0], pos[1] ];
 
         },
         stop : function() {
@@ -205,6 +207,9 @@ define(['backbone', 'jqueryuidraggable'], function(Backbone, jqueryuidraggable) 
       if (this.getCustomContents){
         this.$el.find('.node-data-container').html( this.getCustomContents() );
       }
+
+      var del = { show: 400 };
+      this.$el.find('.node-port-output').tooltip({title: "Click & drag to create a connection", placement: "right", delay: del});
       
       return this;
 
@@ -407,6 +412,8 @@ define(['backbone', 'jqueryuidraggable'], function(Backbone, jqueryuidraggable) 
       var that = this;
       var inIndex = 0;
       var outIndex = 0;
+      var zoom = 1 / this.model.workspace.get('zoom');
+
       this.$el.find('.node-port').each(function(index, ele) {
 
         var nodeCircle = document.createElementNS('http://www.w3.org/2000/svg','circle');

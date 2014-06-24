@@ -107,6 +107,7 @@ require.config({
         // backbone models
         App: 'models/App',
         Connection: 'models/Connection',
+        Marquee: 'models/Marquee',
         Node: 'models/Node',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
@@ -138,6 +139,7 @@ require.config({
         // backbone views
         AppView: 'views/AppView',
         ConnectionView: 'views/ConnectionView',
+        MarqueeView: 'views/MarqueeView',
         SearchView: 'views/SearchView',
         WorkspaceControlsView: 'views/WorkspaceControlsView',
         SearchElementView: 'views/SearchElementView',
