@@ -1,5 +1,5 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'SocketConnection', 'SearchElement', 'ModelsListMessage'],
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, SocketConnection, SearchElement, ModelsListMessage){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'SearchElement', 'ModelsListMessage'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, SearchElement, ModelsListMessage){
 
   return Backbone.Model.extend({
 
@@ -26,7 +26,6 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.login = new Login({}, { app: this });
 
       this.SearchElements = new SearchElements({app:this});
-      this.socket = new SocketConnection();
     },
 
     parse : function(resp) {

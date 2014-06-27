@@ -1,23 +1,21 @@
-define(['AbstractRunner', 'commandsMap', 'Message', 'CreateNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
-    function (AbstractRunner, commandsMap, Message, CreateNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
-
-    var app;
+define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
+    function (AbstractRunner, SocketConnection, commandsMap, Message, CreateNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
 
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
-            app = vals.workspace.app;
             AbstractRunner.prototype.initialize.call(this, attrs, vals);
         },
 
         postMessage: function (data, quiet) {
             if (commands.hasOwnProperty(data.kind)) {
-                app.socket.send(commands[data.kind].call(this, data));
+                this.socket.send(commands[data.kind].call(this, data));
             }
 
             AbstractRunner.prototype.postMessage.call(this, data, quiet);
         },
 
         reset: function () {
+            this.socket = new SocketConnection();
             AbstractRunner.prototype.reset.call(this);
         }
     });
