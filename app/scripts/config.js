@@ -99,7 +99,8 @@ require.config({
     paths: {
         // backbone collections
         Connections: 'collections/Connections',
-        SearchElements: 'collections/SearchElements',
+        //Use DynamoSearchElements class in case of websocket connection, otherwise use FloodSearchElements
+        SearchElements: 'collections/DynamoSearchElements', //'collections/FloodSearchElements'
         Nodes: 'collections/Nodes',
         Workspaces: 'collections/Workspaces',
         WorkspaceBrowserElements: 'collections/WorkspaceBrowserElements',
@@ -131,6 +132,11 @@ require.config({
         UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
 
         Message: 'models/messages/Message',
+        ModelsListMessage: 'models/messages/ModelsListMessage',
+
+        //Responses
+        ComputationResponse: 'models/responses/ComputationResponse',
+        ContentResponse: 'models/responses/ContentResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',

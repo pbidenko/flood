@@ -1,5 +1,6 @@
-define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateNodeCommand', 'MakeConnectionCommand'],
-    function (AbstractRunner, SocketConnection, commandsMap, Message, CreateNodeCommand, MakeConnectionCommand) {
+define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
+    function (AbstractRunner, SocketConnection, commandsMap, Message, CreateNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
+
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
             AbstractRunner.prototype.initialize.call(this, attrs, vals);
@@ -42,6 +43,7 @@ define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateN
                 commands = [];
             for( ; i < len; i++ ){
                 commands.push(new CreateNodeCommand( {}, data.nodes[i] ));
+                Array.prototype.push.apply(commands, new UpdateModelValueCommand( {}, data.nodes[i] ));
             }
 
             for( i = 0, len = data.connections.length; i < len; i++ ){

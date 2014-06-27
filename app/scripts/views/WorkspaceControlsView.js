@@ -1,4 +1,4 @@
-define(['backbone', 'List', 'SearchElementView', 'bootstrap'], function(Backbone, List, SearchElementView, bootstrap) {
+define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], function(Backbone, List, SearchElement, SearchElementView, bootstrap) {
 
   return Backbone.View.extend({
 
@@ -8,6 +8,16 @@ define(['backbone', 'List', 'SearchElementView', 'bootstrap'], function(Backbone
     initialize: function(atts, arr) {
       this.app = arr.app;
       this.appView = arr.appView;
+
+      //Bind to document's click event for hiding toolbox
+      //Unbind first to avoid duplicate bindings
+      $(window).off('click.models-view');
+      $(window).on('click.models-view', function(e){
+
+        if(e.target!==this.$input[0]){
+          this.$list.hide();
+        }
+      }.bind(this));
     },
 
     template: _.template( $('#workspace-search-template').html() ),
@@ -15,7 +25,6 @@ define(['backbone', 'List', 'SearchElementView', 'bootstrap'], function(Backbone
     events: {
       'keyup .library-search-input': 'searchKeyup',
       'focus .library-search-input': 'focus',
-      'blur .library-search-input': 'blur',
       'click #delete-button': 'deleteClick',
       'click #undo-button': 'undoClick',
       'click #redo-button': 'redoClick',
@@ -36,8 +45,23 @@ define(['backbone', 'List', 'SearchElementView', 'bootstrap'], function(Backbone
       this.$list.empty();
 
       var that = this;
+      var prevCategory = '';
 
       this.app.SearchElements.forEach(function(ele) {
+
+        if (ele.attributes.category !== null) {
+          var category = ele.attributes.category.split('.')[0];
+          if (category !== prevCategory) {
+            prevCategory = category;
+
+            var elem = new SearchElement({name: '==> ' + category + ' <==', category: category, app: that.app});
+
+            var eleView = new SearchElementView({ model: elem }, { appView: that.appView, app: that.app });
+
+             eleView.render();
+             that.$list.append(eleView.$el);
+          }
+        }
 
         var eleView = new SearchElementView({ model: ele }, { appView: that.appView, app: that.app, 
           click: function(e){ that.elementClick.call(that, e); } });
@@ -73,13 +97,6 @@ define(['backbone', 'List', 'SearchElementView', 'bootstrap'], function(Backbone
     focus: function(event){
       this.$('.search-list').show();
       this.$('.library-search-input').select();
-    },
-
-    blur: function(event){
-      var that = this;
-      window.setTimeout(function(){
-        that.$('.search-list').hide();
-      }, 100);
     },
 
     currentWorkspace: function(){
