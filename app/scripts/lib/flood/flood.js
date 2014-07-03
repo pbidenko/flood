@@ -588,6 +588,43 @@ define(function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
+    FLOOD.nodeTypes.ServerNode = function(inPort, outPort) {
+
+        var inPorts = [];
+        var outPorts = [];
+
+        if (!inPort) {
+            inPorts.push(new FLOOD.baseTypes.InputPort( "A", [Number], 0 ));
+        }
+        else {
+            inPort.forEach(function (x) {
+                inPorts.push(new FLOOD.baseTypes.InputPort(x, [Number], 0));
+            });
+        }
+
+        if (!outPort) {
+            outPorts.push(new FLOOD.baseTypes.OutputPort( "⇒", [Number] ));
+        }
+        else {
+            outPort.forEach(function (x) {
+                outPorts.push(new FLOOD.baseTypes.OutputPort(x, [Number]));
+            });
+        }
+
+        var typeData = {
+            inputs: inPorts,
+            outputs: outPorts,
+            typeName: "MyNode"
+        };
+
+        FLOOD.baseTypes.NodeType.call(this, typeData );
+
+        this.eval = function() {
+            return 1;
+        };
+
+    }.inherits( FLOOD.baseTypes.NodeType );
+
 	FLOOD.nodeTypes.Subtract = function() {
 
 		var typeData = {

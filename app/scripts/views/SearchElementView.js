@@ -8,7 +8,7 @@ define(['backbone'], function(Backbone) {
     template: _.template( $('#search-element-template').html() ),
 
     events: {
-      'click':  'click'
+      'click': 'clickHandler'
     },
 
     initialize: function(a, arr){
@@ -21,11 +21,10 @@ define(['backbone'], function(Backbone) {
       this.$el.html( this.template( this.model.toJSON() ) );
     },
 
-    click: function(e) {
+    clickHandler: function(e) {
+
       if (!this.elementClick) return;
       this.elementClick(this);
     }
-
   });
-
 });

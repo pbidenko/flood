@@ -3,7 +3,10 @@ define(['backbone'], function(Backbone) {
   return Backbone.Model.extend({
 
     defaults: {
-      name: null
+      name: null,
+      category: null,
+      inPort: [],
+      outPort: []
     }, 
     
     initialize: function(a, b) {
