@@ -21,4 +21,3 @@ define(['backbone', 'SearchElement', 'FLOOD'], function(Backbone, SearchElement,
 
 	});
 });
-

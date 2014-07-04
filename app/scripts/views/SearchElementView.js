@@ -25,7 +25,5 @@ define(['backbone'], function(Backbone) {
       if (!this.elementClick) return;
       this.elementClick(this);
     }
-
   });
-
 });

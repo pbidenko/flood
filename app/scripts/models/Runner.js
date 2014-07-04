@@ -1,191 +1,169 @@
-define(['backbone'], function(Backbone) {
+define(['backbone'], function (Backbone) {
 
-	return Backbone.Model.extend({
+    return Backbone.Model.extend({
 
-	  defaults: {
-	  	isRunning : false
-	  },
+        defaults: {
+            isRunning: false
+        },
 
-		initialize: function(atts, vals) {
+        initialize: function (atts, vals) {
 
-			this.app = vals.app;
-			var ws = vals.workspace;
-			this.workspace = ws;
+            this.app = vals.app;
+            var ws = vals.workspace;
+            this.workspace = ws;
 
-			this.set('id', ws.get('_id') );
+            this.set('id', ws.get('_id'));
 
-			this.reset();
+            this.reset();
 
-			vals.workspace.get('connections').on('add', this.addConnection, this );
-			vals.workspace.get('connections').on('remove', this.removeConnection, this );
+            vals.workspace.get('connections').on('add', this.addConnection, this);
+            vals.workspace.get('connections').on('remove', this.removeConnection, this);
 
-			vals.workspace.get('nodes').on('add', this.addNode, this );
-			vals.workspace.get('nodes').on('remove', this.removeNode, this );
+            vals.workspace.get('nodes').on('add', this.addNode, this);
+            vals.workspace.get('nodes').on('remove', this.removeNode, this);
 
-			this.runCount = 0;
-			this.averageRunTime = 0;
+            this.runCount = 0;
+            this.averageRunTime = 0;
 
-	  },
+        },
 
-	  post: function(data, quiet){
+        postMessage: function(data, quiet) {
 
-	  	data.workspace_id = this.workspace.get('_id');
-	  	this.worker.postMessage(data);
+            if (quiet) return;
 
-	  	if (quiet) return;
+            this.trigger('post', data);
+        },
 
-	  	this.trigger('post', data );
+        post: function (data, quiet) {
 
-	  },
+            data.workspace_id = this.workspace.get('_id');
+            this.postMessage(data, quiet);
 
-	  onWorkerMessage: function(data){
+        },
 
-	  	var cb = this["on_" + data.kind];
-	  	if ( cb ) cb.call(this, data);
-			
-	  },
+        initWorkspace: function () {
 
-	  initWorker: function(){
+            this.post({ kind: 'addWorkspace' });
 
-	  	this.worker = new Worker("scripts/lib/flood/flood_runner.js");
+            var wsc = this.workspace.toJSON();
+            var ncb = function () { this.updateNode(node); };
 
-	  	var that = this;
+            var that = this;
+            this.workspace.get('nodes').each(function (x) {
+                that.watchNodeEvents.call(that, x);
+            });
 
-			this.worker.addEventListener('message', function(e) {
-				return that.onWorkerMessage.call(that, e.data);	
-			}, false);
+            wsc.kind = "setWorkspaceContents";
+            this.post(wsc);
+        },
 
-	  },
+        on_nodeEvalComplete: function (data) {
 
-	  initWorkspace: function(){
+            var node = this.workspace.get('nodes').get(data._id);
+            if (node)
+                node.onEvalComplete(data.isNew, data.value, data.prettyValue);
 
-	  	this.post({kind: 'addWorkspace'});
+        },
 
-	  	var wsc = this.workspace.toJSON();
-	  	var ncb = function(){ this.updateNode( node ); };
+        on_nodeEvalFailed: function (data) {
 
-	  	var that = this;
-	  	this.workspace.get('nodes').each(function(x){
-	  		that.watchNodeEvents.call(that, x);
-	  	});
+            var node = this.workspace.get('nodes').get(data._id);
+            if (node)
+                this.workspace.get('nodes').get(data._id).onEvalFailed(data.exception);
+        },
 
-	  	wsc.kind = "setWorkspaceContents";
-  	  this.post( wsc );
+        on_nodeEvalBegin: function (data) {
 
-	  },
+            var node = this.workspace.get('nodes').get(data._id);
+            if (node)
+                this.workspace.get('nodes').get(data._id).onEvalBegin(data.isNew);
 
-	  on_nodeEvalComplete: function(data){
+        },
 
-	  	var node = this.workspace.get('nodes').get( data._id );
-	  	if (node)
-	  		node.onEvalComplete( data.isNew, data.value, data.prettyValue );
+        on_run: function (data) {
 
-	  },
+            console.log(data);
+            this.set('isRunning', false);
+            this.runCount++;
 
-	 	on_nodeEvalFailed: function(data){
+        },
 
-	 		var node = this.workspace.get('nodes').get( data._id );
-	  	if (node)
-	  		this.workspace.get('nodes').get( data._id ).onEvalFailed(data.exception);
+        cancel: function () {
 
-	  },
+            this.set('isRunning', false);
+            this.reset();
 
-	 	on_nodeEvalBegin: function(data){
+        },
 
-	 		var node = this.workspace.get('nodes').get( data._id );
-	  	if (node)
-	  		this.workspace.get('nodes').get( data._id ).onEvalBegin( data.isNew );
+        runQueued: false,
 
-	  },
+        run: _.throttle(function (bottomIds) {
 
-	  on_run: function(data){
+            this.post({ kind: "run", bottom_ids: bottomIds });
+            this.set('isRunning', true);
 
-	  	console.log( data );
-	  	this.set('isRunning', false);
-	  	this.runCount++;
+        }, 120),
 
-	  },
+        watchNodeEvents: function (node) {
 
-	  cancel: function(){
+            var u = function () { this.updateNode(node); };
+            node.on('change:replication', u, this);
+            node.on('change:ignoreDefaults', u, this);
+            node.on('updateRunner', u, this);
 
-	  	this.set('isRunning', false);
-	  	this.worker.terminate();
-	  	this.reset();
+        },
 
-	  },
+        updateNode: function (node) {
 
-	  runQueued : false,
+            var n = node.serialize();
+            n.kind = "updateNode";
 
-	  run: _.throttle(function( bottomIds ){
+            this.post(n);
 
-	  	this.post({ kind: "run", bottom_ids: bottomIds });
-	  	this.set('isRunning', true);
+        },
 
-	  }, 120),
+        addNode: function (node) {
 
-	  watchNodeEvents: function( node ){
+            var n = node.serialize();
+            n.kind = "addNode";
+            this.watchNodeEvents(node);
 
-	  	var u = function(){ this.updateNode( node ); };
-	  	node.on('change:replication', u, this );
-      node.on('change:ignoreDefaults', u, this);
-  		node.on('updateRunner', u, this );
+            this.post(n);
 
-	  },
+        },
 
-	  updateNode: function( node ){
+        removeNode: function (node) {
 
-	  	var n = node.serialize();
-	  	n.kind = "updateNode";
+            var n = node.serialize();
+            n.kind = "removeNode";
+            this.post(n);
 
-	  	this.post( n );
+        },
 
-	  },
+        addConnection: function (connection) {
 
-	  addNode: function(node){
+            var c = connection.toJSON();
+            c.kind = "addConnection";
+            c.id = connection.get('_id');
 
-	  	var n = node.serialize();
-	  	n.kind = "addNode";
-	  	this.watchNodeEvents( node );
+            this.post(c);
 
-	  	this.post(n);
+        },
 
-	  },
+        removeConnection: function (connection) {
 
-	  removeNode: function(node){
+            var c = connection.toJSON();
+            c.kind = "removeConnection";
+            c.id = connection.get('endNodeId');
+            c.portIndex = connection.get('endPortIndex');
 
-	  	var n = node.serialize();
-	  	n.kind = "removeNode";
-	  	this.post( n );
+            this.post(c);
 
-	  },
+        },
 
-	  addConnection: function(connection){
+        reset: function () {
+            this.initWorkspace();
+        }
 
-	  	var c = connection.toJSON();
-	  	c.kind = "addConnection";
-	  	c.id = connection.get('_id');
-
-	  	this.post(c);
-
-	  },
-
-	  removeConnection: function(connection){
-
-	  	var c = connection.toJSON();
-	  	c.kind = "removeConnection";
-	  	c.id = connection.get('endNodeId');
-	  	c.portIndex = connection.get('endPortIndex');
-
-	  	this.post( c );
-
-	  },	
-
-	  reset: function(){
-
-	  	this.initWorker();
-	  	this.initWorkspace();
-
-	  }
-
-	});
+    });
 });

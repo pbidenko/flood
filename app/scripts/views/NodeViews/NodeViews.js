@@ -1,11 +1,13 @@
-define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'CSGNodeView', 'FormulaView'], function(BaseNodeView, WatchNodeView, NumNodeView, CSGNodeView, FormulaView){
+define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'CSGNodeView', 'FormulaView', 'CodeBlockView'], function(BaseNodeView, WatchNodeView, NumNodeView, CSGNodeView, FormulaView, CodeBlockView){
 
-  var nodeViewTypes = {};
+  var nodeViewTypes = {
+      'Code Block': CodeBlockView
+  };
 
   nodeViewTypes.Base = CSGNodeView;
   nodeViewTypes.Watch = WatchNodeView;
   nodeViewTypes.Number = NumNodeView;
-
+  nodeViewTypes.CodeBlock = CodeBlockView;
   nodeViewTypes.Formula = FormulaView;
 
   // nodeViewTypes.SolidSphere = CSGNodeView;

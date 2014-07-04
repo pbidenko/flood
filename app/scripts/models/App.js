@@ -1,5 +1,5 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'], 
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'Viewer'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, Viewer){
 
   return Backbone.Model.extend({
 
@@ -26,7 +26,8 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.login = new Login({}, { app: this });
 
       this.SearchElements = new SearchElements({app:this});
-      this.SearchElements.fetch();
+
+      this.viewer = new Viewer();
     },
 
     parse : function(resp) {
@@ -41,10 +42,11 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     },
 
     fetch : function(options){
-
+      var that = this;
       this.login.fetch();
-      Backbone.Model.prototype.fetch.call(this, options);
-      
+      this.SearchElements.fetch().always(function(){
+          Backbone.Model.prototype.fetch.call(that, options);
+      });
     },
 
     // override of toJSON to support recursive serialization 
@@ -68,6 +70,10 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         return json;
     },
 
+    makeId: function(){
+        return helpers.guid();
+    },
+
     enableAutosave: function(){
 
       this.get('workspaces').on('add remove', function(){ this.sync("update", this); }, this );
@@ -77,10 +83,6 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     newNodePosition: [0,0],
 
-    makeId: function(){
-      return Math.floor(Math.random() * 1e9);
-    },
-
     getCurrentWorkspace: function(){
       return this.get('workspaces').get( this.get('currentWorkspace') );
     },
@@ -89,7 +91,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       var that = this;
 
-      $.get("/nws", function(data, status){
+      $.get("/nws", function(data){
 
         var ws = new Workspace(data, {app: that });
         that.get('workspaces').add( ws );
@@ -113,7 +115,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       var that = this;
 
-      $.get("/ws/" + id, function(data, status){
+      $.get("/ws/" + id, function(data){
 
         var ws = new Workspace(data, {app: that});
         that.get('workspaces').add( ws );
@@ -143,13 +145,11 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       } 
 
       this.get('workspaces').get(this.get('currentWorkspace')).set('current', true);
-
-    },
-
+    }
   });
 
 
-})
+});
 
 
 

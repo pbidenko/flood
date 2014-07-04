@@ -95,7 +95,8 @@ require.config({
 
         // backbone collections
         Connections: 'collections/Connections',
-        SearchElements: 'collections/SearchElements',
+        //Use DynamoSearchElements class in case of websocket connection, otherwise use FloodSearchElements
+        SearchElements: 'collections/DynamoSearchElements', //'collections/FloodSearchElements'
         Nodes: 'collections/Nodes',
         Workspaces: 'collections/Workspaces',
         WorkspaceBrowserElements: 'collections/WorkspaceBrowserElements',
@@ -104,15 +105,42 @@ require.config({
         App: 'models/App',
         Connection: 'models/Connection',
         Marquee: 'models/Marquee',
-        Node: 'models/Node',
+        Node: 'models/nodes/Node',
+        NumberNode: 'models/nodes/NumberNode',
+        CodeBlockNode: 'models/nodes/CodeBlockNode',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
-        Runner: 'models/Runner',
+        AbstractRunner: 'models/Runner',
+        //Use DynamoRunner class in case of websocket connection, otherwise use FloodRunner
+        Runner: 'models/DynamoRunner', // 'models/FloodRunner'
         Help: 'models/Help',
         Login: 'models/Login',
         WorkspaceBrowserElement: 'models/WorkspaceBrowserElement',
         WorkspaceBrowser: 'models/WorkspaceBrowser',
+        SocketConnection: 'models/SocketConnection',
+        Viewer: 'models/Viewer',
+
+        CreateNodeCommand: 'models/commands/CreateNodeCommand',
+        CreateNoteCommand: 'models/commands/CreateNoteCommand',
+        DeleteModelCommand: 'models/commands/DeleteModelCommand',
+        MakeConnectionCommand: 'models/commands/MakeConnectionCommand',
+        ModelEventCommand: 'models/commands/ModelEventCommand',
+        RecordableCommand: 'models/commands/RecordableCommand',
+        RunCancelCommand: 'models/commands/RunCancelCommand',
+        UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
+
+        Message: 'models/messages/Message',
+        ModelsListMessage: 'models/messages/ModelsListMessage',
+
+        //Responses
+        ComputationResponse: 'models/responses/ComputationResponse',
+        ContentResponse: 'models/responses/ContentResponse',
+
+        //helpers
+        commandsMap: 'helpers/CommandsMap',
+        NodesFactory: 'helpers/NodesFactory',
+        staticHelpers: 'helpers/StaticHelpers',
 
         // backbone views
         AppView: 'views/AppView',
@@ -133,6 +161,7 @@ require.config({
         BaseNodeView: 'views/NodeViews/Base',
         WatchNodeView: 'views/NodeViews/Watch',
         NumNodeView: 'views/NodeViews/Num',
+        CodeBlockView: 'views/NodeViews/CodeBlock',
         FormulaView: 'views/NodeViews/Formula',
 
         CSGNodeView: 'views/NodeViews/ThreeCSG',

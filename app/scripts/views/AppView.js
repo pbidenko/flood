@@ -1,8 +1,9 @@
 define([  'backbone', 
           'App', 
           'WorkspaceView', 
-          'Search', 
-          'SearchView', 
+          'Search',
+          'SearchElement',
+          'SearchView',
           'WorkspaceControlsView', 
           'WorkspaceTabView', 
           'Workspace',
@@ -11,8 +12,8 @@ define([  'backbone',
           'HelpView',
           'Help',
           'LoginView',
-          'Login'], 
-          function(Backbone, App, WorkspaceView, Search, SearchView, WorkspaceControlsView, WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
+          'Login'],
+          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
 
   return Backbone.View.extend({
 
@@ -122,7 +123,7 @@ define([  'backbone',
 
         // if we haven't already, create the search view element and add to the ui
         if (this.searchView === undefined){
-          this.searchView = new SearchView( { model: new Search() }, {app: this.model } );
+          this.searchView = new SearchView( { model: new Search() }, {app: this.model, appView : this} );
           this.searchView.render();
           this.$el.find('#workspaces').prepend(this.searchView.$el);
 

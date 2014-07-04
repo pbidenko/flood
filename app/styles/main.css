@@ -171,7 +171,7 @@ body {
 }
 
 .node-failure-message {
-	display: none;
+	display: inline-block;
 	padding: 2px;
 	left: 0;
 	right: 0;
@@ -1276,4 +1276,23 @@ body {
 }
 .ui-slider-vertical .ui-slider-range-max {
 	top: 0;
+}
+
+span.expcol, span.category {
+	cursor:default !important;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: -moz-none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+li.notmatch{
+	display: none !important;
+}
+
+div.tooltip-inner {
+	max-width: 400px;
 }
