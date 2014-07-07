@@ -26,7 +26,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             this.model.workspace.run();
         },
 
-        onConnectionsUpdate: function(){
+        onConnectionsUpdate: function () {
             var ex = this.model.get('extra') || {};
 
             this.removeConnections(ex);
@@ -64,9 +64,11 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             if (len > ex.outputs.length) {
                 for (i = len - 1; i >= ex.outputs.length; i--) {
                     if (this.model.isPortConnected(i, true)) {
-                        conn = ports[i][0];
-                        this.model.disconnectPort(i, conn, true);
-                        this.model.workspace.get('connections').remove(conn);
+                        while (ports[i].length) {
+                            conn = ports[i][0];
+                            this.model.disconnectPort(i, conn, true);
+                            this.model.workspace.get('connections').remove(conn);
+                        }
                     }
                 }
             }
