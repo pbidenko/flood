@@ -123,7 +123,7 @@ define([  'backbone',
 
         // if we haven't already, create the search view element and add to the ui
         if (this.searchView === undefined){
-          this.searchView = new SearchView( { model: new Search() }, {app: this.model } );
+          this.searchView = new SearchView( { model: new Search() }, {app: this.model, appView : this} );
           this.searchView.render();
           this.$el.find('#workspaces').prepend(this.searchView.$el);
 

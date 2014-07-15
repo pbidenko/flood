@@ -1,6 +1,6 @@
-define(['backbone'], function(Backbone){
-    function ComputationResponse(data){
-        this.nodes = JSON.parse(data.nodesInJson);
+define(['backbone'], function (Backbone) {
+    function ComputationResponse(data) {
+        this.result = data.nodes;
 
         Backbone.trigger('computation-completed:event', this);
     }

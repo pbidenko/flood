@@ -1,5 +1,5 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node', 'Marquee'], 
-    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node, Marquee) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node', 'Marquee', 'NodeFactory'], 
+    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node, Marquee, nodeFactory) {
 
   return Backbone.Model.extend({
 
@@ -42,8 +42,14 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       this.app = arr.app;
 
-      this.set('nodes', new Nodes( atts.nodes, { workspace: this }) );
-      this.set('connections', new Connections( atts.connections, { workspace: this}) );
+                this.set('nodes', new Nodes());
+                for(var i = 0; i < atts.nodes.length; i++) {
+                    this.get('nodes').add(nodeFactory.create({
+                        config: atts.nodes[i],
+                        workspace: this }))
+                }
+
+                this.set('connections', new Connections(atts.connections, { workspace: this }));
 
       // tell all nodes about connections
       _.each( this.get('connections').where({startProxy: false, endProxy: false}), function(ele) {
@@ -51,7 +57,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.get('nodes').get(ele.get('endNodeId')).connectPort(ele.get('endPortIndex'), false, ele);
       }, this);
 
-      this.runner = new Runner({id : this.get('_id') }, { workspace: this });
+      this.runner = new Runner({ id: this.get('_id') }, { workspace: this , app: this.app});
 
       // updates to connections and nodes are emitted to listeners
       var that = this;
@@ -94,7 +100,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.on('runCommand', throttledSync, this);
       this.on('change:name', throttledSync, this);
 
-    },
+      	Backbone.on('computation-completed:event', this.updateNodesValues, this);
+      },
 
     toJSON : function() {
 
@@ -248,15 +255,12 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     paste: function(){
 
-      // build the command
-      var cb = JSON.parse( JSON.stringify( this.app.get('clipboard') ) );
-
-      var that = this;
-
-      var nodes = {};
-      var nodeOffset = Math.min( 20, Math.abs( 80 * Math.random() ) );
-
-      var nodeCount = 0;
+                // build the command
+                var cb = JSON.parse(JSON.stringify(this.app.get('clipboard'))),
+                    that = this,
+                    nodes = {},
+                    nodeOffset = Math.min(20, Math.abs(80 * Math.random())),
+                    nodeCount = 0;
 
       _.each(cb.nodes, function(x){
 
@@ -287,22 +291,25 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       });
 
-      // build the command
-      var multipleCmd = { kind: "multiple", commands: [] };
+                // build the command
+                var multipleCmd = { kind: "multiple", commands: [] },
+                    id,
+                    cpNode,
+                    cpConn;
 
-      // build all of the nodes
-      for (var id in nodes){
-        var cpnode = cb.nodes[id];
-        cpnode.kind = "addNode";
-        multipleCmd.commands.push( cpnode );
-      }
+                // build all of the nodes
+                for (id in nodes) {
+                    cpNode = cb.nodes[id];
+                    cpNode.kind = "addNode";
+                    multipleCmd.commands.push(cpNode);
+                }
 
-      // then builds the connections
-      for (var id in connections){
-        var cpConn = connections[id];
-        cpConn.kind = "addConnection";
-        multipleCmd.commands.push( cpConn );
-      }
+                // then builds the connections
+                for (id in connections) {
+                    cpConn = connections[id];
+                    cpConn.kind = "addConnection";
+                    multipleCmd.commands.push(cpConn);
+                }
 
       this.runInternalCommand( multipleCmd );
       this.addToUndoAndClearRedo( multipleCmd );
@@ -347,16 +354,16 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       
       var multiCmd = { kind: "multiple", commands: [] };
 
-      // remove any existing connection
-      var endNode = this.get('nodes').get(endNodeId)
-      if ( !endNode ) return this;
-      var existingConnection = endNode.getConnectionAtIndex( endPort );
+                // remove any existing connection
+                var endNode = this.get('nodes').get(endNodeId);
+                if (!endNode) return this;
+                var existingConnection = endNode.getConnectionAtIndex(endPort);
 
-      if (existingConnection != null){
-        var rmConn = existingConnection.toJSON();
-        rmConn.kind = "removeConnection";
-        multiCmd.commands.push( rmConn );
-      }
+                if (existingConnection) {
+                    var rmConn = existingConnection.toJSON();
+                    rmConn.kind = "removeConnection";
+                    multiCmd.commands.push(rmConn);
+                }
 
       var newConn = {
           kind: "addConnection",
@@ -413,10 +420,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       },
 
-      addNode: function(data){
-        var node = new Node( data, { workspace: this });
-        this.get('nodes').add( node );
-      },
+                addNode: function (data) {
+                    this.get('nodes').add(nodeFactory.create({
+                        config: data,
+                        workspace: this }));
+                },
 
       removeNode: function(data){
 
@@ -646,15 +654,27 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       return this;
     },
 
-    endProxyConnection: function() {
+            endProxyConnection: function () {
 
-      this.proxyConnection.set('hidden', true);
-      this.draggingProxy = false;
-      return this;
+                this.proxyConnection.set('hidden', true);
+                this.draggingProxy = false;
+                return this;
 
-    }
+            },
 
-  });
+            updateNodesValues: function (param) {
+                var i = 0,
+                    len = param.result.length,
+                    node,
+                    resultNode;
+
+                for (; i < len; i++) {
+                    resultNode = param.result[i];
+                    node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeID);
+                    node.updateValue(param.result[i]);
+                }
+            }
+        });
 
 });
 

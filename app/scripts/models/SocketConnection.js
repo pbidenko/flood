@@ -1,4 +1,4 @@
-﻿define(['backbone', 'ComputationResponse', 'ContentResponse'], function (Backbone, ComputationResponse, ContentResponse) {
+﻿define(['backbone', 'ComputationResponse', 'ContentResponse', 'ModelsListResponse'], function (Backbone, ComputationResponse, ContentResponse, ModelsListResponse) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -12,7 +12,8 @@
         messageStack = [],
         responseMap = {
             'DynamoWebServer.Responses.ContentResponse, DynamoWebServer': ContentResponse,
-            'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': ComputationResponse
+            'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': ComputationResponse,
+            'DynamoWebServer.Responses.ModelsListResponse, DynamoWebServer': ModelsListResponse
         };
 
     return Backbone.Model.extend({
@@ -79,7 +80,7 @@
             sendTimer = window.setInterval(function () {
                 if(this.socket.readyState === 1){
                     while( messageStack.length ){
-                        this.socket.send(messageStack.pop());
+                        this.socket.send(messageStack.shift());
                     }
 
                     window.clearInterval(sendTimer);

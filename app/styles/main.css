@@ -121,8 +121,8 @@ body {
 
 .node:hover .node-last-value-container {
 	display: block;
-	height: 26px;
-	bottom: -26px;
+	height: 52px;
+	bottom: -52px;
 	padding: 3px;
 	border: 1px solid #999;
 	transition-delay: 0.3s;
@@ -172,14 +172,14 @@ body {
 .node-last-value-container:hover {
 	right: -100px;
 	left: -100px;
-	height: 40px;
-	bottom: -40px;
+	height: 66px;
+	bottom: -66px;
 	overflow-x: scroll;
 	overflow-y: scroll;
 }
 
 .node-failure-message {
-	display: none;
+	display: inline-block;
 	padding: 2px;
 	left: 0;
 	right: 0;
@@ -1284,4 +1284,23 @@ body {
 }
 .ui-slider-vertical .ui-slider-range-max {
 	top: 0;
+}
+
+span.expcol, span.category {
+	cursor:default !important;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: -moz-none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+li.notmatch{
+	display: none !important;
+}
+
+div.tooltip-inner {
+	max-width: 400px;
 }

@@ -1,5 +1,5 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'SearchElement', 'ModelsListMessage'],
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, SearchElement, ModelsListMessage){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'Viewer'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, Viewer){
 
   return Backbone.Model.extend({
 
@@ -26,6 +26,10 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.login = new Login({}, { app: this });
 
       this.SearchElements = new SearchElements({app:this});
+      this.SearchElements.reset();
+      this.SearchElements.fetch();
+
+      this.viewer = new Viewer();
     },
 
     parse : function(resp) {
@@ -40,11 +44,8 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     },
 
     fetch : function(options){
-      var that = this;
       this.login.fetch();
-      this.SearchElements.fetch().always(function(){
-          Backbone.Model.prototype.fetch.call(that, options);
-      });
+      Backbone.Model.prototype.fetch.call(this, options);
     },
 
     // override of toJSON to support recursive serialization 

@@ -4,7 +4,9 @@ define(['backbone'], function(Backbone) {
 
     defaults: {
       name: null,
+      creatingName: null,
       category: null,
+      description: null,
       inPort: [],
       outPort: []
     }, 

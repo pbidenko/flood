@@ -102,10 +102,13 @@ require.config({
         WorkspaceBrowserElements: 'collections/WorkspaceBrowserElements',
 
         // backbone models
-        App: 'models/App',
+        //Use DynamoApp class in case of websocket connection, otherwise use App
+        App: 'models/DynamoApp',//'models/App',
         Connection: 'models/Connection',
         Marquee: 'models/Marquee',
-        Node: 'models/Node',
+        Node: 'models/nodes/Node',
+        NumberNode: 'models/nodes/NumberNode',
+        CodeBlockNode: 'models/nodes/CodeBlockNode',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
@@ -117,6 +120,7 @@ require.config({
         WorkspaceBrowserElement: 'models/WorkspaceBrowserElement',
         WorkspaceBrowser: 'models/WorkspaceBrowser',
         SocketConnection: 'models/SocketConnection',
+        Viewer: 'models/Viewer',
 
         CreateNodeCommand: 'models/commands/CreateNodeCommand',
         CreateNoteCommand: 'models/commands/CreateNoteCommand',
@@ -127,16 +131,19 @@ require.config({
         RunCancelCommand: 'models/commands/RunCancelCommand',
         UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
 
-        Message: 'models/messages/Message',
+        RecordableCommandsMessage: 'models/messages/RecordableCommandsMessage',
         ModelsListMessage: 'models/messages/ModelsListMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
         ContentResponse: 'models/responses/ContentResponse',
+        ModelsListResponse: 'models/responses/ModelsListResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',
+        NodeFactory: 'helpers/NodeFactory',
         staticHelpers: 'helpers/StaticHelpers',
+        augment: 'helpers/augment',
 
         // backbone views
         AppView: 'views/AppView',
@@ -151,12 +158,13 @@ require.config({
         LoginView: 'views/LoginView',
         WorkspaceBrowserElementView: 'views/WorkspaceBrowserElementView',
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
-
+        
         // node backbone views
         NodeViewTypes: 'views/NodeViews/NodeViews',
         BaseNodeView: 'views/NodeViews/Base',
         WatchNodeView: 'views/NodeViews/Watch',
         NumNodeView: 'views/NodeViews/Num',
+        CodeBlockView: 'views/NodeViews/CodeBlock',
         FormulaView: 'views/NodeViews/Formula',
 
         CSGNodeView: 'views/NodeViews/ThreeCSG',
