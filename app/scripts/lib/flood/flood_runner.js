@@ -47,6 +47,7 @@ fail = function(m, silent){
 };
 
 workspaces = {};
+functionDefinitions = {};
 commands = [];
 
 // Receive
@@ -73,8 +74,15 @@ on_run = function(data){
 	var ts = Date.now();
 
 	// get all nodes with output ports
-	var S = new scheme.Interpreter()
-	  , baseNode = null
+	var S = new scheme.Interpreter();
+
+	// recompile custom nodes and store in env
+	if (!FLOOD.environment) FLOOD.environment = {};
+	for (var funcId in functionDefinitions){
+		FLOOD.environment[funcId] = FLOOD.internalNodeTypes.CustomNode.compileNodesToLambda( workspaces[funcId].nodes );
+	}
+
+	var baseNode = null
 	  , bottomNodes = workspace.nodes
 	                      .filter(function(ele){
 	                        return !(data.bottom_ids.indexOf(ele.id) < 0 );
@@ -114,6 +122,7 @@ on_run = function(data){
 on_addWorkspace = function(data){
 
 	var workspace = lookupWorkspace(data.workspace_id);
+
 	if (workspace) return fail({kind: "addWorkspace", msg: "A workspace with that id already exists"});
 
 	var workspace = { id: data.workspace_id, nodes: [] };
@@ -151,6 +160,14 @@ on_removeWorkspace = function(data){
 
 }
 
+on_addDefinition = function(data){
+
+	this.functionDefinitions[data._id] = null;
+	data.workspace_id = data._id;
+	on_addWorkspace( data );
+
+};
+
 on_addConnection = function(data){
 
 	var ws = lookupWorkspace(data.workspace_id);
@@ -176,6 +193,46 @@ on_addConnection = function(data){
 	return success({ kind: "addConnection", startNodeId: data.startNodeId, startPortIndex: data.startPortIndex, endNodeId: data.endNodeId, endPortIndex: data.endPortIndex}, data.silent);
 
 };
+
+on_recompile = function(data){
+
+	var wsToRecompile = lookupWorkspace(data._id);
+	if (!wsToRecompile) return fail({ kind: "run", msg: "The workspace id given is not valid" }, data.silent);
+
+	var nodes = wsToRecompile.nodes;
+
+	// recompile it
+	var lambda = FLOOD.internalNodeTypes.CustomNode.compileNodesToLambda( nodes );
+	// var inputTypes = FLOOD.internalNodeTypes.CustomNode.findInputTypes( nodes );
+	var numInputs = FLOOD.internalNodeTypes.CustomNode.nodesOfType( FLOOD.nodeTypes.Input, nodes ).length;
+	var numOutputs = FLOOD.internalNodeTypes.CustomNode.nodesOfType( FLOOD.nodeTypes.Output, nodes ).length;
+
+	// mark all instances of this custom node as dirty
+	for (var id in workspaces){	
+
+		var ws = lookupWorkspace( id );
+
+		ws.nodes.forEach(function(n){
+
+			if ( n.functionId && n.functionId === data._id ){
+
+				n.lambda = lambda;
+
+				n.setNumInputs( numInputs );
+				n.setNumOutputs( numOutputs );
+				// n.setInputTypes( inputTypes );
+
+				n.setDirty();
+
+			}
+
+		});
+
+	};
+
+	return success({ kind: "recompile", _id: data.workspace_id }, data.silent);
+
+}
 
 on_removeConnection = function(data){
 
@@ -230,10 +287,12 @@ on_addNode = function(data){
 	var id = lookupNodeIndex(ws, data._id);
 	if (!(id < 0)) return fail({ kind: "addNode", msg: "Node with given id already exists", workspace_id: data.workspace_id, _id: data._id });
 
-	if ( !FLOOD.nodeTypes[data.typeName] ) 
+	if ( !FLOOD.nodeTypes[data.typeName] && !FLOOD.internalNodeTypes[data.typeName] ) 
 		return fail({ kind: "addNode", msg: "Node with that name does not exist", typeName: data.typeName, workspace_id: data.workspace_id, _id: data._id });
 
-	var node = new FLOOD.nodeTypes[ data.typeName ]();
+	var type = FLOOD.nodeTypes[ data.typeName ] || FLOOD.internalNodeTypes[ data.typeName ];
+
+	var node = new type();
 
 	node.id = data._id;
 	node.replication = data.replication;
@@ -279,8 +338,8 @@ on_removeNode = function(data){
 
 };
 
-// set the nodes for a workspace
-// the entire set of nodes must be sent, although they can provide values
+// set the nodes & connections for a workspace
+// the entire set of nodes must be sent
 on_setWorkspaceContents = function(data){
 
 	var workspace = lookupWorkspace(data.workspace_id);
@@ -356,11 +415,10 @@ post_nodeEvalComplete = function(node, args, isNew, value, prettyValue ){
 
 post_nodeEvalFailed = function(node, exception){
 
-	console.log( exception.toString() )
+	console.log( JSON.stringify(exception) )
 	return fail({ kind: "nodeEvalFailed", _id: node.id, exception: exception.toString() });
 
 };
-
 
 // Helpers
 

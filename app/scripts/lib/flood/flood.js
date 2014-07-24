@@ -56,6 +56,10 @@ define(function() {
 	  return this.push.apply(this, rest);
 	};
 
+	Array.prototype.last = function() {
+	    return this[this.length-1];
+	}
+
 	Function.prototype.method = function (name, func) {
 	    this.prototype[name] = func;
 	    return this;
@@ -69,7 +73,6 @@ define(function() {
 	    return this;
 	});
 
-
 	// MultiOutResult
 	// ===========
 	//
@@ -79,7 +82,16 @@ define(function() {
 			this[i] = object[i];
 		}
 	};
-	QuotedArray.prototype = new Object();
+	MultiOutResult.prototype = new Object();
+
+	MultiOutResult.wrap = function(){
+
+		if (arguments.length === 0) return undefined;
+
+		return arguments.length === 1 ? arguments[0] : 
+			new FLOOD.MultiOutResult( arguments );
+
+	};
 
 	MultiOutResult.prototype.constructor = MultiOutResult;
 	FLOOD.MultiOutResult = MultiOutResult;
@@ -123,12 +135,10 @@ define(function() {
 			qa.push( this[i].toQuotedArray ? this[i].toQuotedArray() : this[i] );
 		}
 		return qa;
-	}
+	};
+
 	QuotedArray.prototype.constructor = QuotedArray;
 	FLOOD.QuotedArray = QuotedArray;
-
-	// NodeType
-	// ========
 
 	FLOOD.baseTypes.NodeType = function(options) {
 
@@ -168,10 +178,11 @@ define(function() {
 
 		}
 
+		this.alwaysDirty = false;
 		this.doPostProcess = true;
 
 		this.isDirty = function() {
-			return _isDirty;
+			return this.alwaysDirty ? true : _isDirty;
 		};
 
 		this.markClean = function() {
@@ -184,7 +195,15 @@ define(function() {
 
 		this.inputTypes = function(){
 			return this.inputs.map(function(x){ return x.type; });
-		}
+		};
+
+		this.getIndexOfInputNode = function( otherNode ){
+			for (var i = 0; i < this.inputs.length; i++){
+				if ( this.inputs[i].isConnectedTo( otherNode ) ) return i;
+			}
+
+			return -1;
+		};
 
 		this.markDirty = function() {
 
@@ -302,8 +321,6 @@ define(function() {
 
 	}
 
-	// InputPort
-
 	FLOOD.baseTypes.NodePort = function(name, type, parentNode, parentIndex, oppNode, oppIndex) {
 		
 		this.name = name;
@@ -377,6 +394,10 @@ define(function() {
 			return undefined;
 		}
 
+		this.isConnectedTo = function( otherNode ){
+			return this.oppNode === otherNode;
+		}
+
 		this.connect = function(otherNode, outIndexOnOtherNode){
 			this.oppNode = otherNode;
 			this.oppIndex = outIndexOnOtherNode != undefined ? outIndexOnOtherNode : 0;
@@ -391,7 +412,251 @@ define(function() {
 
 	}.inherits( FLOOD.baseTypes.NodePort );
 
-	// Number
+	FLOOD.internalNodeTypes.CustomNode = function(functionName, functionId, lambda) {
+
+		var typeData = {
+			typeName: "CustomNode"
+		};
+
+		this.functionName = functionName;
+		this.functionId = functionId;
+		this.lambda = lambda;
+
+		if (scheme) var S = new scheme.Interpreter();
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.eval = function() {
+
+			this.lambda = FLOOD.environment[this.functionId];
+
+			if ( !this.lambda ) throw new Error("The custom node is not yet compiled.");
+
+			var args = Array.prototype.slice.call(arguments, 0);
+			var exp = [ this.lambda ].concat(args) ;
+
+			return S.eval( exp );
+
+		};
+
+		this.printExpression = function() { 
+			return "(" + this.functionName + " " + this.inputs.map(function(n){ return n.printExpression(); }).join(' ') + ")";					
+		};
+
+		this.extend = function(args){
+
+			if (args.functionName && typeof args.functionName === "string"){
+				this.functionName = args.functionName;
+			}
+
+			if (args.functionId && typeof args.functionId === "string"){
+				this.functionId = args.functionId;
+			}
+
+			if (args.numInputs && typeof args.numInputs === "number" ){
+				this.setNumInputs(args.numInputs);
+			}
+
+			if (args.numOutputs && typeof args.numOutputs === "number" ){
+				this.setNumOutputs(args.numOutputs);
+			}
+
+		};
+
+		var that = this;
+
+
+		this.setInputTypes = function( inputTypes ){
+
+			for (var i = 0; i < this.inputs.length; i++) 
+				this.inputs[i].type = inputTypes[i];
+
+		};
+
+		this.setNumInputs = function( num ){
+
+			if (typeof num != "number" || num < 0 || this.inputs.length === num) {
+				return;
+			}
+
+			if (this.inputs.length < num) addInput();
+			if (this.inputs.length > num) removeInput();
+
+			this.setNumInputs( num );
+		};
+
+		this.setNumOutputs = function( num ){
+
+			if (typeof num != "number" || num < 0 || this.outputs.length === num) {
+				return;
+			}
+
+			if (this.outputs.length < num) addOutput();
+			if (this.outputs.length > num) removeOutput();
+
+			this.setNumOutputs( num );
+		};
+
+		var addInput = function(){
+			var port = new FLOOD.baseTypes.InputPort( characters[ that.inputs.length ], [AnyTypeButQuotedArray], 0 );
+			port.parentNode = that;
+			port.parentIndex = that.inputs.length;
+			that.inputs.push( port );
+		};
+
+		var removeInput = function(){
+			if (that.inputs.length === 0) return;
+			that.inputs.pop();
+		};
+
+		var addOutput = function(){
+			var port = new FLOOD.baseTypes.OutputPort( characters[ that.outputs.length ], [AnyType] );
+			port.parentNode = that;
+			port.parentIndex = that.outputs.length;
+			that.outputs.push( port );
+		};
+
+		var removeOutput = function(){
+			if (that.outputs.length === 0) return;
+			that.outputs.pop();
+		};
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	FLOOD.internalNodeTypes.CustomNode.nodesOfType = function(type, nodes){
+
+		return nodes.filter(function(x){
+			return x instanceof type;
+		});
+	};
+
+	FLOOD.internalNodeTypes.CustomNode.findInputTypes = function(nodes){
+
+		var inputNodes = FLOOD.internalNodeTypes.CustomNode.nodesOfType( FLOOD.nodeTypes.Input, nodes );
+
+		return inputNodes.map(function(inode, index){
+
+			// get all of the types for all connections to this one
+			var allPotentialTypes = nodes.reduce(function(agg, node){
+
+				var con = node.getIndexOfInputNode( inode );
+				if (con < 0) return agg;
+
+				agg.push( node.inputs[con].type );
+				return agg;
+
+			}, []);
+			
+			// check if input port is not connected - if so, short-circuit
+			if (allPotentialTypes.length === 0) return AnyTypeButQuotedArray;
+
+			// each type is an array - the last position is the concrete type
+			var typeToMatch = allPotentialTypes[0];
+			var firstConcreteType = typeToMatch.last();
+
+			// assert all types match
+			allPotentialTypes.map(function(t){
+				return t.last();
+			}).forEach(function(t){
+
+				if ( t === firstConcreteType ||
+						 t === AnyType ||
+						 t === AnyTypeButQuotedArray ) return;
+
+				throw new TypeError("One of the inputs is connected to multiple nodes with incompatible types!")
+
+			});
+
+			// get the most complex type, this is simply the longest array
+			var maxLen = 0;
+			var idMax = -1;
+			for (var i = allPotentialTypes.length - 1; i >= 0; i--) {
+				if ( allPotentialTypes[i].length > maxLen ) {
+					idMax = i;
+					maxLen = allPotentialTypes[i].length;
+				} 
+			};
+
+			return allPotentialTypes[maxLen];
+
+		});
+	};
+
+	FLOOD.internalNodeTypes.CustomNode.compileNodesToLambda = function(nodes){
+
+		// find all input nodes
+		var inputNodes = nodes.filter(function(x){
+			return x instanceof FLOOD.nodeTypes.Input;
+		});
+
+		// find all output nodes
+		var outputNodes = nodes.filter(function(x){
+			return x instanceof FLOOD.nodeTypes.Output;
+		});
+
+		// compile the input nodes, forming the arg list
+		var args = inputNodes.map(function(x){
+			return x.compile();
+		});
+
+		// compile the output nodes, forming the internal value expressions
+		var internalExp = outputNodes.map( function(x){ return x.compile(); });
+
+		// we need a function to box up the internal expression
+		// in a dictionary if there are multiple outputs
+		var boxedExp = internalExp.length > 1 ? 
+			[ FLOOD.MultiOutResult.wrap ].concat( internalExp ) : internalExp[0];
+
+		// nodes in a custom node do not cache their value
+		nodes.forEach(function(x){ x.alwaysDirty = true; });
+
+		// ( lambda (args) boxedExp )
+		return ["lambda", args, boxedExp];
+	};
+
+	FLOOD.nodeTypes.Input = function(name) {
+
+		var typeData = {
+			typeName: "Input",
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyTypeButQuotedArray] ) ],
+		};
+
+		if (name === undefined) name = characters[currentInputChar++];
+
+		this.name = name;
+
+		FLOOD.baseTypes.NodeType.call(this, typeData);
+
+		this.compile = function() {
+			return this.name;
+		}
+
+		this.printExpression = function(){
+			return this.name;
+		}
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	var currentOutputChar = 0;
+
+	FLOOD.nodeTypes.Output = function(name) {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "⇒", [AnyType] ) ],
+			typeName: "Output"
+		};
+
+		if (name === undefined) name = characters[currentOutputChar++];
+
+		this.name = name;
+
+		FLOOD.baseTypes.NodeType.call(this, typeData);
+
+		this.compile = function() {
+			return this.inputs[0].compile();
+		}
+
+	}.inherits( FLOOD.baseTypes.NodeType );
 
 	FLOOD.nodeTypes.Number = function() {
 
@@ -424,6 +689,9 @@ define(function() {
 		}
 
 	}.inherits( FLOOD.baseTypes.NodeType );
+
+	var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	var currentInputChar = 0;
 
 	FLOOD.nodeTypes.Formula = function() {
 
@@ -535,7 +803,7 @@ define(function() {
 		FLOOD.baseTypes.NodeType.call(this, typeData);
 
 		this.eval = function(){
-			return 2 * Math.PI;
+			return Math.PI;
 		}
 
 	}.inherits( FLOOD.baseTypes.NodeType );

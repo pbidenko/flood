@@ -64,7 +64,6 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
               .renderRunnerStatus()
               .updateZoom()
               .updateOffset();
-
     },
 
     startMarqueeDrag: function(event){
@@ -158,6 +157,10 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
 
       this.$workspace.css('transform', 'scale(' + this.model.get('zoom') + ')' );
       this.$workspace.css('transform-origin', "0 0" );
+
+      // force redraw in chrome, otherwise the nodes look blurry
+      this.$workspace.css('display', 'none').height();
+      this.$workspace.css('display', 'block');
 
       return this;
 

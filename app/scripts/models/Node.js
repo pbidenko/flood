@@ -28,6 +28,8 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
       // we need to know the type in order to create the node
       if ( atts.typeName != null && FLOOD.nodeTypes[atts.typeName] != undefined){
         this.set( 'type', new FLOOD.nodeTypes[ atts.typeName ]() );
+      } else if ( atts.typeName != null && FLOOD.internalNodeTypes[atts.typeName] != undefined ) {
+        this.set( 'type', new FLOOD.internalNodeTypes[ atts.typeName ]() );
       } else {
 
         var elems = vals.workspace.app.SearchElements.where({ name: atts.typeName });
@@ -47,9 +49,7 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
         this.set( 'type', new FLOOD.nodeTypes.ServerNode(inPort, outPort) );
       }
 
-      if (atts.extra){
-        this.get('type').extend( atts.extra );
-      }
+      if (atts.extra){ this.get('type').extend( atts.extra );  }
 
       if (atts.lastValue){
         this.get('type').value = atts.lastValue;
@@ -57,7 +57,7 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
 
       if (atts.ignoreDefaults && atts.ignoreDefaults.length > 0){
 
-        for (var i = 0; i < atts.ignoreDefaults.length; i++){
+        for (var i = 0; i < this.get('type').inputs.length; i++){
           this.get('type').inputs[i].useDefault = !atts.ignoreDefaults[i];
         }
         
@@ -255,23 +255,24 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
 
     getConnectionAtIndex: function( portIndex, isOutput, connectionIndex ){
 
-      if (!this.isValidPort(portIndex, isOutput)){
-        return null;
-      }
+      var ports = this.getAllConnectionsAtPort( portIndex, isOutput );
+
+      if (ports == null) return null;
+      if ( connectionIndex === undefined ) connectionIndex = 0;
+      if ( connectionIndex >= ports.length || connectionIndex < 0) return null;
+
+      return ports[connectionIndex];
+
+    },
+
+    getAllConnectionsAtPort: function( portIndex, isOutput ){
+
+      if (!this.isValidPort(portIndex, isOutput)) return null;
 
       if (isOutput === undefined) isOutput = false;
 
-      var port = this.getPorts(isOutput)[portIndex];
-
-      if (port == null) {
-        return null;
-      }
-
-      if ( connectionIndex === undefined ) connectionIndex = 0;
-
-      if (connectionIndex >= port.length || connectionIndex < 0) return null;
-
-      return port[connectionIndex];
+      var ports = this.getPorts(isOutput)[portIndex];
+      return ports;
 
     },
 
