@@ -13,7 +13,8 @@ define([  'backbone',
           'Help',
           'LoginView',
           'Login'],
-          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
+          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, WorkspaceTabView, 
+            Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
 
   return Backbone.View.extend({
 

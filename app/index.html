@@ -250,9 +250,12 @@
       <script type="text/template" id="search-template">
         <div class="search-top-container">
           <input placeholder="Add a node..." class="library-search-input search"></input>
-        </div>
-        <ul class="list search-list">
-        </ul>
+        </div>        
+      </script>
+
+      <script type="text/template" id="search-category-template">
+        <span class="name"><%= name %></span>
+        <ul></ul>
       </script>
 
       <script type="text/template" id="workspace-browser-template">
@@ -289,21 +292,16 @@
         </div>
 
       </script>
-
+     
       <script type="text/template" id="workspace-search-template">
         
         <div class="workspace-search-container" id="workspace-search-input-container">
-
           <ul class="list search-list" style="display:none;">
           </ul>
-
           <div class="search-bottom-container">
-
             <i style="display:inline-block;" class="icon-search icon-white dim-button" ></i>
             <input placeholder="Add a node..." class="library-search-input search"></input>
-
           </div>
-
         </div>
 
         <div class="workspace-search-container">
@@ -363,8 +361,7 @@
 
       </script>
 
-      <script type="text/template" id="workspace-runner-status-template">
-
+      <script type="text/template" id="workspace-runner-status-template">          
       </script>
 
       <script type="text/template" id="search-element-template">

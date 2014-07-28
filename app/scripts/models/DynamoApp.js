@@ -25,9 +25,14 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'], function
 
         mapModels: function(param) {
           this.SearchElements.models = param.models.map(function(item){
-            return new SearchElement({name: item.name, creatingName: item.creatingName,
-              category: item.category, description: item.description, inPort: item.parameters,
-              outPort: item.returnKeys, app: this});
+            return new SearchElement({
+              name: item.name,
+              creatingName: item.creatingName,
+              category: item.category,
+              description: item.description,
+              inPort: item.parameters,
+              outPort: item.returnKeys, app: this
+            });
           });
         }
 

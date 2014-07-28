@@ -11,8 +11,9 @@ define(['backbone'], function(Backbone) {
       outPort: []
     }, 
     
-    initialize: function(a, b) {
-      this.app = a.app;
+    initialize: function(attrs, options) {
+      this.app = attrs.app;
+      this.parent = options ? options.parent : null;
     }
 
   });

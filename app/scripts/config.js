@@ -158,6 +158,8 @@ require.config({
         LoginView: 'views/LoginView',
         WorkspaceBrowserElementView: 'views/WorkspaceBrowserElementView',
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
+        ModelsListView: 'views/ModelsListView',
+        SearchCategoryView: 'views/SearchCategoryView',
         
         // node backbone views
         NodeViewTypes: 'views/NodeViews/NodeViews',

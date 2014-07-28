@@ -109,9 +109,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
         eleView.$el.tooltip({ title: ele.attributes.description, delay: del });
         prevCategoryElem.append( eleView.$el );
 
-      });
-
-      this.$list.find('> li > span.expcol').click();
+      });      
 
       // build button tooltips
       this.$el.find('#undo-button').tooltip({title: "Ctrl/Cmd Z", delay: del});

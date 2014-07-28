@@ -384,7 +384,7 @@ body {
 }
 
 .search-element {
-	background: #333;
+	background: #595959;
 	color: white;
 	display: block;
 	width: 100%;
@@ -393,10 +393,28 @@ body {
 	border-top: solid 1px #444;
 	border-bottom: solid 1px #222;
 	padding: 5px;
+	cursor: default;
+	list-style: none;
 }
 
 .search-element:hover {
 	background: #444;
+}
+
+.search-element.category {
+	background-color: #333;
+}
+
+.search-element ul {
+	padding-left: 0;
+}
+
+.search-element.category > .name:before {
+	content: '[+] '
+}
+
+.search-element.category.expanded > .name:before {
+	content: '[-] '
 }
 
 .library-search-input {
