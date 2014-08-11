@@ -8,16 +8,18 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
       this.app = arr.app;
 
       this.model.get('workspaces').on('reset', this.render, this );
-      this.model.get('workspaces').on('add', this.addWorkspace, this );
-      this.model.get('workspaces').on('remove', this.removeWorkspace, this );
+      this.model.get('workspaces').on('add', this.addWorkspaceElement, this );
+      this.model.get('workspaces').on('remove', this.removeWorkspaceElement, this );
 
       this.render();
     },
 
     template: _.template( $('#workspace-browser-template').html() ),
 
-    events: {
-
+    events: { 
+      'click .workspace-browser-refresh': "refreshClick",
+      'click #workspace-browser-header-custom-nodes': "customNodeHeaderClick",
+      'click #workspace-browser-header-projects': "projectHeaderClick"
     },
 
     render: function(arg) {
@@ -25,21 +27,54 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
       this.$el.html( this.template( this.model.toJSON() ) );
 
       this.contents = this.$el.find('#workspace-browser-contents');
-      this.contents.empty();
+
+      this.customNodes = this.$el.find('#workspace-browser-custom-nodes');
+      this.customNodes.empty();
+
+      this.projects = this.$el.find('#workspace-browser-projects');
+      this.projects.empty();
 
     },
 
-    addWorkspace: function(x){
+    refreshClick: function(e){
+      this.model.refresh();
+      e.preventPropagation();
+    },
+
+    customNodeHeaderClick: function(e){
+
+      this.projects.hide();
+      this.customNodes.show();
+
+      $('#workspace-browser-header-custom-nodes').css('bottom','').css('top','40px');
+
+    },
+
+    projectHeaderClick: function(e){
+
+      this.customNodes.hide();
+      this.projects.show();
+
+      $('#workspace-browser-header-custom-nodes').css('bottom','0').css('top','');
+
+    },
+
+    addWorkspaceElement: function(x){
 
       if (!this.contents) this.render();
 
       var v = new WorkspaceBrowserElementView( { model: x }, { app : this.app } );
       v.render();
-      this.contents.append(v.$el);
 
+      if ( x.get('isCustomNode') ){
+        this.customNodes.append( v.$el );
+      } else {
+        this.projects.append( v.$el );
+      }
+      
     }, 
 
-    removeWorkspace: function(ws){
+    removeWorkspaceElement: function(ws){
 
       if (!this.contents) return;
       this.contents.find('.workspace-browser-element[data-id*=' + ws.get('_id') + ']').remove();

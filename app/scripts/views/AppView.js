@@ -44,13 +44,20 @@ define([  'backbone',
       'click #settings-button': 'showSettings',
       'click #workspace_hide' : 'toggleViewer',
       'click #add-workspace-button': 'newWorkspace',
+      'click #add-node-workspace-button': 'newNodeWorkspace',
       'click #workspace-browser-button': 'toggleBrowser'
     },
 
-    keydownHandler: function(e){
-      
-      this.currentWorkspaceView.keydownHandler(e);
+    newWorkspace: function(){
+      this.model.newWorkspace();
+    },
 
+    newNodeWorkspace: function(){
+      this.model.newNodeWorkspace();
+    },
+
+    keydownHandler: function(e){
+      this.currentWorkspaceView.keydownHandler(e);
     },
 
     saveClick: function(e){
@@ -161,13 +168,11 @@ define([  'backbone',
 
     workspaceCounter: 1,
 
-    newWorkspace: function(){
-      this.model.newWorkspace();
-    },
-
-    // This callback is called when a Workspace is added to
-    // the App's Workspace Collection
     addWorkspaceTab: function(workspace){
+
+      if ( this.model.isBackgroundWorkspace(workspace.id) ) return;
+
+      if ( this.workspaceTabViews[workspace.get('_id')] != undefined) return;
 
       var view = new WorkspaceTabView({ model: workspace });
       this.workspaceTabViews[workspace.get('_id')] = view;
@@ -177,8 +182,6 @@ define([  'backbone',
 
     },
 
-    // Function is called when a workspace is removed from the 
-    // App's Workspace Collection
     removeWorkspaceTab: function(workspace){
 
       // The Workspace can no longer be current
@@ -236,22 +239,26 @@ define([  'backbone',
 
     showWorkspace: function(workspaceView){
 
+      // if the workspace tab does not exist
+      this.model.removeWorkspaceFromBackground( workspaceView.model.id );
+      this.addWorkspaceTab( workspaceView.model );
+
       if (!$.contains(document.documentElement, workspaceView.$el[0])){
         this.$el.children('#workspaces').append( this.currentWorkspaceView.$el );
       }
       
       workspaceView.$el.show();
-      
+
     },
 
     render: function(arg) {
 
+      var model = this.model;
       var workspaces = this.model.get('workspaces')
       var currentWorkspaceId = this.model.get('currentWorkspace');
 
       if (!currentWorkspaceId){
         var currentWorkspace = workspaces.first();
-        // this.model.set('currentWorkspace', currentWorkspace.get('_id'));
       } else {
         var currentWorkspace = workspaces.get(currentWorkspaceId);
       }
@@ -263,14 +270,16 @@ define([  'backbone',
 
           this.workspaceControlsView = new WorkspaceControlsView( { model: new Search() }, {app: this.model, appView : this } );
           this.workspaceControlsView.render();
-          this.$el.find('#workspaces').prepend(this.workspaceControlsView.$el);
+
+          this.$el.find('#workspaces').prepend( this.workspaceControlsView.$el );
 
         }
 
       // render tabs
         if (!this.workspaceTabViews){
           this.workspaceTabViews = {};
-          workspaces.each(this.addWorkspaceTab, this);
+
+          workspaces.each( this.addWorkspaceTab, this );
         }
 
       // hide current workspace, show workspace
@@ -294,10 +303,12 @@ define([  'backbone',
     },
 
     renderLogin: function(){
+
       if (!this.loginView){
         this.loginView = new LoginView({model: this.model.login }, { app: this.model });
         this.loginView.render();
       }
+
     },
 
     lookingAtViewer: false,

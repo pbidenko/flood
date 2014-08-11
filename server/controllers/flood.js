@@ -121,9 +121,14 @@ exports.putMySession = function(req, res) {
 				w.lastSaved = Date.now();
 				w.redoStack = x.redoStack || w.redoStack;
 				w.undoStack = x.undoStack || w.undoStack;
+
+				console.log( x.workspaceDependencyIds );
+
+				w.workspaceDependencyIds = x.workspaceDependencyIds || w.workspaceDependencyIds;
+				w.isCustomNode = ( x.isCustomNode != undefined ) ? x.isCustomNode : w.isCustomNode;
 				w.isFirstExperience = false;
 
-				w.markModified("isFirstExperience name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack");
+				w.markModified("workspaceDependencyIds isCustomNode isFirstExperience name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack");
 
 				w.save(function(se){
 					if (se) return callback(se);
@@ -221,8 +226,9 @@ exports.getWorkspaces = function(req, res) {
 	if (!user) return res.status(403).send("Must be logged in to list your workspaces")
 
 	User.findById( user._id )
-		.populate('workspaces', 'name lastSaved isPublic maintainers isModified')
+		.populate('workspaces', 'name lastSaved isPublic maintainers isModified isCustomNode')
 		.exec(function(e, u) {
+			console.log(u)
 			return res.send( u.workspaces.filter(function(x){ return x.isModified === true; }).sort(dateSort) );
 	}); 
 
@@ -235,7 +241,7 @@ exports.getWorkspace = function(req, res) {
 	Workspace.findById( wid , function(e, ws) {
 
 		if (e) {
-	  	return res.send('Workspace not found');
+	  		return res.send('Workspace not found');
 		}
 
 		return res.send(ws);
@@ -268,9 +274,11 @@ exports.putWorkspace = function(req, res) {
 		w.lastSaved = Date.now();
 		w.redoStack = x.redoStack || w.redoStack;
 		w.undoStack = x.undoStack || w.undoStack;
+		w.isCustomNode = ( x.isCustomNode != undefined ) ? x.isCustomNode : w.isCustomNode;
+		w.workspaceDependencyIds = x.workspaceDependencyIds || w.workspaceDependencyIds;
 		w.isModified = true;
 
-		w.markModified("name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack isModified");
+		w.markModified("workspaceDependencyIds name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack isModified");
 
 		w.save(function(se){
 			if (se) return res.status(500).send('Could not save the workspace');

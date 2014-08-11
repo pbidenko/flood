@@ -28,7 +28,13 @@ define(function() {
 		this.outer = outer;
 
 		this.find = function(key){
-			return this.scope[key] != null ? this.scope: this.outer.find(key);
+			if ( this.scope[key] != null) 
+				return this.scope
+
+			if (this.outer != null) 
+				return this.outer.find(key);
+
+			throw new Error("Could not find identifier: " + key)
 		};
 
 		this.add_methods = function(object) {
@@ -122,6 +128,7 @@ define(function() {
 				var exps = x.map(function(exp) { 					
 					return that.eval(exp, env);
 				});
+
 			  var proc = exps.shift();
 			  return proc.apply(this, exps);
 			}

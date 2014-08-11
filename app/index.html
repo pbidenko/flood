@@ -34,7 +34,6 @@
             display: none;
           }
         </style>
-        
 
         <!-- jqueryui -->
         <link rel="stylesheet" href="bower_components/jquery.ui/themes/base/jquery.ui.all.css">
@@ -50,6 +49,10 @@
 
             <div id="add-workspace-button" class="menu-element" style="float: left">
               <i class="icon-file dim-button"></i>
+            </div>
+
+            <div id="add-node-workspace-button" class="menu-element" style="float: left">
+              <i class="icon-book dim-button"></i>
             </div>
 
             <div id="more-menu">
@@ -125,13 +128,13 @@
 
                 </ul>
               </div>
-
+                    
             </li>
           <% }); %>
         </ul>
 
         <div class="node-data-container" >
-          <span class="name searchfield"><%- typeName %></span>
+          <span class="name searchfield"><%= typeName != "CustomNode" ? typeName : type.functionName  %></span>
         </div>
 
         <ul class="node-outputs" >
@@ -199,6 +202,7 @@
       <script type="text/template" id="workspace-tab-template">
 
         <i class="icon-pencil dim-button edit-button" style="visibility: hidden; margin-left: 10px"></i>
+        <span class="workspace-tab-function <%= isCustomNode ? "" : "hidden" %>">f</span>
         <input class="workspace-name" disabled="disabled" value="<%= name %>"></input>
         <i class="icon-remove dim-button remove-button"></i>
 
@@ -259,9 +263,22 @@
       </script>
 
       <script type="text/template" id="workspace-browser-template">
-        <h5 style="padding: 5px;">My Workspaces</h5>
-        <ul id="workspace-browser-contents">
-        </ul>
+
+        <div id="workspace-browser-contents">
+
+          <span class="workspace-browser-header row" id="workspace-browser-header-projects">
+            My Projects
+            <i class="workspace-browser-header-refresh icon-refresh dim-button workspace-browser-refresh" ></i>
+          </span>
+          <ul class="workspace-browser-element-list row scroll-y" id="workspace-browser-projects"></ul>
+
+          <span class="workspace-browser-header row" id="workspace-browser-header-custom-nodes">
+            My Custom Nodes
+            <i class="workspace-browser-header-refresh icon-refresh dim-button workspace-browser-refresh" ></i>
+          </span>
+          <ul class="workspace-browser-element-list row scroll-y" id="workspace-browser-custom-nodes"></ul>
+
+        </div>
       </script>
 
       <script type="text/template" id="workspace-browser-element-template">
@@ -355,6 +372,14 @@
 
           <div id="zoomreset-button" class="workspace-search-button workspace-search-button-active">
             Reset
+          </div>
+
+        </div>
+
+        <div class="workspace-search-container">
+
+          <div id="export-button" class="workspace-search-button workspace-search-button-active">
+            Export
           </div>
 
         </div>

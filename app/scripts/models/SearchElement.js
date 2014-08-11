@@ -9,6 +9,8 @@ define(['backbone'], function(Backbone) {
       description: null,
       inPort: [],
       outPort: []
+      isCustomNode: false,
+      functionId: -1
     }, 
     
     initialize: function(attrs, options) {
