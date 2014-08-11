@@ -5,10 +5,11 @@ define(['backbone'], function(Backbone) {
     defaults: {
       name: null,
       creatingName: null,
+      displayedName: null,
       category: null,
       description: null,
       inPort: [],
-      outPort: []
+      outPort: [],
       isCustomNode: false,
       functionId: -1
     }, 

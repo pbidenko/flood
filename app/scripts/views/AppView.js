@@ -32,6 +32,7 @@ define([  'backbone',
       this.model.on('change:showingLogin', this.viewLogin, this);
       this.model.on('change:showingHelp', this.viewHelp, this);
       this.model.on('change:showingBrowser', this.viewBrowser, this);
+      this.model.on('hide-search', this.hideSearch, this);
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
 
@@ -78,6 +79,11 @@ define([  'backbone',
         this.model.set('showingBrowser', true);
       }
 
+    },
+
+    hideSearch: function(){
+      this.model.set('showingSearch', false);
+      this.workspaceControlsView && this.workspaceControlsView.hideSearch();      
     },
 
     viewBrowser: function(){

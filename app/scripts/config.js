@@ -132,12 +132,12 @@ require.config({
         UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
 
         RecordableCommandsMessage: 'models/messages/RecordableCommandsMessage',
-        ModelsListMessage: 'models/messages/ModelsListMessage',
+        LibraryItemsListMessage: 'models/messages/LibraryItemsListMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
         ContentResponse: 'models/responses/ContentResponse',
-        ModelsListResponse: 'models/responses/ModelsListResponse',
+         LibraryItemsListResponse: 'models/responses/LibraryItemsListResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',

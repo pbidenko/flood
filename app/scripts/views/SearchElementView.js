@@ -14,16 +14,26 @@ define(['backbone'], function(Backbone) {
     initialize: function(attrs, options){      
       this.searchView = options.searchView;      
       this.parent = options.parent;
+
+      if (!this.model.get('creatingName')){
+            this.model.set('creatingName', this.model.get('name'));
+            this.model.set('displayedName', this.model.get('name'));
+        }
     },
 
     render: function() {
       this.$el.html( this.template( this.model.toJSON() ) );
+      this.$el.tooltip({ title: this.model.get('description'), delay: {
+          show: 300
+      }});
 
       return this;
     },
 
     clickHandler: function(e) {
       this.searchView.trigger('add-element', this.model);
+      e.preventDefault();
+      return false;
     },
 
     toggle: function(isVisible){

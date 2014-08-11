@@ -1,4 +1,5 @@
-define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], function(Backbone, List, SearchElement, SearchElementView, bootstrap) {
+define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', 'ModelsListView'],
+ function(Backbone, List, SearchElement, SearchElementView, bootstrap, ModelsListView) {
 
   return Backbone.View.extend({
 
@@ -9,17 +10,14 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
       this.app = arr.app;
       this.appView = arr.appView;
 
+      this.on('add-element', this.elementClick);
+
       //Bind to document's click event for hiding toolbox
       //Unbind first to avoid duplicate bindings
       $(window).off('click.models-view');
       $(window).on('click.models-view', function(e){
-
-        if( e.target !== this.$input[0] &&
-            !$(e.target).hasClass( 'expcol' ) &&
-            !$(e.target).hasClass( 'category' ) &&
-            e.target.localName !== 'li' ) {
-            this.$list.hide();
-        }
+        if(e.target !== this.$input[0])
+          this.$list.hide();
       }.bind(this));
 
       this.app.SearchElements.on('add remove', this.render, this);
@@ -43,78 +41,22 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
     },
 
     render: function(arg) {
+      var del = {
+          show: 300
+      };
 
       this.$el.html( this.template( this.model.toJSON() ) );
 
       this.$input = this.$('.library-search-input');
-      this.$list = this.$('.search-list');
 
-      this.$list.empty();
+      this.modelsListView = new ModelsListView({}, {
+                app: this.app,                
+                searchView: this
+      });
 
-      var del = { show: 300 };
+      this.$list = this.$('.search-list-container').append(this.modelsListView.render().$el);
 
-      var that = this;
-      var prevCategory = '';
-      var prevCategoryElem = that.$list;
-
-      this.app.SearchElements.forEach( function(ele) {
-
-        if ( ele.attributes.category !== null ) {
-          var categories = ele.attributes.category.split( '.' );
-          if ( ele.attributes.category !== prevCategory ) {
-            prevCategory = ele.attributes.category;
-              prevCategoryElem = that.$list;
-              for ( var i = 0; i < categories.length; i++ ) {
-                  if ( prevCategoryElem.find( 'li.' + categories[i] ).length == 0 ) {
-                      var name = categories[i];
-                      var category = ele.attributes.category.replace(' ', '_');
-                      categories[i] = categories[i].replace(' ', '_');
-
-                      var elem = new SearchElement({ name: name, category: category, app: that.app });
-
-                      var eleView = new SearchElementView({ model: elem }, { appView: that.appView, app: that.app });
-
-                      eleView.render();
-                      eleView.$el.find( 'span' ).addClass( 'category' );
-                      eleView.$el.addClass( categories[i] );
-                      eleView.$el.prepend( '<span class="expcol">[-]</span>' );
-                      var expandCollapse = function(e) {
-
-                          var expColSpan = $(this).hasClass('expcol') ? this :
-                              $(this).closest('li').find('> span.expcol')[0];
-
-                          var currentLi = $( expColSpan ).closest( 'li' );
-
-                          if ( expColSpan.innerHTML == '[-]' ) {
-                              currentLi.find( 'li' ).hide();
-                              currentLi.find( 'span.expcol' ).html( '[+]' );
-                          }
-                          else {
-                              currentLi.find( '> li' ).show();
-                              expColSpan.innerHTML = '[-]';
-                          }
-                      };
-
-                      eleView.$el.find('> span.expcol').click( expandCollapse );
-                      eleView.$el.find('> span.category').click( expandCollapse );
-
-                      prevCategoryElem.append(eleView.$el);
-                  }
-
-                  prevCategoryElem = prevCategoryElem.find('li.'+categories[i]).first();
-              }
-          }
-        }
-
-        var eleView = new SearchElementView({ model: ele }, { appView: that.appView, app: that.app, 
-          click: function(e){ that.elementClick.call(that, e); } });
-
-        eleView.render();
-        eleView.$el.tooltip({ title: ele.attributes.description, delay: del });
-        prevCategoryElem.append( eleView.$el );
-
-      });      
-
+      
       // build button tooltips
       this.$el.find('#undo-button').tooltip({title: "Ctrl/Cmd Z", delay: del});
       this.$el.find('#redo-button').tooltip({title: "Ctrl/Cmd Y", delay: del});
@@ -130,19 +72,8 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
 
     },
 
-    _showHideAll:  function(ul, isHide) {
-        var htmlText = isHide ? '[+]' : '[-]';
-        if ( isHide ) {
-              ul.find( 'li' ).hide();
-          }
-        else {
-              ul.find('li').show();
-        }
-        ul.find( 'span.expcol' ).html( htmlText );
-    },
-
     focus: function(event){
-      this.$('.search-list').show();
+      this.$list.show();
       this.$('.library-search-input').select();
     },
 
@@ -193,12 +124,10 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
       return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
     },
 
-    addNode: function(name){
+    addNode: function(nodeModel){
 
-      if (name === undefined ) return;
-
-      this.currentWorkspace().addNodeByNameAndPosition( name, this.getWorkspaceCenter() );
-
+      this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creatingName'), this.getWorkspaceCenter());
+      this.hideSearch();
     },
 
     objConverter: function(x, vertexOffset, index){
@@ -324,64 +253,34 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
         pom.click();
     },
 
-    elementClick: function(ele){
+    elementClick: function(model){
 
-      this.addNode( ele.model.get('name') );
+      this.addNode(model);
 
     },
+    
+    hideSearch: function(){
+      this.$list.hide();
+    },
 
-    searchKeyup: function(event) {
-
-      // enter key causes first result to be inserted
-      if ( event.keyCode === 13) {
-
-        var nodeName = this.$list.find( '.search-element:not(.notmatch,:has(li.search-element))' ).first()
-            .find( '.name:not(.category)' ).first().html();
-        if (nodeName === undefined )
+    searchKeyup: _.debounce(function (event) {            
+        var searchText = this.$input.val();
+        //If the key is Escape or search text is empty, just quit
+        if( event.keyCode === 27 ){
+            this.app.trigger('hide-search');
             return;
+        }
 
-        this.addNode( nodeName );
+        if (event.keyCode === 13) { // enter key causes first result to be inserted
+            var elementToAdd = this.modelsListView.findElementByCreatingName(searchText);
+            elementToAdd && this.elementClick(elementToAdd.model);                
 
-      }
-      else {
-          var val = this.$input.val().toLowerCase();
-
-          var checkForMatch = function( liElement ) {
-              var name = liElement.find( '> span.name' )[0].innerHTML;
-
-              if ( name.toLowerCase().indexOf( val ) > -1 ) {
-                  liElement.removeClass( 'notmatch' );
-                  liElement.find( 'li.search-element' ).removeClass('notmatch');
-
-                  return true;
-              }
-              else {
-                  var subCategories = liElement.find( '> li.search-element' );
-                  var hasMatched = false;
-
-                  for ( var i = 0; i < subCategories.length; i++) {
-                      if ( checkForMatch( $( subCategories[i] ) ) ) {
-                          hasMatched = true;
-                      }
-                  }
-
-                  if (hasMatched)
-                      liElement.removeClass( 'notmatch' );
-                  else
-                      liElement.addClass( 'notmatch' );
-
-                  return hasMatched;
-                  }
-          }
-
-          var rootCategories = this.$list.find( '> li.search-element' );
-          for(var i = 0; i < rootCategories.length; i++) {
-              checkForMatch( $( rootCategories[i] ) );
-          }
-
-          this._showHideAll(rootCategories, val.length == 0 );
-      }
-    }
+        } 
+        //Expand categories containing matching elements
+        else {
+            this.modelsListView.expandElements(searchText);
+        }
+    }, 400)
 
   });
 

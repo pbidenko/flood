@@ -7,8 +7,9 @@ define(['backbone'], function(Backbone) {
 
     return Backbone.Model.extend({
 
-        initialize: function() {
-            Backbone.on('computation-completed:event', this.redrawGeometry, this);
+        initialize: function (atts) {
+            this.app = atts.app;
+            this.listenTo( this.app, 'computation-completed:event', this.redrawGeometry);
         },
 
         redrawGeometry: function(param) {

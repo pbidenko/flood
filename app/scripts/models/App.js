@@ -30,7 +30,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.SearchElements.reset();
       this.SearchElements.fetch();
 
-      this.viewer = new Viewer();
+      this.viewer = new Viewer({app: this});
     },
 
     parse : function(resp) {
@@ -121,9 +121,10 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       var that = this;
 
-      $.get("/nws", function(data, status){
+      $.get("/nws", function(data){
 
         data.isCustomNode = true;
+        data.guid = that.makeId();
 
         var ws = new Workspace(data, { app: that });
 
@@ -142,10 +143,14 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     loadWorkspace: function( id, callback ){
 
       var ws = this.get('workspaces').get(id);
+      if(ws) return;
 
       var that = this;
 
       $.get("/ws/" + id, function(data){
+
+        var ws = that.get('workspaces').get(id);
+        if(ws) return;
 
         var ws = new Workspace(data, {app: that});
         that.get('workspaces').add( ws );

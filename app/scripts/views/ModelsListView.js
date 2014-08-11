@@ -13,20 +13,37 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
 
         template: _.template(''),
 
-        events: {
-            'keyup .library-search-input': 'searchKeyup'
-        },
+        render: function () {
+            var result = getNamespaces(this.app.SearchElements.models);
+            var categories = result.descendants;
+            if($.isEmptyObject(categories))
+            {
+                _.each(result.elements, function (element) {
+                    var view = new SearchElementView({
+                        model: element
+                    },
+                    {
+                        //parent: this,
+                        searchElements: this.searchElements,
+                        searchView: this.searchView
+                    });
 
-        render: function () {          
-            var categories = getNamespaces(this.app.SearchElements.models).descendants; 
-            for(var prop in categories){
-                this.$el.append(new SearchCategoryView({
-                    model: categories[prop]
-                }, 
-                {
-                    searchElements: this.searchElements,
-                    searchView: this.searchView
-                }).render().$el);
+                    this.searchElements.push(view);
+
+                    this.$el.append(view.render().$el);
+                }.bind(this));
+            }
+            else
+            {
+                for(var prop in categories){
+                    this.$el.append(new SearchCategoryView({
+                        model: categories[prop]
+                    }, 
+                    {
+                        searchElements: this.searchElements,
+                        searchView: this.searchView
+                    }).render().$el);
+                }
             }
             
             return this;     
@@ -123,31 +140,39 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
             categories,
             category;
         for (; i < len; i++) {
-            categories = source[i].get('category').split('.');
-            //If there's no root namespace, create namespaces chain from scratch
-            if (!result.descendants.hasOwnProperty(categories[0])) {
-                createCategoriesInRoot(categories, result);
+            //If there's no category, create elements in root
+            if(!source[i].get('category'))
+            {
+                result.elements.push(source[i]);
             }
+            else
+            {
+                categories = source[i].get('category').split('.');
+                //If there's no root namespace, create namespaces chain from scratch
+                if (!result.descendants.hasOwnProperty(categories[0])) {
+                    createCategoriesInRoot(categories, result);
+                }
                 //If namespace already exists, check if all descendant namespaces already in there
-            else {
-                parent = result.descendants[categories.shift()];
-                //Use loop over the recursion to avoid stack issues
-                while (categories.length) {
-                    category = categories.shift();
-                    if (parent.descendants.hasOwnProperty(category)) {
-                        parent = parent.descendants[category];
-                    } else {
-                        parent = parent.descendants[category] = {        
-                            name: category,                    
-                            descendants: {},
-                            elements: []
+                else {
+                    parent = result.descendants[categories.shift()];
+                    //Use loop over the recursion to avoid stack issues
+                    while (categories.length) {
+                        category = categories.shift();
+                        if (parent.descendants.hasOwnProperty(category)) {
+                            parent = parent.descendants[category];
+                        } else {
+                            parent = parent.descendants[category] = {        
+                                name: category,                    
+                                descendants: {},
+                                elements: []
+                            }
                         }
                     }
                 }
-            }
 
-            //Put element in created namespace
-            putElementInNamespace(source[i], result);
+                //Put element in created namespace
+                putElementInNamespace(source[i], result);
+            }
         }
 
         return result;

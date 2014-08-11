@@ -1,9 +1,9 @@
-define(['collections/FloodSearchElements', 'ModelsListMessage'], function(FloodSearchElements, ModelsListMessage) {
+define(['collections/FloodSearchElements', 'LibraryItemsListMessage'], function(FloodSearchElements, LibraryItemsListMessage) {
 
     return FloodSearchElements.extend({
 
         fetch: function() {
-          this.app.socket.send(JSON.stringify(new ModelsListMessage()));
+          this.app.socket.send(JSON.stringify(new LibraryItemsListMessage()));
         },
 
         fetchFromProto: function() {

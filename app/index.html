@@ -134,7 +134,7 @@
         </ul>
 
         <div class="node-data-container" >
-          <span class="name searchfield"><%= typeName != "CustomNode" ? typeName : type.functionName  %></span>
+          <span class="name searchfield"><%= typeName != "CustomNode" ? displayedName : type.functionName  %></span>
         </div>
 
         <ul class="node-outputs" >
@@ -313,8 +313,8 @@
       <script type="text/template" id="workspace-search-template">
         
         <div class="workspace-search-container" id="workspace-search-input-container">
-          <ul class="list search-list" style="display:none;">
-          </ul>
+          <div class="search-list-container" style="display:none;">
+          </div>
           <div class="search-bottom-container">
             <i style="display:inline-block;" class="icon-search icon-white dim-button" ></i>
             <input placeholder="Add a node..." class="library-search-input search"></input>

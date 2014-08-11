@@ -1,16 +1,15 @@
-var app = app || {};
+define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, staticHelpers) {
 
-define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
+    return Backbone.Model.extend({
 
-  return Backbone.Model.extend({
-
-    idAttribute: "_id",
+        idAttribute: '_id',
 
         defaults: {
             name: 'DefaultNodeName'
           , position: [10, 10]
           , typeName: 'Add'
           , creatingName: 'Add'
+          , displayedName: 'Add'
           , type: null
           , inputConnections: []
           , outputConnections: []
@@ -27,30 +26,22 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
         initialize: function (attrs, vals) {
             var inPort,
                 outPort,
-                i = 0,
-                a = 'A',
-                len,
                 elems;
             // Need to know the type in order to create the node
             if (attrs.typeName && FLOOD.nodeTypes[attrs.typeName]) {
                 this.set('type', new FLOOD.nodeTypes[attrs.typeName]());
                 this.set('creatingName', attrs.typeName);
-            } else if ( attrs.typeName != null && FLOOD.internalNodeTypes[attrs.typeName] != undefined ) {
-  	        this.set( 'type', new FLOOD.internalNodeTypes[ attrs.typeName ]() );
-            }
-	    else {
-                elems = vals.workspace.app.SearchElements.where({ name: attrs.typeName });
+                this.set('displayedName', attrs.typeName);
+            } else {
+                elems = vals.workspace.app.SearchElements.where({ creatingName: attrs.typeName });
                 if (elems.length === 0) {
                     if (attrs.ignoreDefaults) {
-                        inPort = [];
-                        len = a.charCodeAt(0) + attrs.ignoreDefaults.length;
-                        for (i = a.charCodeAt(0); i < len; i++) {
-                            inPort.push(String.fromCharCode(i));
-                        }
+                        inPort = staticHelpers.generatePortNames(attrs.ignoreDefaults.length);
                     }
                 } else {
                     inPort = elems[0].get('inPort');
                     outPort = elems[0].get('outPort');
+                    this.set('displayedName', elems[0].get('displayedName'));
                     this.set('creatingName', elems[0].get('creatingName'));
                 }
 
@@ -103,6 +94,7 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
               , position: this.get('position')
               , typeName: this.get('typeName')
               , creatingName: this.get('creatingName')
+              , displayedName: this.get('displayedName')
               , selected: this.get('selected')
               , visible: this.get('visible')
               , ignoreDefaults: this.get('ignoreDefaults')

@@ -21,19 +21,19 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
 
     var commands = {
         addNode: function (data) {
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         updateNode: function(data){
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         removeNode: function (data) {
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         addConnection: function(data){
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         removeConnection: function(data){
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         setWorkspaceContents: function(data){
             //Create batch of commands to be executed on server
@@ -50,10 +50,10 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
                  Array.prototype.push.apply(commands, new MakeConnectionCommand({}, data.connections[i]));
             }
 
-            return createMessage(commands);
+            return createMessage.call(this, commands);
         },
         run: function(data){
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         }
     },
     instantiateCommand = function(data){
@@ -65,7 +65,7 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
             commands = [commands];
         }
 
-        return JSON.stringify(new RecordableCommandsMessage(commands));
+        return JSON.stringify(new RecordableCommandsMessage(commands, this.workspace.get('guid')));
     };
 
     return DynamoRunner;
