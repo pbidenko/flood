@@ -1,4 +1,4 @@
-define(['backbone'], function(Backbone){
+define(['backbone'], function (Backbone) {
     function ComputationResponse(data){
         this.nodes = JSON.parse(data.nodesInJson);
 

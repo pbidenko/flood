@@ -378,7 +378,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
 
     deselectAll: function() {
       this.model.get('nodes').deselectAll();
-    },
+    }
 
   });
 });

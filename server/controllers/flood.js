@@ -121,9 +121,14 @@ exports.putMySession = function(req, res) {
 				w.lastSaved = Date.now();
 				w.redoStack = x.redoStack || w.redoStack;
 				w.undoStack = x.undoStack || w.undoStack;
+
+				w.workspaceDependencyIds = x.workspaceDependencyIds || w.workspaceDependencyIds;
+				w.isCustomNode = ( x.isCustomNode != undefined ) ? x.isCustomNode : w.isCustomNode;
 				w.isFirstExperience = false;
 
-				w.markModified("isFirstExperience name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack");
+				w.guid = x.guid || w.guid;
+
+				w.markModified("workspaceDependencyIds isCustomNode isFirstExperience name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack guid");
 
 				w.save(function(se){
 					if (se) return callback(se);
@@ -268,9 +273,11 @@ exports.putWorkspace = function(req, res) {
 		w.lastSaved = Date.now();
 		w.redoStack = x.redoStack || w.redoStack;
 		w.undoStack = x.undoStack || w.undoStack;
+		w.isCustomNode = ( x.isCustomNode != undefined ) ? x.isCustomNode : w.isCustomNode;
+		w.workspaceDependencyIds = x.workspaceDependencyIds || w.workspaceDependencyIds;
 		w.isModified = true;
 
-		w.markModified("name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack isModified");
+		w.markModified("workspaceDependencyIds name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack isModified");
 
 		w.save(function(se){
 			if (se) return res.status(500).send('Could not save the workspace');

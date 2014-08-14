@@ -24,6 +24,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
       this.workspace = args.workspace;
       this.workspaceView = args.workspaceView;
 
+      this.listenTo(this.model, 'requestRender', this.render );
       this.listenTo(this.model, 'change:position', this.move );
       this.listenTo(this.model, 'change:lastValue', this.renderLastValue );
       this.listenTo(this.model, 'change:failureMessage', this.renderLastValue );
@@ -390,10 +391,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
     },
 
     renderPorts: function() {
-
-      if (this.portGroup 
-          && this.inputPorts.length === this.model.get('type').inputs.length 
-          && this.outputPorts.length === this.model.get('type').outputs.length ) return this.movePorts().colorPorts();
 
       if ( this.portGroup ) {
         // we need to redraw the ports

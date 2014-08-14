@@ -106,10 +106,12 @@ require.config({
         WorkspaceBrowserElements: 'collections/WorkspaceBrowserElements',
 
         // backbone models
-        App: 'models/App',
+        //Use DynamoApp class in case of websocket connection, otherwise use App
+        App: 'models/DynamoApp',//'models/App',
         Connection: 'models/Connection',
         Marquee: 'models/Marquee',
-        Node: 'models/Node',
+        Node: 'models/nodes/Node',
+        CustomNode: 'models/nodes/CustomNode',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
@@ -130,6 +132,7 @@ require.config({
         RecordableCommand: 'models/commands/RecordableCommand',
         RunCancelCommand: 'models/commands/RunCancelCommand',
         UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
+        CreateCustomNodeCommand: 'models/commands/CreateCustomNodeCommand',
 
         Message: 'models/messages/Message',
         ModelsListMessage: 'models/messages/ModelsListMessage',
@@ -140,7 +143,9 @@ require.config({
 
         //helpers
         commandsMap: 'helpers/CommandsMap',
+        NodesFactory: 'helpers/NodesFactory',
         staticHelpers: 'helpers/StaticHelpers',
+        augment: 'helpers/augment',
 
         // backbone views
         AppView: 'views/AppView',

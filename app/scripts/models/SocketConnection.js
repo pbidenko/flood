@@ -1,4 +1,4 @@
-﻿define(['backbone', 'ComputationResponse', 'ContentResponse'], function (Backbone, ComputationResponse, ContentResponse) {
+define(['backbone', 'ComputationResponse', 'ContentResponse'], function (Backbone, ComputationResponse, ContentResponse) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections

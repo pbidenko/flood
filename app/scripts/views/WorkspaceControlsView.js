@@ -9,6 +9,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
       this.app = arr.app;
       this.appView = arr.appView;
 
+      this.app.SearchElements.on('add remove', this.render, this);
       //Bind to document's click event for hiding toolbox
       //Unbind first to avoid duplicate bindings
       $(window).off('click.models-view');

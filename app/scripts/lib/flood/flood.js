@@ -184,7 +184,7 @@ define(function() {
 
 		this.inputTypes = function(){
 			return this.inputs.map(function(x){ return x.type; });
-		}
+		};
 
 		this.markDirty = function() {
 
@@ -391,6 +391,50 @@ define(function() {
 
 	}.inherits( FLOOD.baseTypes.NodePort );
 
+	FLOOD.nodeTypes.Input = function(name) {
+
+		var typeData = {
+			typeName: "Input",
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [Number] ) ],
+		};
+
+		if (name === undefined) name = characters[currentInputChar++];
+
+		this.name = name;
+
+		FLOOD.baseTypes.NodeType.call(this, typeData);
+
+		this.compile = function() {
+			return this.name;
+		}
+
+		this.printExpression = function(){
+			return this.name;
+		}
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	var currentOutputChar = 0;
+
+	FLOOD.nodeTypes.Output = function(name) {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "⇒", [Number] ) ],
+			typeName: "Output"
+		};
+
+		if (name === undefined) name = characters[currentOutputChar++];
+
+		this.name = name;
+
+		FLOOD.baseTypes.NodeType.call(this, typeData);
+
+		this.compile = function() {
+			return this.inputs[0].compile();
+		}
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
 	// Number
 
 	FLOOD.nodeTypes.Number = function() {
@@ -425,11 +469,14 @@ define(function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
+	var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	var currentInputChar = 0;
+
 	FLOOD.nodeTypes.Formula = function() {
 
 		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "A", [Number], 0 ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [Number] ) ],
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "A", [AnyTypeButQuotedArray], 0 ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
 			typeName: "Formula" 
 		};
 
@@ -510,7 +557,7 @@ define(function() {
 		};
 
 		var addFormulaInput = function(){
-			var port = new FLOOD.baseTypes.InputPort( that.portNames[ that.inputs.length ], [Number], 0 );
+			var port = new FLOOD.baseTypes.InputPort( that.portNames[ that.inputs.length ], [AnyTypeButQuotedArray], 0 );
 			port.parentNode = that;
 			port.parentIndex = that.inputs.length;
 			that.inputs.push( port );
@@ -535,7 +582,7 @@ define(function() {
 		FLOOD.baseTypes.NodeType.call(this, typeData);
 
 		this.eval = function(){
-			return 2 * Math.PI;
+			return Math.PI;
 		}
 
 	}.inherits( FLOOD.baseTypes.NodeType );
@@ -588,13 +635,14 @@ define(function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
-    FLOOD.nodeTypes.ServerNode = function(inPort, outPort) {
+    FLOOD.nodeTypes.ServerNode = function (inPort, outPort) {
 
-        var inPorts = [];
-        var outPorts = [];
+        var inPorts = [],
+            outPorts = [],
+            that = this;
 
         if (!inPort) {
-            inPorts.push(new FLOOD.baseTypes.InputPort( "A", [Number], 0 ));
+            inPorts.push(new FLOOD.baseTypes.InputPort('A', [Number], 0));
         }
         else {
             inPort.forEach(function (x) {
@@ -603,7 +651,7 @@ define(function() {
         }
 
         if (!outPort) {
-            outPorts.push(new FLOOD.baseTypes.OutputPort( "⇒", [Number] ));
+            outPorts.push(new FLOOD.baseTypes.OutputPort('⇒', [Number]));
         }
         else {
             outPort.forEach(function (x) {
@@ -614,18 +662,88 @@ define(function() {
         var typeData = {
             inputs: inPorts,
             outputs: outPorts,
-            typeName: "MyNode"
+            typeName: "ServerNode"
         };
 
-        FLOOD.baseTypes.NodeType.call(this, typeData );
+        FLOOD.baseTypes.NodeType.call(this, typeData);
 
-        this.eval = function() {
+        this.setInputs = function (inputs) {
+            var i = 0,
+                length = inputs.length,
+                thisLength = this.inputs.length,
+                name;
+
+            for (; i < length; i++) {
+                name = inputs[i] ? inputs[i] : 'A';
+                if (thisLength > i) {
+                    this.inputs[i].name = name;
+                }
+                else {
+                    addInput(name);
+                }
+            }
+
+            if (thisLength > length) {
+                for (i = 0; i < thisLength - length; i++) {
+                    removeInput();
+                }
+            }
+        };
+
+        this.setOutputs = function (outputs) {
+            var i = 0,
+                length = outputs.length,
+                thisLength = this.outputs.length,
+                name;
+
+            for (; i < length; i++) {
+                name = '⇒';
+                if (thisLength > i) {
+                    this.outputs[i].name = name;
+                }
+                else {
+                    addOutput(name);
+                }
+            }
+
+            if (thisLength > length) {
+                for (i = 0; i < thisLength - length; i++) {
+                    removeOutput();
+                }
+            }
+        };
+
+        this.eval = function () {
             return 1;
         };
 
-    }.inherits( FLOOD.baseTypes.NodeType );
+        var addInput = function (name) {
+            var port = new FLOOD.baseTypes.InputPort(name, [Number], 0);
+            port.parentNode = that;
+            port.parentIndex = that.inputs.length;
+            that.inputs.push(port);
+        };
 
-	FLOOD.nodeTypes.Subtract = function() {
+        var removeInput = function () {
+            if (that.inputs.length === 0) return;
+            that.inputs.pop();
+        };
+
+        var addOutput = function (name) {
+            var port = new FLOOD.baseTypes.OutputPort(name, [Number]);
+            port.parentNode = that;
+            port.parentIndex = that.outputs.length;
+            that.outputs.push(port);
+        };
+
+        var removeOutput = function () {
+            if (that.outputs.length === 0) return;
+            that.outputs.pop();
+        };
+
+    }.inherits(FLOOD.baseTypes.NodeType);
+
+    FLOOD.nodeTypes.Subtract = function () {
 
 		var typeData = {
 			inputs: [ 	new FLOOD.baseTypes.InputPort( "A", [Number], 0 ),

@@ -8,10 +8,15 @@ define(['backbone', 'SearchElement', 'FLOOD'], function(Backbone, SearchElement,
 			this.app = atts.app;
 		},
 
-		fetch: function() {
+		addCustomNode: function(customNode){
 
-			// the models array has a single empty element at start (not sure why)
-			this.models.length = 0;
+			var match = this.where({ creatingName: customNode.get('creatingName') });
+			if (match) this.remove( match );
+
+			this.add(customNode);
+		},
+
+		fetch: function() {
 
 			for (var key in FLOOD.nodeTypes){
 				this.models.push( new SearchElement({name: key, app: this.app}) );	

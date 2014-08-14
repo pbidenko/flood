@@ -1,4 +1,4 @@
-define(['collections/FloodSearchElements', 'SearchElement', 'FLOOD'], function(FloodSearchElements, SearchElement, FLOOD) {
+define(['collections/FloodSearchElements', 'ModelsListMessage'], function(FloodSearchElements, ModelsListMessage) {
 
     return FloodSearchElements.extend({
 
@@ -23,6 +23,10 @@ define(['collections/FloodSearchElements', 'SearchElement', 'FLOOD'], function(F
                 }
             });
 
+        },
+
+        fetchFromProto: function() {
+          FloodSearchElements.prototype.fetch.call(this);
         }
 
     });

@@ -43,7 +43,16 @@ define([  'backbone',
       'click #settings-button': 'showSettings',
       'click #workspace_hide' : 'toggleViewer',
       'click #add-workspace-button': 'newWorkspace',
+      'click #add-node-workspace-button': 'newNodeWorkspace',
       'click #workspace-browser-button': 'toggleBrowser'
+    },
+
+    newWorkspace: function(){
+      this.model.newWorkspace();
+    },
+
+    newNodeWorkspace: function(){
+      this.model.newNodeWorkspace();
     },
 
     keydownHandler: function(e){
@@ -123,7 +132,7 @@ define([  'backbone',
 
         // if we haven't already, create the search view element and add to the ui
         if (this.searchView === undefined){
-          this.searchView = new SearchView( { model: new Search() }, {app: this.model } );
+          this.searchView = new SearchView( { model: new Search() }, {app: this.model, appView : this} );
           this.searchView.render();
           this.$el.find('#workspaces').prepend(this.searchView.$el);
 
@@ -160,13 +169,12 @@ define([  'backbone',
 
     workspaceCounter: 1,
 
-    newWorkspace: function(){
-      this.model.newWorkspace();
-    },
 
     // This callback is called when a Workspace is added to
     // the App's Workspace Collection
     addWorkspaceTab: function(workspace){
+
+      if ( this.workspaceTabViews[workspace.get('_id')] != undefined) return;
 
       var view = new WorkspaceTabView({ model: workspace });
       this.workspaceTabViews[workspace.get('_id')] = view;
@@ -235,6 +243,9 @@ define([  'backbone',
 
     showWorkspace: function(workspaceView){
 
+      // if the workspace tab does not exist
+      this.addWorkspaceTab( workspaceView.model );
+
       if (!$.contains(document.documentElement, workspaceView.$el[0])){
         this.$el.children('#workspaces').append( this.currentWorkspaceView.$el );
       }
@@ -283,6 +294,8 @@ define([  'backbone',
           this.currentWorkspaceView.render();
           this.currentWorkspaceId = currentWorkspaceId;
           this.focusWorkspace();
+
+          currentWorkspace.trigger('requestRun');
         }
 
       this.showSearch();
