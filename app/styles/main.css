@@ -36,7 +36,6 @@ body {
 	z-index: 100;
 }
 
-
 .workspace-server-search {
     bottom: 0px;
     left: 600px;
@@ -62,8 +61,6 @@ body {
 }
 
 .workspace-search-container ul {
-	max-height: 500px;
-	overflow-y: scroll;
 	list-style: none;
 	padding: 0;
 	margin: 0;
@@ -134,8 +131,8 @@ body {
 
 .node:hover .node-last-value-container {
 	display: block;
-	height: 26px;
-	bottom: -26px;
+	height: 52px;
+	bottom: -52px;
 	padding: 3px;
 	border: 1px solid #999;
 	transition-delay: 0.3s;
@@ -185,14 +182,14 @@ body {
 .node-last-value-container:hover {
 	right: -100px;
 	left: -100px;
-	height: 60px;
-	bottom: -60px;
+	height: 66px;
+	bottom: -66px;
 	overflow-x: scroll;
 	overflow-y: scroll;
 }
 
 .node-failure-message {
-	display: none;
+	display: inline-block;
 	padding: 2px;
 	left: 0;
 	right: 0;
@@ -274,7 +271,7 @@ body {
 	right: 0;
 	width: 200px;
 	bottom: 0;
-	top: 30px;
+	top: 30px;	
 }
 
 .workspace-browser-header {
@@ -317,6 +314,12 @@ body {
 	top: 80px;
 	bottom: 0px;
 }
+
+#workspace-browser-contents {
+	list-style: none;
+	margin: 0;
+	padding : 0;
+}	
 
 .workspace-name {
   pointer-events: none;
@@ -439,7 +442,7 @@ body {
 }
 
 .search-element {
-	background: #333;
+	background: #595959;
 	color: white;
 	display: block;
 	width: 100%;
@@ -448,10 +451,28 @@ body {
 	border-top: solid 1px #444;
 	border-bottom: solid 1px #222;
 	padding: 5px;
+	cursor: default;
+	list-style: none;
 }
 
 .search-element:hover {
 	background: #444;
+}
+
+.search-element.category {
+	background-color: #333;
+}
+
+.search-element ul {
+	padding-left: 0;
+}
+
+.search-element.category > .name:before {
+	content: '[+] '
+}
+
+.search-element.category.expanded > .name:before {
+	content: '[-] '
 }
 
 .library-search-input {
@@ -1343,4 +1364,23 @@ body {
 }
 .ui-slider-vertical .ui-slider-range-max {
 	top: 0;
+}
+
+span.expcol, span.category {
+	cursor:default !important;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: -moz-none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+li.notmatch{
+	display: none !important;
+}
+
+div.tooltip-inner {
+	max-width: 400px;
 }

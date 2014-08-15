@@ -1,80 +1,63 @@
-define(['backbone', 'List', 'SearchElementView'], function(Backbone, List, SearchElementView) {
+define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView'], function (Backbone, SearchElement, SearchElementView, ModelsListView) {
 
-  return Backbone.View.extend({
+    return Backbone.View.extend({
 
-    tagName: 'div',
-    className: 'search-container row',
+        tagName: 'div',
+        className: 'search-container row',
 
-    initialize: function(atts, arr) {
-      this.app = arr.app;
+        initialize: function (attrs, arr) {
+            this.app = arr.app;
+            this.appView = arr.appView;
+            this.on('add-element', this.elementClick);
+        },
 
-      this.app.SearchElements.on('add remove', this.render, this);
-    },
+        template: _.template($('#search-template').html()),
 
-    template: _.template( $('#search-template').html() ),
+        events: {
+            'keyup .library-search-input': 'searchKeyup'
+        },
 
-    events: {
-      'keyup .library-search-input': 'searchKeyup'
-    },
+        render: function () {
 
-    render: function(arg) {
+            this.$el.html(this.template(this.model.toJSON()));
 
-      this.$el.html( this.template( this.model.toJSON() ) );
+            this.$input = this.$('.library-search-input');           
 
-      this.$input = this.$('.library-search-input');
-      this.$list = this.$('.search-list');
+            this.modelsListView = new ModelsListView({}, {
+                app: this.app,                
+                searchView: this
+            });
 
-      this.$list.empty();
+            this.$el.append(this.modelsListView.render().$el);            
+        },
 
-      var that = this;
+        addNode: function (nodeModel) {
+            this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creatingName'), this.app.newNodePosition);
+        },
 
-      this.app.SearchElements.forEach(function(ele) {
+        elementClick: function (model) {
+            this.addNode(model);
+            this.app.trigger('hide-search');
+        },
 
-        if (ele.name === null) return;
+        searchKeyup: _.debounce(function (event) {            
+            var searchText = this.$input.val();
+            //If the key is Escape or search text is empty, just quit
+            if( event.keyCode === 27 ){
+                this.app.trigger('hide-search');
+                return;
+            }
 
-        var eleView = new SearchElementView({ model: ele }, { app: that.app, click: function(e){ that.elementClick.call(that, e) } });
+            if (event.keyCode === 13) { // enter key causes first result to be inserted
+                var elementToAdd = this.modelsListView.findElementByCreatingName(searchText);
+                elementToAdd && this.elementClick(elementToAdd.model);                
 
-        eleView.render();
-        that.$list.append( eleView.$el );
-
-      });
-
-      var options = {
-          valueNames: [ 'name' ]
-      };
-
-      this.list = new List(this.el, options);
-
-    },
-
-    addNode: function(name){
-
-      this.app.getCurrentWorkspace().addNodeByNameAndPosition( name, this.app.newNodePosition );
-
-    },
-
-    elementClick: function(ele){
-
-      this.addNode(ele.model.get('name'));
-      this.app.set('showingSearch', false);
-
-    },
-
-    searchKeyup: function(event) {
-
-      if ( event.keyCode === 13) { // enter key causes first result to be inserted
-        var nodeName = this.$list.find('.search-element').first().find('.name').first().html();
-        if (nodeName === undefined ) return;
-
-        this.addNode( nodeName );
-        this.app.set('showingSearch', false);
-
-      } else if ( event.keyCode === 27) { // esc key exits search
-        this.app.set('showingSearch', false);
-      }
-    } 
-
-  });
-
+            } 
+            //Expand categories containing matching elements
+            else {
+                this.modelsListView.expandElements(searchText);
+            }
+        }, 400)
+    });
 });
 

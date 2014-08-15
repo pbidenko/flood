@@ -1,5 +1,5 @@
-define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
-    function (AbstractRunner, SocketConnection, commandsMap, Message, CreateNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
+define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
+    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
 
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
@@ -8,33 +8,32 @@ define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateN
 
         postMessage: function (data, quiet) {
             if (commands.hasOwnProperty(data.kind)) {
-                this.socket.send(commands[data.kind].call(this, data));
+                this.app.socket.send(commands[data.kind].call(this, data));
             }
 
             AbstractRunner.prototype.postMessage.call(this, data, quiet);
         },
 
         reset: function () {
-            this.socket = new SocketConnection();
             AbstractRunner.prototype.reset.call(this);
         }
     });
 
     var commands = {
         addNode: function (data) {
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         updateNode: function(data){
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         removeNode: function (data) {
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         addConnection: function(data){
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         removeConnection: function(data){
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         },
         setWorkspaceContents: function(data){
             //Create batch of commands to be executed on server
@@ -51,10 +50,10 @@ define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateN
                  Array.prototype.push.apply(commands, new MakeConnectionCommand({}, data.connections[i]));
             }
 
-            return createMessage(commands);
+            return createMessage.call(this, commands);
         },
         run: function(data){
-            return createMessage(instantiateCommand(data));
+            return createMessage.call(this, instantiateCommand(data));
         }
     },
     instantiateCommand = function(data){
@@ -66,7 +65,7 @@ define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateN
             commands = [commands];
         }
 
-        return JSON.stringify(new Message(commands));
+        return JSON.stringify(new RecordableCommandsMessage(commands, this.workspace.get('guid')));
     };
 
     return DynamoRunner;

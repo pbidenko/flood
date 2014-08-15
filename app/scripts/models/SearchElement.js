@@ -4,15 +4,19 @@ define(['backbone'], function(Backbone) {
 
     defaults: {
       name: null,
+      creatingName: null,
+      displayedName: null,
       category: null,
+      description: null,
       inPort: [],
-      outPort: []
+      outPort: [],
       isCustomNode: false,
       functionId: -1
     }, 
     
-    initialize: function(a, b) {
-      this.app = a.app;
+    initialize: function(attrs, options) {
+      this.app = attrs.app;
+      this.parent = options ? options.parent : null;
     }
 
   });

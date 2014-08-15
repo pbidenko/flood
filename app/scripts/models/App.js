@@ -1,5 +1,5 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'SearchElement', 'ModelsListMessage'],
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, SearchElement, ModelsListMessage){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'Viewer'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, Viewer){
 
   return Backbone.Model.extend({
 
@@ -27,6 +27,10 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.login = new Login({}, { app: this });
 
       this.SearchElements = new SearchElements({app:this});
+      this.SearchElements.reset();
+      this.SearchElements.fetch();
+
+      this.viewer = new Viewer({app: this});
     },
 
     parse : function(resp) {
@@ -41,11 +45,8 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     },
 
     fetch : function(options){
-      var that = this;
       this.login.fetch();
-      this.SearchElements.fetch().always(function(){
-          Backbone.Model.prototype.fetch.call(that, options);
-      });
+      Backbone.Model.prototype.fetch.call(this, options);
     },
 
     toJSON : function() {
@@ -120,9 +121,10 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       var that = this;
 
-      $.get("/nws", function(data, status){
+      $.get("/nws", function(data){
 
         data.isCustomNode = true;
+        data.guid = that.makeId();
 
         var ws = new Workspace(data, { app: that });
 
@@ -141,10 +143,14 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     loadWorkspace: function( id, callback ){
 
       var ws = this.get('workspaces').get(id);
+      if(ws) return;
 
       var that = this;
 
       $.get("/ws/" + id, function(data){
+
+        var ws = that.get('workspaces').get(id);
+        if(ws) return;
 
         var ws = new Workspace(data, {app: that});
         that.get('workspaces').add( ws );

@@ -4,9 +4,9 @@ define( ['CreateNodeCommand', 'DeleteModelCommand', 'MakeConnectionCommand', 'Ru
             //Key should correspond to the name of command inside flood_runner.js
             addNode: CreateNodeCommand,
             removeNode: DeleteModelCommand,
-            removeConnection: DeleteModelCommand,
+            removeConnection: MakeConnectionCommand,
             addConnection: MakeConnectionCommand,
             run: RunCancelCommand,
-            updateNode: UpdateModelValueCommand
+            updateNode: UpdateModelValueCommand            
         };
     });

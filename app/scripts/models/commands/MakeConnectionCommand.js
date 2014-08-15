@@ -14,6 +14,7 @@ define(['RecordableCommand'], function (RecordableCommand) {
         input: 'INPUT',
         output: 'OUTPUT'
     },
+    zeroGuid = '00000000-0000-0000-0000-000000000000',
 
     MakeConnectionCommand =  RecordableCommand.extend({
         defaults: {
@@ -39,18 +40,27 @@ define(['RecordableCommand'], function (RecordableCommand) {
     }),
 
     getInstance = function(prefix, data){
+        if (prefix === nodePrefixes.start && data['startPortIndex'] == -1) {
+            return new MakeConnectionCommand({}, {
+                nodeId: zeroGuid,
+                portIndex: -1,
+                portType: portTypes.input,
+                mode: portModes.cancel
+            });
+        }
+
         return new MakeConnectionCommand({}, {
             nodeId: data[prefix+'NodeId'],
             portIndex: data[prefix+'PortIndex'],
             portType: prefix === nodePrefixes.start ? portTypes.output : portTypes.input,
-            mode: prefix === nodePrefixes.start ? portModes.begin : portModes.end
+            mode: prefix === nodePrefixes.start ? portModes.end : portModes.begin
         });
     };
 
     return function Connection(config, options){
         return [
-            getInstance(nodePrefixes.start, options),
-            getInstance(nodePrefixes.end, options)
+            getInstance(nodePrefixes.end, options),
+            getInstance(nodePrefixes.start, options)
         ]
     }
 });

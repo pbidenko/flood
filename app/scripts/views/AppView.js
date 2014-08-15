@@ -13,7 +13,8 @@ define([  'backbone',
           'Help',
           'LoginView',
           'Login'],
-          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
+          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, WorkspaceTabView, 
+            Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
 
   return Backbone.View.extend({
 
@@ -31,6 +32,7 @@ define([  'backbone',
       this.model.on('change:showingLogin', this.viewLogin, this);
       this.model.on('change:showingHelp', this.viewHelp, this);
       this.model.on('change:showingBrowser', this.viewBrowser, this);
+      this.model.on('hide-search', this.hideSearch, this);
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
 
@@ -77,6 +79,11 @@ define([  'backbone',
         this.model.set('showingBrowser', true);
       }
 
+    },
+
+    hideSearch: function(){
+      this.model.set('showingSearch', false);
+      this.workspaceControlsView && this.workspaceControlsView.hideSearch();      
     },
 
     viewBrowser: function(){
@@ -130,7 +137,7 @@ define([  'backbone',
 
         // if we haven't already, create the search view element and add to the ui
         if (this.searchView === undefined){
-          this.searchView = new SearchView( { model: new Search() }, {app: this.model } );
+          this.searchView = new SearchView( { model: new Search() }, {app: this.model, appView : this} );
           this.searchView.render();
           this.$el.find('#workspaces').prepend(this.searchView.$el);
 

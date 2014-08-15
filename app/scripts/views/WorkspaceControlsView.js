@@ -1,4 +1,5 @@
-define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], function(Backbone, List, SearchElement, SearchElementView, bootstrap) {
+define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', 'ModelsListView'],
+ function(Backbone, List, SearchElement, SearchElementView, bootstrap, ModelsListView) {
 
   return Backbone.View.extend({
 
@@ -9,14 +10,14 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
       this.app = arr.app;
       this.appView = arr.appView;
 
+      this.on('add-element', this.elementClick);
+
       //Bind to document's click event for hiding toolbox
       //Unbind first to avoid duplicate bindings
       $(window).off('click.models-view');
       $(window).on('click.models-view', function(e){
-
-        if(e.target!==this.$input[0]){
+        if(e.target !== this.$input[0])
           this.$list.hide();
-        }
       }.bind(this));
 
       this.app.SearchElements.on('add remove', this.render, this);
@@ -40,49 +41,22 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
     },
 
     render: function(arg) {
+      var del = {
+          show: 300
+      };
 
       this.$el.html( this.template( this.model.toJSON() ) );
 
       this.$input = this.$('.library-search-input');
-      this.$list = this.$('.search-list');
 
-      this.$list.empty();
-
-      var that = this;
-      var prevCategory = '';
-
-      this.app.SearchElements.forEach(function(ele) {
-
-        if (ele.attributes.category !== null) {
-          var category = ele.attributes.category.split('.')[0];
-          if (category !== prevCategory) {
-            prevCategory = category;
-
-            var elem = new SearchElement({name: '==> ' + category + ' <==', category: category, app: that.app});
-
-            var eleView = new SearchElementView({ model: elem }, { appView: that.appView, app: that.app });
-
-             eleView.render();
-             that.$list.append(eleView.$el);
-          }
-        }
-
-        var eleView = new SearchElementView({ model: ele }, { appView: that.appView, app: that.app, 
-          click: function(e){ that.elementClick.call(that, e); } });
-
-        eleView.render();
-        that.$list.append( eleView.$el );
-
+      this.modelsListView = new ModelsListView({}, {
+                app: this.app,                
+                searchView: this
       });
 
-      var options = {
-          valueNames: [ 'name' ]
-      };
+      this.$list = this.$('.search-list-container').append(this.modelsListView.render().$el);
 
-      this.list = new List(this.el, options);
-
-      var del = { show: 300 };
-
+      
       // build button tooltips
       this.$el.find('#undo-button').tooltip({title: "Ctrl/Cmd Z", delay: del});
       this.$el.find('#redo-button').tooltip({title: "Ctrl/Cmd Y", delay: del});
@@ -99,7 +73,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
     },
 
     focus: function(event){
-      this.$('.search-list').show();
+      this.$list.show();
       this.$('.library-search-input').select();
     },
 
@@ -150,12 +124,10 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
       return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
     },
 
-    addNode: function(name){
+    addNode: function(nodeModel){
 
-      if (name === undefined ) return;
-
-      this.currentWorkspace().addNodeByNameAndPosition( name, this.getWorkspaceCenter() );
-
+      this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creatingName'), this.getWorkspaceCenter());
+      this.hideSearch();
     },
 
     objConverter: function(x, vertexOffset, index){
@@ -281,25 +253,34 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
         pom.click();
     },
 
-    elementClick: function(ele){
+    elementClick: function(model){
 
-      this.addNode( ele.model.get('name') );
+      this.addNode(model);
 
     },
+    
+    hideSearch: function(){
+      this.$list.hide();
+    },
 
-    searchKeyup: function(event) {
+    searchKeyup: _.debounce(function (event) {            
+        var searchText = this.$input.val();
+        //If the key is Escape or search text is empty, just quit
+        if( event.keyCode === 27 ){
+            this.app.trigger('hide-search');
+            return;
+        }
 
-      // enter key causes first result to be inserted
-      if ( event.keyCode === 13) {
+        if (event.keyCode === 13) { // enter key causes first result to be inserted
+            var elementToAdd = this.modelsListView.findElementByCreatingName(searchText);
+            elementToAdd && this.elementClick(elementToAdd.model);                
 
-        var nodeName = this.$list.find('.search-element').first().find('.name').first().html();
-        if (nodeName === undefined ) return;
-
-        this.addNode( nodeName );
-
-      } 
-
-    } 
+        } 
+        //Expand categories containing matching elements
+        else {
+            this.modelsListView.expandElements(searchText);
+        }
+    }, 400)
 
   });
 

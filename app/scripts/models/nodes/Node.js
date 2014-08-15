@@ -1,98 +1,107 @@
-var app = app || {};
+define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, staticHelpers) {
 
-define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
+    return Backbone.Model.extend({
 
-  return Backbone.Model.extend({
+        idAttribute: '_id',
 
-    idAttribute: "_id",
+        defaults: {
+            name: 'DefaultNodeName'
+          , position: [10, 10]
+          , typeName: 'Add'
+          , creatingName: 'Add'
+          , displayedName: 'Add'
+          , type: null
+          , inputConnections: []
+          , outputConnections: []
+          , selected: true
+          , lastValue: null
+          , failureMessage: null
+          , visible: true
+          , replication: 'applyLongest'
+          , extra: {}
+          , ignoreDefaults: []
+          , isEvaluating: false
+        },
 
-    defaults: {
-      name: 'DefaultNodeName'
-      , position: [10, 10]
-      , typeName: 'Add'
-      , type: null
-      , inputConnections: []
-      , outputConnections: []
-      , selected: true
-      , lastValue: null
-      , failureMessage: null
-      , visible: true
-      , replication: "applyLongest"
-      , extra: {}
-      , ignoreDefaults: []
-      , isEvaluating: false
-    },
+        initialize: function (attrs, vals) {
+            var inPort,
+                outPort,
+                elems;
+            // Need to know the type in order to create the node
+            if (attrs.typeName && FLOOD.nodeTypes[attrs.typeName]) {
+                this.set('type', new FLOOD.nodeTypes[attrs.typeName]());
+                this.set('creatingName', attrs.typeName);
+                this.set('displayedName', attrs.typeName);
+            } else {
+                elems = vals.workspace.app.SearchElements.where({ creatingName: attrs.typeName });
+                if (elems.length === 0) {
+                    if (attrs.ignoreDefaults) {
+                        inPort = staticHelpers.generatePortNames(attrs.ignoreDefaults.length);
+                    }
+                } else {
+                    inPort = elems[0].get('inPort');
+                    outPort = elems[0].get('outPort');
+                    this.set('displayedName', elems[0].get('displayedName'));
+                    this.set('creatingName', elems[0].get('creatingName'));
+                }
 
-    initialize: function(atts, vals) {
+                this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort));
+            }
 
-      // we need to know the type in order to create the node
-      if ( atts.typeName != null && FLOOD.nodeTypes[atts.typeName] != undefined){
-        this.set( 'type', new FLOOD.nodeTypes[ atts.typeName ]() );
-      } else if ( atts.typeName != null && FLOOD.internalNodeTypes[atts.typeName] != undefined ) {
-        this.set( 'type', new FLOOD.internalNodeTypes[ atts.typeName ]() );
-      } else {
+            this.initAttrs(attrs, vals);
+        },
 
-        var elems = vals.workspace.app.SearchElements.where({ name: atts.typeName });
-        if (elems.length > 0) {
-          var inPort = elems[0].get('inPort');
-          var outPort = elems[0].get('outPort');
-        }
-        // Create dummy ports if no connection with server established.
-        else if (atts.ignoreDefaults){
-          var inPort = new Array();
+        initAttrs: function (attrs, vals) {
+            if (attrs.extra) {
+                this.get('type').extend(attrs.extra);
+            }
 
-          var a = "A";
-          for (var i = a.charCodeAt(0); i < a.charCodeAt(0) + atts.ignoreDefaults.length; i++) {
-            inPort.push(String.fromCharCode(i));
-          }
-        }
-        this.set( 'type', new FLOOD.nodeTypes.ServerNode(inPort, outPort) );
-      }
+            if (attrs.lastValue) {
+                this.get('type').value = attrs.lastValue;
+            }
 
-      if (atts.extra){ this.get('type').extend( atts.extra );  }
+            if (attrs.ignoreDefaults &&
+                attrs.ignoreDefaults.length > 0 &&
+                this.get('type').inputs.length === attrs.ignoreDefaults.length) {
 
-      if (atts.lastValue){
-        this.get('type').value = atts.lastValue;
-      }
+                for (var i = 0; i < attrs.ignoreDefaults.length; i++) {
+                    this.get('type').inputs[i].useDefault = !attrs.ignoreDefaults[i];
+                }
 
-      if (atts.ignoreDefaults && atts.ignoreDefaults.length > 0){
+            } else {
+                attrs.ignoreDefaults = this.get('type').inputs.map(function (x) {
+                    return !x.useDefault;
+                });
+            }
 
-        for (var i = 0; i < this.get('type').inputs.length; i++){
-          this.get('type').inputs[i].useDefault = !atts.ignoreDefaults[i];
-        }
-        
-      } else {
-        atts.ignoreDefaults = this.get('type').inputs.map(function(x){ return !x.useDefault; });
-      }
+            this.set('ignoreDefaults', attrs.ignoreDefaults);
 
-      this.set('ignoreDefaults', atts.ignoreDefaults );
-      
-      var that = this;
-      this.on('connection', this.onConnectPort);
-      
-      this.on('disconnection', this.onDisconnectPort);
-      this.workspace = vals.workspace;
+            this.on('connection', this.onConnectPort);
 
-      this.on('remove', this.onRemove);
+            this.on('disconnection', this.onDisconnectPort);
+            this.workspace = vals.workspace;
 
-      this.initializePorts();
-      
-    },
+            this.on('remove', this.onRemove);
+
+            this.initializePorts();
+        },
 
     // called when saving the node to server
     serialize : function() {
 
-      var vals = {
-        name: this.get("name")
-        , position: this.get('position')
-        , typeName: this.get('typeName')
-        , selected: this.get('selected')
-        , visible: this.get('visible')
-        , ignoreDefaults: this.get('ignoreDefaults')
-        , _id: this.get('_id')
-        , replication: this.get('replication')
-        , extra: this.get('extra')
-      };
+            var vals = {
+                name: this.get('name')
+              , position: this.get('position')
+              , typeName: this.get('typeName')
+              , creatingName: this.get('creatingName')
+              , displayedName: this.get('displayedName')
+              , selected: this.get('selected')
+              , visible: this.get('visible')
+              , ignoreDefaults: this.get('ignoreDefaults')
+              , _id: this.get('_id')
+              , replication: this.get('replication')
+              , extra: this.get('extra')
+            };
 
       return vals;
 
@@ -105,7 +114,20 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
       this.set('inputConnections', new Array( type.inputs.length ));
       this.set('outputConnections', new Array( type.outputs.length ));
 
-    },
+        },
+
+        updateValue: function (values) {
+            if (values.data) {
+                this.set('lastValue', values.data);
+            }
+
+            if (values.state !== 'Active') {
+                this.set('failureMessage', values.stateMessage);
+            }
+            else {
+                this.set('failureMessage', '');
+            }
+        },
 
     onRemove: function(){
 
@@ -276,40 +298,38 @@ define(['backbone', 'FLOOD'], function(Backbone, FLOOD) {
 
     },
 
-    disconnectPort: function( portIndex, connection, isOutput ){
+        disconnectPort: function (portIndex, connection, isOutput) {
+            var port,
+                index = -1;
+            if (!this.isValidPort(portIndex, isOutput))
+                return;
 
-      if (!this.isValidPort(portIndex, isOutput)){
-        return;
-      }
+            port = this.getPorts(isOutput)[portIndex];
 
-      var port = this.getPorts(isOutput)[portIndex];
+            if (!port)
+                return;
 
-      if (port == null)
-        return;
+            if (connection) {
+                index = port.indexOf(connection);
 
-      var index = -1;
-      if ( connection ){
+            }
+            else if (!isOutput && port.length > 0) {
+                index = 0;
+                connection = port[0];
+                isOutput = false;
+                this.workspace.get('connections').remove(connection);
+            }
 
-        var index = port.indexOf(connection);
+            if (index === -1)
+                return;
 
-      } else if (!isOutput && port.length > 0) {
+            // remove the requested connection on the port
+            port.remove(index);
 
-        index = 0;
-        connection = port[0];
-        isOutput = false;
-        this.workspace.get('connections').remove( connection );
+            this.trigger('disconnection', portIndex, isOutput, connection);
+            this.trigger('change');
 
-      }
-        
-      if (index === -1) return;
-        
-      // remove the requested connection on the port
-      port.remove(index);
-
-      this.trigger('disconnection', portIndex, isOutput, connection);
-      this.trigger('change');
-        
-    },
+        },
 
     onConnectPort: function( portIndex, isOutput, connection){
       

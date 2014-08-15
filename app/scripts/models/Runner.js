@@ -16,25 +16,24 @@ define(['backbone'], function (Backbone) {
 
             this.reset();
 
-            vals.workspace.get('connections').on('add', this.addConnection, this);
-            vals.workspace.get('connections').on('remove', this.removeConnection, this);
-
-            vals.workspace.get('nodes').on('add', this.addNode, this);
-            vals.workspace.get('nodes').on('remove', this.removeNode, this);
+            this.subscribeOnNodesConnectionsChanges();
 
             this.runCount = 0;
             this.averageRunTime = 0;
 
         },
 
+        subscribeOnNodesConnectionsChanges: function(){
+
+            this.workspace.get('connections').on('add', this.addConnection, this);
+            this.workspace.get('connections').on('remove', this.removeConnection, this);
+
+            this.workspace.get('nodes').on('add', this.addNode, this);
+            this.workspace.get('nodes').on('remove', this.removeNode, this);
+
+        },
+
         postMessage: function(data, quiet) {
-
-				  	if (!data.workspace_id)
-				  		data.workspace_id = this.workspace.get('_id');
-
-				  	this.worker.postMessage(data);
-
-
             this.trigger('post', data);
         },
 
@@ -167,6 +166,7 @@ define(['backbone'], function (Backbone) {
 			c.kind = "removeConnection";
 			c.id = connection.get('endNodeId');
 			c.portIndex = connection.get('endPortIndex');
+			c.startPortIndex = -1;
 			c.workspace_id = connection.workspace.id;
 
 			this.post( c );
