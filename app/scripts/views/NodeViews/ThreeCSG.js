@@ -40,9 +40,9 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       if (this.model.get('selected')) {
 
-        var meshMat = new THREE.MeshPhongMaterial({color: 0x00FFFF});
-        var partMat = new THREE.ParticleBasicMaterial({color: 0x00FFFF, size: 3, sizeAttenuation: false});
-        var lineMat = new THREE.LineBasicMaterial({ color: 0x00ffff });
+        var meshMat = new THREE.MeshPhongMaterial({color: 0x66d6ff });
+        var partMat = new THREE.ParticleBasicMaterial({color: 0x66d6ff, size: 3, sizeAttenuation: false});
+        var lineMat = new THREE.LineBasicMaterial({ color: 0x66d6ff });
 
       } else {
 
@@ -197,9 +197,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
         }
 
         this.threeGeom = threeTemp;
-
         scene.add( this.threeGeom );
-
         this.changeVisibility();
 
       }, this );
@@ -218,7 +216,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
           var g3  = that.toThreeGeom( list[i] );
 
           if (that.model.get('selected')){
-            var color = 0x00FFFF;
+            var color = 0x66d6ff;
           } else {
             var color = 0x999999;
           }
