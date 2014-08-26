@@ -16,6 +16,9 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
 
         reset: function () {
             AbstractRunner.prototype.reset.call(this);
+        },
+
+        initWorker: function () {
         }
     });
 
