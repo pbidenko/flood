@@ -47,7 +47,7 @@ function init() {
 
 	// add directional light source
 	var directionalLight = new THREE.DirectionalLight(0xbbbbbb);
-	directionalLight.position.set(0.5, 0.3, 0.5);
+	directionalLight.position.set(50, 30, 50);
 	scene.add(directionalLight);
 
 	var directionalLight = new THREE.DirectionalLight(0xaaaaaa);
@@ -66,8 +66,60 @@ function init() {
 
 function makeGrid(){
 
-	var axisHelper = new THREE.AxisHelper( 50 );
+	var l = 60;
+
+	var axisHelper = new THREE.AxisHelper( l );
 	scene.add( axisHelper );
+
+	var geometry = new THREE.Geometry();
+	var geometryThick = new THREE.Geometry();
+
+	var n = l;
+	var inc = 2 * l / n;
+	var rate = 10;
+
+	for (var i = 0; i < n + 1; i++){
+
+    	var v1 = new THREE.Vector3(-l, -l + i * inc, 0);
+		var v2 = new THREE.Vector3(l, -l + i * inc, 0);
+
+    	geometry.vertices.push(v1);
+    	geometry.vertices.push(v2);
+
+    	if (i % rate == 0){
+			geometryThick.vertices.push(v1);
+    		geometryThick.vertices.push(v2);
+    	}
+	}
+
+	for (var i = 0; i < n + 1; i++){
+		var v1 = new THREE.Vector3(-l + i * inc, l, 0);
+		var v2 = new THREE.Vector3(-l + i * inc, -l, 0);
+
+		geometry.vertices.push(v1);
+    	geometry.vertices.push(v2);
+
+    	if (i % rate == 0){
+			geometryThick.vertices.push(v1);
+    		geometryThick.vertices.push(v2);
+    	}
+	}
+
+	var material = new THREE.LineBasicMaterial({
+        color: 0xeeeeee,
+        linewidth: 0.1
+    });
+
+    var materialThick = new THREE.LineBasicMaterial({
+        color: 0xeeeeee,
+        linewidth: 2
+    });
+
+    var line = new THREE.Line(geometry, material, THREE.LinePieces);
+    var lineThick = new THREE.Line(geometryThick, materialThick, THREE.LinePieces);
+
+    scene.add(line);
+    scene.add(lineThick);
 
 }
 

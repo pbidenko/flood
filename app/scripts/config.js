@@ -169,6 +169,8 @@ require.config({
         NumNodeView: 'views/NodeViews/Num',
         CodeBlockView: 'views/NodeViews/CodeBlock',
         FormulaView: 'views/NodeViews/Formula',
+        InputView: 'views/NodeViews/Input',
+        OutputView: 'views/NodeViews/Output',
 
         CSGNodeView: 'views/NodeViews/ThreeCSG',
 

@@ -51,7 +51,6 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView'], fun
             if (event.keyCode === 13) { // enter key causes first result to be inserted
                 var elementToAdd = this.modelsListView.findElementByCreatingName(searchText);
                 elementToAdd && this.elementClick(elementToAdd.model);                
-
             } 
             //Expand categories containing matching elements
             else {

@@ -29,12 +29,18 @@ define([  'backbone',
       this.model.get('workspaces').on('remove', this.removeWorkspaceTab, this);
 
       this.model.on('change:showingSettings', this.viewSettings, this);
-      this.model.on('change:showingLogin', this.viewLogin, this);
+      this.model.on('change:showingFeedback', this.viewFeedback, this);
       this.model.on('change:showingHelp', this.viewHelp, this);
       this.model.on('change:showingBrowser', this.viewBrowser, this);
       this.model.on('hide-search', this.hideSearch, this);
 
+      this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
+      this.model.login.on('change:showing', this.showHelpOnFirstExperience, this );
+
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
+
+      // deactivate the context menu
+      $(document).bind("contextmenu",function(e){ return false; });
 
     },
 
@@ -44,20 +50,67 @@ define([  'backbone',
       'click #help-button': 'showHelp',
       'click #settings-button': 'showSettings',
       'click #workspace_hide' : 'toggleViewer',
-      'click #add-workspace-button': 'newWorkspace',
-      'click #add-node-workspace-button': 'newNodeWorkspace',
-      'click #workspace-browser-button': 'toggleBrowser'
+      'click #workspace-browser-button': 'toggleBrowser',
+
+      'click #add-project-workspace' : 'newWorkspace',
+      'click #add-node-workspace' : 'newNodeWorkspace',
+
+      'mouseover #add-workspace-button': 'showAddWorkspaceSelect',
+      'mouseout #add-workspace-button': 'hideAddWorkspaceSelect',
+      'mouseover #add-workspace-select-element': 'showAddWorkspaceSelect',
+      'mouseout #add-workspace-select-element': 'hideAddWorkspaceSelect',
+    },
+
+    showHelpOnFirstExperience: function(){
+
+      var that = this;
+
+      if (that.model.login.get('isLoggedIn')  && that.model.get('isFirstExperience')){
+        setTimeout(function(){
+          that.model.set( 'showingHelp', true);
+          that.model.set( 'isFirstExperience', false );
+         }, 800);
+      } else {
+        that.model.set( 'showingHelp', false);
+      }
+
+    },
+
+    showAddWorkspaceSelect: function(){
+      $('#add-workspace-select-element').show();
+    },
+
+    hideAddWorkspaceSelect: function(){
+      $('#add-workspace-select-element').hide();
     },
 
     newWorkspace: function(){
       this.model.newWorkspace();
+      this.hideAddWorkspaceSelect();
     },
 
     newNodeWorkspace: function(){
       this.model.newNodeWorkspace();
+      this.hideAddWorkspaceSelect();
     },
 
     keydownHandler: function(e){
+
+      var isBackspaceOrDelete = e.keyCode === 46 || e.keyCode === 8;
+
+      if ( !(e.metaKey || e.ctrlKey) && !isBackspaceOrDelete ) return;
+
+      // do not capture from input
+      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "INPUT") return;
+      if (e.target.nodeName === "INPUT") return;
+
+      // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
+      switch (e.keyCode) {
+        case 78:
+          this.newWorkspace();
+          return e.preventDefault();
+      }
+
       this.currentWorkspaceView.keydownHandler(e);
     },
 
@@ -102,13 +155,28 @@ define([  'backbone',
     viewHelp: function(){
       if (!this.helpView){
         this.helpView = new HelpView({model: new Help() }, { app: this.model });
+      }
+      
+      if (this.model.get('showingHelp') === true){
+        // the workspace must be focused before showing help
+        this.focusWorkspace();
         this.helpView.render();
+        this.helpView.$el.fadeIn();  
+      } else {
+        this.helpView.$el.fadeOut();
+      }
+    },
+
+    viewFeedback: function(){
+      if (!this.feedbackView){
+        this.feedbackView = new FeedbackView({model: new Feedback() }, { app: this.model });
+        this.feedbackView.render();
       }
 
-      if (this.model.get('showingHelp') === true){
-        this.helpView.$el.show();  
+      if (this.model.get('showingFeedback') === true){
+        this.feedbackView.$el.fadeIn();  
       } else {
-        this.helpView.$el.hide();
+        this.feedbackView.$el.fadeOut();
       }
     },
 
@@ -118,6 +186,14 @@ define([  'backbone',
 
     hideHelp: function(){
       this.model.set('showingHelp', true);
+    },
+
+    showFeedback: function(){
+      this.model.set('showingFeedback', true);
+    },
+
+    hideFeedback: function(){
+      this.model.set('showingFeedback', true);
     },
 
     showLogin: function(){
