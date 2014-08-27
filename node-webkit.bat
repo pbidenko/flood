@@ -7,6 +7,8 @@
 @echo                        /_/    /_/ \____/ \____/ \__,_/   
 @echo ===============================================================================
 
+@if exist "dist" rmdir "dist" /s /q
+
 @echo Enter path to Dynamo bin files (like D:\Dynamo\Bin\Release)
 
 @set /p dynamoBin=^>
