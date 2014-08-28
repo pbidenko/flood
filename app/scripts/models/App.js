@@ -1,5 +1,5 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'Viewer'],
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, Viewer){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers){
 
   return Backbone.Model.extend({
 
@@ -32,7 +32,6 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.SearchElements.reset();
       this.SearchElements.fetch();
 
-      this.viewer = new Viewer({app: this});
     },
 
     parse : function(resp) {

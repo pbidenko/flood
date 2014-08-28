@@ -1,5 +1,5 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee', 'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers'],
-    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee, nodeFactory, FLOOD, scheme, SearchElement, staticHelpers) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee', 'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers', 'GeometryMessage'],
+    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee, nodeFactory, FLOOD, scheme, SearchElement, staticHelpers, GeometryMessage) {
 
   return Backbone.Model.extend({
 
@@ -131,6 +131,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
         this.runAllowed = true;
         this.initializeRunner();
         this.listenTo( this.app, 'computation-completed:event', this.updateNodesValues);
+        this.listenTo( this.app, 'geometry-data-received:event', this.updateNodeGeometry);
         this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);
         return;
       }
@@ -208,6 +209,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
                     this.runAllowed = true;
                     this.initializeRunner();
                     this.listenTo( this.app, 'computation-completed:event', this.updateNodesValues);
+                    this.listenTo( this.app, 'geometry-data-received:event', this.updateNodeGeometry);
                     this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);
                     this.app.get('workspaces').trigger('add', this);
       }
@@ -578,6 +580,20 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
     },
 
+    removeNodeByID: function ( id ) {
+        if ( !id )
+            return;
+        // select only node that is needed to be deleted
+        this.get( 'nodes' ).each(function (x) {
+            if (x.get('_id') === id) {
+                x.set('selected', true);
+            }
+            else {
+                x.set('selected', false);
+            }
+        });
+        this.removeSelected();
+    },
     makeId: function(){
       return this.app.makeId();
     },
@@ -1090,21 +1106,122 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
       this.draggingProxy = false;
       return this;
 
-            },
+    },
 
-            updateNodesValues: function (param) {
-                var i = 0,
-                    len = param.result.length,
-                    node,
-                    resultNode;
+    updateNodesValues: function (param) {
+        var i = 0,
+            len = param.result.length,
+            node,
+            resultNode;
 
-                for (; i < len; i++) {
-                    resultNode = param.result[i];
-                    node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeID);
-                    node.updateValue(param.result[i]);
-                }
+        for (; i < len; i++) {
+            resultNode = param.result[i];
+            node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeID);
+            if (node) {
+                node.updateValue(param.result[i]);
+                this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeID)));
             }
-        });
+        }
+    },
+
+    updateNodeGeometry: function(param) {
+        var node = this.app.getCurrentWorkspace().get('nodes').get(param.geometryData.nodeID);
+        if (node && param.geometryData.graphicPrimitivesData) {
+            var graphicData = param.geometryData.graphicPrimitivesData;
+            graphicData.pointVertices = this._getFloatArray(graphicData.pointVertices);
+            graphicData.lineStripVertices = this._getFloatArray(graphicData.lineStripVertices);
+            graphicData.lineStripCounts = this._getIntArray(graphicData.lineStripCounts);
+            graphicData.triangleVertices = this._getFloatArray(graphicData.triangleVertices);
+            graphicData.triangleNormals = this._getFloatArray(graphicData.triangleNormals);
+            var geometrys = []; // prettyLastValue
+            graphicData.numberOfCoordinates = 3;
+            this._addPoints(graphicData, geometrys);
+            this._addTriangles(graphicData, geometrys);
+            this._addCurves(graphicData, geometrys);
+            node.set('prettyLastValue', geometrys);
+        }
+    },
+
+    _addPoints: function (graphicData, geometrys) {
+        // if we have single points
+        if (graphicData.pointVertices && graphicData.pointVertices.length) {
+            var points = {vertices: []}, onePoint;
+            // while there are at least 3 coordinates
+            while (graphicData.pointVertices.length >= graphicData.numberOfCoordinates) {
+                // add [x, y, z]
+                onePoint = graphicData.pointVertices.splice(0, graphicData.numberOfCoordinates);
+                points.vertices.push(onePoint);
+            }
+            geometrys.push(points);
+        }
+    },
+
+    _addCurves: function (graphicData, geometrys) {
+        // if we have line strips
+        if (graphicData.lineStripVertices && graphicData.lineStripVertices.length
+            && graphicData.lineStripCounts && graphicData.lineStripCounts.length) {
+            var curve, count, oneVertex;
+            for (var k = 0; k < graphicData.lineStripCounts.length; k++) {
+                curve = { linestrip: []};
+                count = graphicData.lineStripCounts[k];
+                while (count > 0 && graphicData.lineStripVertices.length >= graphicData.numberOfCoordinates) {
+                    oneVertex = graphicData.lineStripVertices.splice(0, graphicData.numberOfCoordinates);
+                    curve.linestrip.push(oneVertex);
+                    count--;
+                }
+                geometrys.push(curve);
+            }
+        }
+    },
+
+    _addTriangles: function (graphicData, geometrys) {
+        // if we have triangles
+        if (graphicData.triangleVertices && graphicData.triangleVertices.length
+            && graphicData.triangleNormals && graphicData.triangleNormals.length) {
+            var triangles = {vertices: [], faces:[]};
+            var index = 0, oneVertex, vertexCount = 3;
+            // while there are at least 9 coordinates of triangle's vertices
+            // and at least 3 coordinates of normal vector
+            while (graphicData.triangleVertices.length >= (vertexCount * graphicData.numberOfCoordinates)
+                && graphicData.triangleNormals.length >= graphicData.numberOfCoordinates) {
+                for (var i = 0; i < vertexCount; i++)
+                {
+                    // Add vertex - [x, y, z]
+                    oneVertex = graphicData.triangleVertices.splice(0, graphicData.numberOfCoordinates);
+                    triangles.vertices.push(oneVertex);
+                }
+                // add [indexA, indexB, indexC, normal_vector: [x, y, z]]
+                triangles.faces.push([index++, index++, index++,
+                    graphicData.triangleNormals.splice(0, graphicData.numberOfCoordinates)]);
+            }
+            geometrys.push(triangles);
+        }
+    },
+
+    _getArrayFromBase64string: function(base64){
+        var byteCharacters = atob(base64);
+        var byteNumbers = new Uint8Array(byteCharacters.length);
+        for (var i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        return byteNumbers;
+    },
+
+    _getByteArray: function (base64){
+        return this._getArrayFromBase64string(base64);
+    },
+
+    _getIntArray: function (base64){
+        var buffer = this._getArrayFromBase64string(base64).buffer;
+        return Array.apply([], new Int32Array(buffer));
+    },
+
+    _getFloatArray: function (base64){
+        var buffer = this._getArrayFromBase64string(base64).buffer;
+        return Array.apply([], new Float32Array(buffer));
+    }
+  });
 
 });
 

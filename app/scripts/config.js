@@ -120,7 +120,6 @@ require.config({
         WorkspaceBrowserElement: 'models/WorkspaceBrowserElement',
         WorkspaceBrowser: 'models/WorkspaceBrowser',
         SocketConnection: 'models/SocketConnection',
-        Viewer: 'models/Viewer',
 
         CreateNodeCommand: 'models/commands/CreateNodeCommand',
         CreateNoteCommand: 'models/commands/CreateNoteCommand',
@@ -133,12 +132,14 @@ require.config({
 
         RecordableCommandsMessage: 'models/messages/RecordableCommandsMessage',
         LibraryItemsListMessage: 'models/messages/LibraryItemsListMessage',
+        GeometryMessage: 'models/messages/GeometryMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
         ContentResponse: 'models/responses/ContentResponse',
         LibraryItemsListResponse: 'models/responses/LibraryItemsListResponse',
         NodeCreationDataResponse: 'models/responses/NodeCreationDataResponse',
+        GeometryDataResponse: 'models/responses/GeometryDataResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',

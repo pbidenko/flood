@@ -1,6 +1,12 @@
 define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, _, $, BaseNodeView) {
 
-  return BaseNodeView.extend({
+    var colors = {
+        selected: 0x00FFFF,
+        notSelected: 0x999999,
+        notSelectedLine: 0x000000
+    };
+
+    return BaseNodeView.extend({
 
     initialize: function(args) {
 
@@ -9,9 +15,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
       this.model.on('change:selected', this.colorSelected, this);
       this.model.on('change:visible', this.changeVisibility, this);
       this.model.on('remove', this.onRemove, this);
-      this.model.on('change:prettyLastValue', this.onEvalComplete, this );
       this.model.workspace.on('change:current', this.changeVisibility, this);
-
+      this.listenTo( this.model, 'change:prettyLastValue', this.onEvalComplete);
       this.onEvalComplete();
 
     },
@@ -40,15 +45,15 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       if (this.model.get('selected')) {
 
-        var meshMat = new THREE.MeshPhongMaterial({color: 0x66d6ff });
-        var partMat = new THREE.ParticleBasicMaterial({color: 0x66d6ff, size: 3, sizeAttenuation: false});
-        var lineMat = new THREE.LineBasicMaterial({ color: 0x66d6ff });
+        var meshMat = new THREE.MeshPhongMaterial({color: colors.selected});
+        var partMat = new THREE.ParticleBasicMaterial({color: colors.selected, size: 3, sizeAttenuation: false});
+        var lineMat = new THREE.LineBasicMaterial({ color: colors.selected });
 
       } else {
 
-        var meshMat = new THREE.MeshPhongMaterial({color: 0x999999});
-        var partMat = new THREE.ParticleBasicMaterial({color: 0x999999, size: 3, sizeAttenuation: false});
-        var lineMat = new THREE.LineBasicMaterial({ color: 0x000000 });
+        var meshMat = new THREE.MeshPhongMaterial({color: colors.notSelected});
+        var partMat = new THREE.ParticleBasicMaterial({color: colors.notSelected, size: 3, sizeAttenuation: false});
+        var lineMat = new THREE.LineBasicMaterial({ color: colors.notSelectedLine });
 
       }
 
@@ -119,20 +124,26 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       var threeGeom = new THREE.Geometry(), face;
 
-      if (!rawGeom) return threeGeom;
+      if (!rawGeom || !rawGeom.vertices && !rawGeom.linestrip )
+          return threeGeom;
 
-      if (!rawGeom.vertices && !rawGeom.linestrip ) return threeGeom;
+      //rawGeom.vertices || rawGeom.linestrip
+      if (rawGeom.linestrip)
+          return this.addLineStrip( rawGeom, threeGeom );
 
-      if (rawGeom.linestrip) return this.addLineStrip( rawGeom, threeGeom );
+      // !linestrip, rawGeom.vertices
+      if (!rawGeom.faces)
+          return this.addPoints( rawGeom, threeGeom );
 
-      if (rawGeom.vertices && !rawGeom.faces) return this.addPoints( rawGeom, threeGeom );
-
+      // rawGeom.faces, !linestrip, rawGeom.vertices
       for ( var i = 0; i < rawGeom.vertices.length; i++ ) {
         var v = rawGeom.vertices[i];
         threeGeom.vertices.push( new THREE.Vector3( v[0], v[1], v[2] ) );
       }
 
-      if (!rawGeom.faces) return threeGeom;
+      // impossible case
+      //if (!rawGeom.faces)
+          //return threeGeom;
 
       for ( var i = 0; i < rawGeom.faces.length; i++ ) {
         var f = rawGeom.faces[i];
@@ -171,9 +182,10 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
       
     },
 
-    onEvalComplete: function(a, b, newValue){
+    onEvalComplete: function(newValue){
 
-      if (!newValue && this.evaluated) return;
+      //if (!newValue && this.evaluated)
+          //return;
 
       this.evaluated = true;
 
@@ -215,10 +227,13 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
         
           var g3  = that.toThreeGeom( list[i] );
 
+          var color, colorLine;
           if (that.model.get('selected')){
-            var color = 0x66d6ff;
-          } else {
-            var color = 0x999999;
+            color = colorLine = colors.selected;
+          }
+          else {
+            color = colors.notSelected;
+            colorLine = colors.notSelectedLine;
           }
 
           switch (g3._floodType) {
@@ -229,7 +244,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
               geom.add( new THREE.ParticleSystem(g3, new THREE.ParticleBasicMaterial({color: color, size: 3, sizeAttenuation: false}) ));
               break;
             case 2:
-              geom.add( new THREE.Line(g3, new THREE.LineBasicMaterial({ color: 0x000000 })));
+              geom.add( new THREE.Line(g3, new THREE.LineBasicMaterial({ color: colorLine })));
               break;
           }
 
@@ -237,7 +252,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
         if (i < list.length) {
           setTimeout(tick, 25);
-        } else {
+        }
+        else {
           callback.call(that);
         }
 
@@ -287,7 +303,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       return this;
 
-    },
+    }
 
   });
 
