@@ -14,7 +14,7 @@ if (typeof require != 'function' && typeof window != "object") {
 
 }
 	
-define(function() {
+define('scheme', function() {
 
 	// Env
 	// A dictionary of symbol-value pairs
@@ -31,7 +31,7 @@ define(function() {
 
 		this.find = function(key){
 			if ( this.scope[key] != null) 
-				return this.scope
+				return this.scope;
 
 			if (this.outer != null) 
 				return this.outer.find(key);

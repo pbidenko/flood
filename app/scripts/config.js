@@ -137,7 +137,8 @@ require.config({
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
         ContentResponse: 'models/responses/ContentResponse',
-         LibraryItemsListResponse: 'models/responses/LibraryItemsListResponse',
+        LibraryItemsListResponse: 'models/responses/LibraryItemsListResponse',
+        NodeCreationDataResponse: 'models/responses/NodeCreationDataResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',

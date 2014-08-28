@@ -128,8 +128,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
       if (!depIds || depIds.length === 0 ) {
         console.log(this.get('name') + " has no dependencies");
-        this.trigger('requestRun');
-	this.runAllowed = true;
+        this.runAllowed = true;
         this.initializeRunner();
         this.listenTo( this.app, 'computation-completed:event', this.updateNodesValues);
         this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);

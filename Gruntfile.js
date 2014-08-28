@@ -18,7 +18,7 @@ module.exports = function (grunt) {
     // configurable paths
     var yeomanConfig = {
         app: 'app',
-        dist: 'dist'
+        dist: 'dist/app'
     };
 
     grunt.initConfig({
@@ -101,7 +101,7 @@ module.exports = function (grunt) {
               include: ["main"],
               insertRequire: ["main"],
 
-              out: "dist/source.min.js",
+              out: "dist/app/source.min.js",
               optimize: "uglify",
               // optimize: "none",
 
@@ -148,7 +148,7 @@ module.exports = function (grunt) {
             }
         },
         copy: {
-            dist: {
+            distApp: {
                 files: [{
                     expand: true,
                     dot: true,
@@ -158,12 +158,40 @@ module.exports = function (grunt) {
                         '*.{ico,txt}',
                         '.htaccess',
                         '*.html',
-                        '*.json',
                         'images/{,*/}*.{webp,gif}',
+                        'styles/bootstrap.css',
                         'bower_components/jquery.ui/themes/base/*.css',
                         'bower_components/jquery.ui/themes/base/images/*.png',
-                        'bower_components/pace/pace.min.js',
-                        'scripts/lib/flood/*.js'
+                        'bower_components/pace/pace.min.js'
+                    ]
+                }]
+            },
+            distServer: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: 'server',
+                    dest: 'dist/server',
+                    src: [
+                        'start.html',
+                        'app.js',
+                        'config/**/*',
+                        'controllers/**/*',
+                        'models/**/*',
+                        'node_modules/**/*',
+                        'public/**/*',
+                        'views/**/*'
+                    ]
+                }]
+            },
+            distJson: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: '.',
+                    dest: 'dist',
+                    src: [
+                        'package.json'
                     ]
                 }]
             }
@@ -176,7 +204,7 @@ module.exports = function (grunt) {
         processhtml: {
           release: {
             files: {
-              "dist/index.html": ["app/index.html"]
+              "dist/app/index.html": ["app/index.html"]
             }
           }
         },
@@ -231,6 +259,10 @@ module.exports = function (grunt) {
         'cssmin',
         'copy',
         'processhtml',
+        'nodewebkit'
+    ]);
+
+    grunt.registerTask('desktop_dynamo', [
         'nodewebkit'
     ]);
 
