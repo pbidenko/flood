@@ -65,12 +65,17 @@ define(['RecordableCommand'], function (RecordableCommand) {
     };
 
     return function Connection(config, options){
-        return (options['startPortIndex'] == -1) ? [
-            getInstance(nodePrefixes.end, options),
-            getInstance(nodePrefixes.start, options)
-        ] : [
-            getInstance(nodePrefixes.start, options),
-            getInstance(nodePrefixes.end, options)
-        ];
+        if ( options['startPortIndex'] == -1 ) {
+            return [
+                getInstance( nodePrefixes.end, options ),
+                getInstance( nodePrefixes.start, options )
+            ];
+        }
+        else {
+            return [
+                getInstance( nodePrefixes.start, options ),
+                getInstance( nodePrefixes.end, options )
+            ];
+        }
     }
 });
