@@ -32,35 +32,50 @@ define(['RecordableCommand'], function (RecordableCommand) {
             this.set('mode', options.mode);
         }
     },
-        //Static properties
-        {
-            //Modes enum
-            modes: portModes,
-            types: portTypes
+    //Static properties
+    {
+        //Modes enum
+        modes: portModes,
+        types: portTypes
     }),
 
     getInstance = function(prefix, data){
-        if (prefix === nodePrefixes.start && data['startPortIndex'] == -1) {
-            return new MakeConnectionCommand({}, {
-                nodeId: zeroGuid,
-                portIndex: -1,
-                portType: portTypes.input,
-                mode: portModes.cancel
-            });
+        var mode;
+        if (data['startPortIndex'] == -1) {
+            if (prefix === 'start') {
+                return new MakeConnectionCommand({}, {
+                    nodeId: zeroGuid,
+                    portIndex: -1,
+                    portType: portTypes.input,
+                    mode: portModes.cancel
+                });
+                mode = portModes.begin;
+            }
+        }
+        else {
+            mode = prefix === nodePrefixes.start ? portModes.begin : portModes.end;
         }
 
         return new MakeConnectionCommand({}, {
             nodeId: data[prefix+'NodeId'],
             portIndex: data[prefix+'PortIndex'],
             portType: prefix === nodePrefixes.start ? portTypes.output : portTypes.input,
-            mode: prefix === nodePrefixes.start ? portModes.end : portModes.begin
+            mode: mode
         });
     };
 
     return function Connection(config, options){
-        return [
-            getInstance(nodePrefixes.end, options),
-            getInstance(nodePrefixes.start, options)
-        ]
+        if ( options['startPortIndex'] == -1 ) {
+            return [
+                getInstance( nodePrefixes.end, options ),
+                getInstance( nodePrefixes.start, options )
+            ];
+        }
+        else {
+            return [
+                getInstance( nodePrefixes.start, options ),
+                getInstance( nodePrefixes.end, options )
+            ];
+        }
     }
 });

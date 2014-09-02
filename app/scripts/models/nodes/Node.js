@@ -359,10 +359,87 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
       if (this.workspace)
         this.workspace.run();
 
+    },
+
+    updateNodeGeometry: function(param) {
+        var graphicData = param.geometryData.graphicPrimitivesData;
+
+        graphicData.pointVertices = staticHelpers.getFloatArray(graphicData.pointVertices);
+        graphicData.lineStripVertices = staticHelpers.getFloatArray(graphicData.lineStripVertices);
+        graphicData.lineStripCounts = staticHelpers.getIntArray(graphicData.lineStripCounts);
+        graphicData.triangleVertices = staticHelpers.getFloatArray(graphicData.triangleVertices);
+        graphicData.triangleNormals = staticHelpers.getFloatArray(graphicData.triangleNormals);
+
+        var geometries = []; // prettyLastValue
+        graphicData.numberOfCoordinates = 3;
+
+        this.addPoints(graphicData, geometries);
+        this.addTriangles(graphicData, geometries);
+        this.addCurves(graphicData, geometries);
+
+        this.set('prettyLastValue', geometries);
+    },
+
+    addPoints: function (graphicData, geometries) {
+        // if we have single points
+        if (graphicData.pointVertices && graphicData.pointVertices.length) {
+            var points = {vertices: []}, onePoint;
+            // while there are at least 3 coordinates
+            while (graphicData.pointVertices.length >= graphicData.numberOfCoordinates) {
+                // add [x, y, z]
+                onePoint = graphicData.pointVertices.splice(0, graphicData.numberOfCoordinates);
+                points.vertices.push(onePoint);
+            }
+
+            geometries.push(points);
+        }
+    },
+
+    addCurves: function (graphicData, geometries) {
+        // if we have line strips
+        if (graphicData.lineStripVertices && graphicData.lineStripVertices.length
+            && graphicData.lineStripCounts && graphicData.lineStripCounts.length) {
+            var curve, count, oneVertex;
+            for (var k = 0; k < graphicData.lineStripCounts.length; k++) {
+                curve = { linestrip: []};
+                count = graphicData.lineStripCounts[k];
+
+                while (count > 0 && graphicData.lineStripVertices.length >= graphicData.numberOfCoordinates) {
+                    oneVertex = graphicData.lineStripVertices.splice(0, graphicData.numberOfCoordinates);
+                    curve.linestrip.push(oneVertex);
+                    count--;
+                }
+
+                geometries.push(curve);
+            }
+        }
+    },
+
+    addTriangles: function (graphicData, geometries) {
+        // if we have triangles
+        if (graphicData.triangleVertices && graphicData.triangleVertices.length
+            && graphicData.triangleNormals && graphicData.triangleNormals.length) {
+            var triangles = {vertices: [], faces:[]};
+            var index = 0, oneVertex, vertexCount = 3;
+            // while there are at least 9 coordinates of triangle's vertices
+            // and at least 3 coordinates of normal vector
+            while (graphicData.triangleVertices.length >= (vertexCount * graphicData.numberOfCoordinates)
+                && graphicData.triangleNormals.length >= graphicData.numberOfCoordinates) {
+                for (var i = 0; i < vertexCount; i++)
+                {
+                    // Add vertex - [x, y, z]
+                    oneVertex = graphicData.triangleVertices.splice(0, graphicData.numberOfCoordinates);
+                    triangles.vertices.push(oneVertex);
+                }
+                // add [indexA, indexB, indexC, normal_vector: [x, y, z]]
+                triangles.faces.push([index++, index++, index++,
+                    graphicData.triangleNormals.splice(0, graphicData.numberOfCoordinates)]);
+            }
+
+            geometries.push(triangles);
+        }
     }
-
   });
-
 });
 
 

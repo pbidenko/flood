@@ -1,6 +1,6 @@
 define(function(){
     function RecordableCommandsMessage(commands, guid){
-        this.$type = 'DynamoWebServer.Messages.RecordableCommandsMessage, DynamoCore';
+        this.$type = 'DynamoWebServer.Messages.RunCommandsMessage, DynamoWebServer';
         this.Commands = commands || [];
         this.WorkspaceGuid = guid;
     }

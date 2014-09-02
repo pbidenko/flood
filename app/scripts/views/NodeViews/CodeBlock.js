@@ -171,7 +171,13 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             this.input.blur(function () {
 
                 var ex = JSON.parse(JSON.stringify(that.model.get('extra')));
-                if (ex.code === that.input.val()) return;
+                if (!that.input.val()) {
+                    that.selectable = true;
+                    that.model.workspace.removeNodeByID(that.model.get('_id'));
+                    return;
+                }
+                if (ex.code === that.input.val())
+                    return;
 
                 ex.code = that.input.val();
 
@@ -192,6 +198,8 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                     });
                 }
             }
+
+            this.input.focus();
 
             return this;
 
