@@ -64,11 +64,11 @@ define(['backbone', 'staticHelpers'], function(Backbone, helpers) {
 
       var arr = [];
 
-      session.workspaces.map(function(y) {
+      session.workspaces.map(function(ws) {
         arr.push({
-          _id: y._id,
-          name: y.name,
-          isCustomNode: y.isCustomNode,
+          _id: ws._id,
+          name: ws.name,
+          isCustomNode: ws.isCustomNode,
           isPublic: false,
           lastSaved: new Date().toISOString(),
           isModified: false,
@@ -80,9 +80,9 @@ define(['backbone', 'staticHelpers'], function(Backbone, helpers) {
     },
 
     syncWorkspace: function(method, model, options) {
-      session.workspaces.map(function(x) {
-        if (x._id === model.get('_id'))
-          x.name = model.get('name');
+      session.workspaces.map(function(ws) {
+        if (ws._id === model.get('_id'))
+          ws.name = model.get('name');
       });
       return true;
     }
