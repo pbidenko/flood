@@ -145,6 +145,8 @@ require.config({
         NodeFactory: 'helpers/NodeFactory',
         staticHelpers: 'helpers/StaticHelpers',
         augment: 'helpers/augment',
+        // Use BaseStorage if no actual data storage is required
+        Storage: 'helpers/MongoStorage', //'helpers/BaseStorage',
 
         // backbone views
         AppView: 'views/AppView',

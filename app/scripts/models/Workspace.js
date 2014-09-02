@@ -1,5 +1,5 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee', 'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers'],
-    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee, nodeFactory, FLOOD, scheme, SearchElement, staticHelpers) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee', 'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers', 'Storage'],
+    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee, nodeFactory, FLOOD, scheme, SearchElement, staticHelpers, Storage) {
 
   return Backbone.Model.extend({
 
@@ -1090,23 +1090,24 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
       this.draggingProxy = false;
       return this;
 
-            },
+    },
 
-            updateNodesValues: function (param) {
-                var i = 0,
-                    len = param.result.length,
-                    node,
-                    resultNode;
+    updateNodesValues: function (param) {
+      var i = 0,
+          len = param.result.length,
+          node,
+          resultNode;
 
-                for (; i < len; i++) {
-                    resultNode = param.result[i];
-                    node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeID);
-                    node.updateValue(param.result[i]);
-                }
-            }
-        });
+      for (; i < len; i++) {
+        resultNode = param.result[i];
+        node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeID);
+        node.updateValue(param.result[i]);
+      }
+    },
+
+    sync: function( method, model, options ) {
+      return Storage.syncWorkspace(method, model, options);
+    }
+  });
 
 });
-
-
-
