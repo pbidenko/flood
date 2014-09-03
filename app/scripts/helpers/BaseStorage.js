@@ -46,11 +46,13 @@ define(['backbone', 'staticHelpers'], function(Backbone, helpers) {
 
     fetchLogin: function() {
 
+      // Return a mock object with email property just to emulate successful login action.
       return createPromise({ email: 'default' });
     },
 
     logout: function() {
 
+      // Return an empty promise to disable user logout ability, because user is actually not logged in.
       return createPromise();
     },
 
