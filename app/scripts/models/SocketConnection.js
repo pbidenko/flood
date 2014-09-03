@@ -1,7 +1,7 @@
 ﻿define(['backbone', 'ComputationResponse', 'ContentResponse', 'LibraryItemsListResponse',
-        'NodeCreationDataResponse'],
+        'NodeCreationDataResponse', 'GeometryDataResponse'],
     function (Backbone, ComputationResponse, ContentResponse, LibraryItemsListResponse,
-              NodeCreationDataResponse) {
+              NodeCreationDataResponse, GeometryDataResponse) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -16,14 +16,16 @@
         responseMap = {
             'DynamoWebServer.Responses.ContentResponse, DynamoWebServer': ContentResponse,
             'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': ComputationResponse,
-            'DynamoWebServer.Responses.LibraryItemsListResponse, DynamoWebServer': LibraryItemsListResponse,            
-            'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : NodeCreationDataResponse
+            'DynamoWebServer.Responses.LibraryItemsListResponse, DynamoWebServer': LibraryItemsListResponse,
+            'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : NodeCreationDataResponse,
+            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : GeometryDataResponse
         },
         responseEventMap = {
             'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': 'computation-completed:event',
             'DynamoWebServer.Responses.LibraryItemsListResponse, DynamoWebServer': 'libraryItemsList-received:event',
             'DynamoWebServer.Responses.SavedFileResponse, DynamoWebServer': 'saved-file-received:event',
-            'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : 'creation-data-received:event'
+            'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : 'creation-data-received:event',
+            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : 'geometry-data-received:event'
         },
         app;
 

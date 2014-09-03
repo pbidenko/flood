@@ -1,5 +1,5 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee', 'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers', 'Storage'],
-    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee, nodeFactory, FLOOD, scheme, SearchElement, staticHelpers, Storage) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee', 'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers', 'GeometryMessage', 'Storage'],
+    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee, nodeFactory, FLOOD, scheme, SearchElement, staticHelpers, GeometryMessage, Storage) {
 
   return Backbone.Model.extend({
 
@@ -131,6 +131,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
         this.runAllowed = true;
         this.initializeRunner();
         this.listenTo( this.app, 'computation-completed:event', this.updateNodesValues);
+        this.listenTo( this.app, 'geometry-data-received:event', this.updateNodeGeometry);
         this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);
         return;
       }
@@ -208,6 +209,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
                     this.runAllowed = true;
                     this.initializeRunner();
                     this.listenTo( this.app, 'computation-completed:event', this.updateNodesValues);
+                    this.listenTo( this.app, 'geometry-data-received:event', this.updateNodeGeometry);
                     this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);
                     this.app.get('workspaces').trigger('add', this);
       }
@@ -578,6 +580,20 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
     },
 
+    removeNodeByID: function ( id ) {
+        if ( !id )
+            return;
+        // select only node that is needed to be deleted
+        this.get( 'nodes' ).each(function (x) {
+            if (x.get('_id') === id) {
+                x.set('selected', true);
+            }
+            else {
+                x.set('selected', false);
+            }
+        });
+        this.removeSelected();
+    },
     makeId: function(){
       return this.app.makeId();
     },
@@ -1092,22 +1108,32 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
     },
 
-    updateNodesValues: function (param) {
-      var i = 0,
-          len = param.result.length,
-          node,
-          resultNode;
+    updateNodeValues: function (param) {
+        var i = 0,
+            len = param.result.length,
+            node,
+            resultNode;
 
-      for (; i < len; i++) {
-        resultNode = param.result[i];
-        node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeID);
-        node.updateValue(param.result[i]);
-      }
+        for (; i < len; i++) {
+            resultNode = param.result[i];
+            node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeID);
+            if (node) {
+                node.updateValue(param.result[i]);
+                this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeID)));
+            }
+        }
+    },
+
+    updateNodeGeometry: function(param) {
+        var node = this.app.getCurrentWorkspace().get('nodes').get(param.geometryData.nodeID);
+        if (node && param.geometryData.graphicPrimitivesData) {
+            node.updateNodeGeometry(param);
+        }
     },
 
     sync: function( method, model, options ) {
       return Storage.syncWorkspace(method, model, options);
     }
-  });
 
+  });
 });
