@@ -129,6 +129,7 @@ require.config({
         RecordableCommand: 'models/commands/RecordableCommand',
         RunCancelCommand: 'models/commands/RunCancelCommand',
         UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
+        CreateCustomNodeCommand: 'models/commands/CreateCustomNodeCommand',
 
         RecordableCommandsMessage: 'models/messages/RecordableCommandsMessage',
         LibraryItemsListMessage: 'models/messages/LibraryItemsListMessage',

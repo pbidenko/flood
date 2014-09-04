@@ -21,14 +21,14 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView'], fun
 
             this.$el.html(this.template(this.model.toJSON()));
 
-            this.$input = this.$('.library-search-input');           
+            this.$input = this.$('.library-search-input');
 
             this.modelsListView = new ModelsListView({}, {
-                app: this.app,                
+                app: this.app,
                 searchView: this
             });
 
-            this.$el.append(this.modelsListView.render().$el);            
+            this.$el.append(this.modelsListView.render().$el);
         },
 
         addNode: function (nodeModel) {
@@ -40,7 +40,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView'], fun
             this.app.trigger('hide-search');
         },
 
-        searchKeyup: _.debounce(function (event) {            
+        searchKeyup: _.debounce(function (event) {
             var searchText = this.$input.val();
             //If the key is Escape or search text is empty, just quit
             if( event.keyCode === 27 ){
@@ -51,6 +51,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView'], fun
             if (event.keyCode === 13) { // enter key causes first result to be inserted
                 var elementToAdd = this.modelsListView.findElementByCreatingName(searchText);
                 elementToAdd && this.elementClick(elementToAdd.model);                
+
             } 
             //Expand categories containing matching elements
             else {

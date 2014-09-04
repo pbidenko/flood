@@ -412,7 +412,7 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodePort );
 
-	FLOOD.internalNodeTypes.CustomNode = function(functionName, functionId, lambda) {
+	FLOOD.internalNodeTypes.CustomNode = function(functionName, functionId, guid, lambda) {
 
 		var typeData = {
 			typeName: "CustomNode"
@@ -420,6 +420,7 @@ define('FLOOD', function() {
 
 		this.functionName = functionName;
 		this.functionId = functionId;
+		this.guid = guid;
 		this.lambda = lambda;
 
 		if (scheme) var S = new scheme.Interpreter();
@@ -451,6 +452,10 @@ define('FLOOD', function() {
 
 			if (args.functionId && typeof args.functionId === "string"){
 				this.functionId = args.functionId;
+			}
+
+			if (args.guid && typeof args.guid === "string"){
+				this.guid = args.guid;
 			}
 
 			if (args.numInputs && typeof args.numInputs === "number" ){

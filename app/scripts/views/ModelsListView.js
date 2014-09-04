@@ -7,9 +7,9 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
 
         initialize: function (attrs, options) {
             this.app = options.app;
-            this.searchView = options.searchView;            
+            this.searchView = options.searchView;
             this.searchElements = [];
-        },        
+        },
 
         template: _.template(''),
 
@@ -23,7 +23,6 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                         model: element
                     },
                     {
-                        //parent: this,
                         searchElements: this.searchElements,
                         searchView: this.searchView
                     });
@@ -44,6 +43,20 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                         searchView: this.searchView
                     }).render().$el);
                 }
+
+                _.each(result.elements, function (element) {
+                    var view = new SearchElementView({
+                        model: element
+                    },
+                    {
+                        searchElements: this.searchElements,
+                        searchView: this.searchView
+                    });
+
+                    this.searchElements.push(view);
+
+                    this.$el.append(view.render().$el);
+                }.bind(this));
             }
             
             return this;     
@@ -91,12 +104,12 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
             if(!name){
                 len = this.searchElements.length;
                 for( ; i < len; i++ ){
-                    this.searchElements[i].showWithAncestors();                    
+                    this.searchElements[i].showWithAncestors();
                     this.searchElements[i].toggle(false);
                 }
             }
             else {
-                elementsToShow = this.findElementsByName(name),                
+                elementsToShow = this.findElementsByName(name),
                 len = elementsToShow.length;
                 //First hide all visible elements
                 this.hideElements();
@@ -111,7 +124,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
             return this;
         },
 
-        hideElements: function() {            
+        hideElements: function() {
             var i = 0,
                 len = this.searchElements.length;
             for( ; i < len; i++){
@@ -161,8 +174,8 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                         if (parent.descendants.hasOwnProperty(category)) {
                             parent = parent.descendants[category];
                         } else {
-                            parent = parent.descendants[category] = {        
-                                name: category,                    
+                            parent = parent.descendants[category] = {
+                                name: category,
                                 descendants: {},
                                 elements: []
                             }
@@ -182,7 +195,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
         var category = categories.shift(),
             parentCategory;
 
-        parentCategory = destination.descendants[category] = {         
+        parentCategory = destination.descendants[category] = {
             name: category,   
             descendants: {},
             elements: []
@@ -190,8 +203,8 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
 
         while (categories.length) {
             category = categories.shift();
-            parentCategory = parentCategory.descendants[category] = {      
-                name: category,             
+            parentCategory = parentCategory.descendants[category] = {
+                name: category,
                 descendants: {},
                 elements: []
             }
