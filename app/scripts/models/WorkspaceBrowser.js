@@ -6,7 +6,7 @@ define(['backbone', 'WorkspaceBrowserElements'], function(Backbone, WorkspaceBro
       workspaces: new WorkspaceBrowserElements()
 	  },
 
-	  initialize: function(atts, vals) {
+	  fetch: function(atts, vals) {
 	  	this.get('workspaces').fetch();
 	  },
 

@@ -1,4 +1,4 @@
-define(['backbone'], function(Backbone) {
+define(['backbone', 'Storage'], function(Backbone, Storage) {
 
 	return Backbone.Model.extend({
 
@@ -17,7 +17,7 @@ define(['backbone'], function(Backbone) {
 	  fetch : function(){
 
 	  	var that = this;
-	  	$.get('/email', function(e){
+	  	Storage.fetchLogin().done(function(e){
 	  		if (e.email) {
 	  			that.set('email', e.email);
 	  			that.set('isLoggedIn', true); 
@@ -75,7 +75,7 @@ define(['backbone'], function(Backbone) {
 	  logout: function(){
 
 	  	var that = this;
-	  	$.get('/logout', {}, function(e){
+	  	Storage.logout().done(function(e){
 	  		that.app.fetch();
 	  	});
 

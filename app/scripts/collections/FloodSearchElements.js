@@ -10,10 +10,12 @@ define(['backbone', 'SearchElement', 'FLOOD'], function(Backbone, SearchElement,
 
 		addCustomNode: function(customNode){
 
-			var match = this.where({ creatingName: customNode.get('creatingName') });
+			var match = this.where({ functionId: customNode.functionId });
 			if (match) this.remove( match );
 
-			this.add(customNode);
+			this.add(new SearchElement({name: customNode.functionName, functionName: customNode.functionName, 
+				isCustomNode: true, functionId: customNode.functionId, app: this.app, numInputs: customNode.inputs.length, 
+				numOutputs: customNode.outputs.length }));
 		},
 
 		fetch: function() {

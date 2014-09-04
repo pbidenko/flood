@@ -1,5 +1,5 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee', 'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers', 'GeometryMessage'],
-    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee, nodeFactory, FLOOD, scheme, SearchElement, staticHelpers, GeometryMessage) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee', 'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers', 'GeometryMessage', 'Storage'],
+    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee, nodeFactory, FLOOD, scheme, SearchElement, staticHelpers, GeometryMessage, Storage) {
 
   return Backbone.Model.extend({
 
@@ -1129,10 +1129,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
         if (node && param.geometryData.graphicPrimitivesData) {
             node.updateNodeGeometry(param);
         }
+    },
+
+    sync: function( method, model, options ) {
+      return Storage.syncWorkspace(method, model, options);
     }
 
   });
 });
-
-
-
