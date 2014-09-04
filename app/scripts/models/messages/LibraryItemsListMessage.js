@@ -1,6 +1,6 @@
 define(function(){
     function ModelsListMessage(){
-        this.$type = 'Dynamo.Messages.ModelsListMessage, DynamoCore';
+        this.$type = 'DynamoWebServer.Messages.GetLibraryItemsMessage, DynamoWebServer';
     }
 
     return ModelsListMessage;

@@ -3,9 +3,8 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'], function
     return App.extend({
 
         initialize: function() {
-          Backbone.on('modelsList-received:event', this.mapModels, this);
-
-          this.socket = new SocketConnection();
+          this.socket = new SocketConnection({app : this});
+          this.on('libraryItemsList-received:event', this.mapLibraryItems, this);
           App.prototype.initialize.call(this);
         },
 
@@ -23,10 +22,11 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'], function
           }.bind(this), 3000);
         },
 
-        mapModels: function(param) {
-          this.SearchElements.models = param.models.map(function(item){
+        mapLibraryItems: function(param) {
+          this.SearchElements.models = param.libraryItems.map(function(item){
             return new SearchElement({name: item.name, creatingName: item.creatingName,
-              category: item.category, description: item.description, inPort: item.parameters,
+              displayedName: item.displayedName, category: item.category,
+              description: item.description, inPort: item.parameters,
               outPort: item.returnKeys, app: this});
           });
         }

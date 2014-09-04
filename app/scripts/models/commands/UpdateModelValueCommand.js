@@ -30,11 +30,11 @@ define(['RecordableCommand'], function (RecordableCommand) {
     };
 
     return function UpdateModel(config, options){
-        var values = [] 
+        var values = [];
         for(var name in options.extra) {
-            if (!options.lastValue || ( options.lastValue[name] != options.extra[name]) ) {
+            if (!options.lastValue || ( options.lastValue[name] !== options.extra[name]) ) {
                 //Dynamo is only able to handle 'Value' now
-                if (name == 'value') {
+                if (name === 'value' || name === 'code') {
                     values.push(getInstance(options._id, capitalizeFirstLetter(name), options.extra[name]));
                 }
             }

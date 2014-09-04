@@ -47,7 +47,8 @@ var initUserSession = function(req, res){
 				if (errSesh) return res.status(500).send("Failed to initialize user session");
 
 				user.lastSession = newSesh;
-				user.markModified("lastSession");
+				user.workspaces = [ nws ];
+				user.markModified("lastSession workspaces");		
 
 				user.save(function(err){
 					if (err) return res.status(500).send("Failed to save user session");
@@ -226,9 +227,13 @@ exports.getWorkspaces = function(req, res) {
 	if (!user) return res.status(403).send("Must be logged in to list your workspaces")
 
 	User.findById( user._id )
-		.populate('workspaces', 'name lastSaved isPublic maintainers isModified')
+		.populate('workspaces', 'name lastSaved isPublic maintainers isModified isCustomNode')
 		.exec(function(e, u) {
-			return res.send( u.workspaces.filter(function(x){ return x.isModified === true; }).sort(dateSort) );
+			console.log(u);
+			var filtered = u.workspaces.filter(function(x, i){ return x.isModified === true || i === 0; }).sort(dateSort);
+			console.log(filtered);
+
+			return res.send( filtered );
 	}); 
 
 };
@@ -240,7 +245,7 @@ exports.getWorkspace = function(req, res) {
 	Workspace.findById( wid , function(e, ws) {
 
 		if (e) {
-	  	return res.send('Workspace not found');
+	  		return res.send('Workspace not found');
 		}
 
 		return res.send(ws);

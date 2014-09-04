@@ -1,4 +1,5 @@
-define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], function(Backbone, List, SearchElement, SearchElementView, bootstrap) {
+define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', 'ModelsListView'],
+ function(Backbone, List, SearchElement, SearchElementView, bootstrap, ModelsListView) {
 
   return Backbone.View.extend({
 
@@ -9,16 +10,18 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
       this.app = arr.app;
       this.appView = arr.appView;
 
-      this.app.SearchElements.on('add remove', this.render, this);
+      this.on('add-element', this.elementClick);
+
       //Bind to document's click event for hiding toolbox
       //Unbind first to avoid duplicate bindings
       $(window).off('click.models-view');
       $(window).on('click.models-view', function(e){
-
-        if(e.target!==this.$input[0]){
+        if(e.target !== this.$input[0])
           this.$list.hide();
-        }
       }.bind(this));
+
+      this.app.SearchElements.on('add remove', this.render, this);
+
     },
 
     template: _.template( $('#workspace-search-template').html() ),
@@ -33,53 +36,27 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
       'click #paste-button': 'pasteClick',
       'click #zoomin-button': 'zoominClick',
       'click #zoomout-button': 'zoomoutClick',
-      'click #zoomreset-button': 'zoomresetClick'
+      'click #zoomreset-button': 'zoomresetClick',
+      'click #export-button': 'exportClick'
     },
 
     render: function(arg) {
+      var del = {
+          show: 300
+      };
 
       this.$el.html( this.template( this.model.toJSON() ) );
 
       this.$input = this.$('.library-search-input');
-      this.$list = this.$('.search-list');
 
-      this.$list.empty();
-
-      var that = this;
-      var prevCategory = '';
-
-      this.app.SearchElements.forEach(function(ele) {
-
-        if (ele.attributes.category !== null) {
-          var category = ele.attributes.category.split('.')[0];
-          if (category !== prevCategory) {
-            prevCategory = category;
-
-            var elem = new SearchElement({name: '==> ' + category + ' <==', category: category, app: that.app});
-
-            var eleView = new SearchElementView({ model: elem }, { appView: that.appView, app: that.app });
-
-             eleView.render();
-             that.$list.append(eleView.$el);
-          }
-        }
-
-        var eleView = new SearchElementView({ model: ele }, { appView: that.appView, app: that.app, 
-          click: function(e){ that.elementClick.call(that, e); } });
-
-        eleView.render();
-        that.$list.append( eleView.$el );
-
+      this.modelsListView = new ModelsListView({}, {
+                app: this.app,                
+                searchView: this
       });
 
-      var options = {
-          valueNames: [ 'name' ]
-      };
+      this.$list = this.$('.search-list-container').append(this.modelsListView.render().$el);
 
-      this.list = new List(this.el, options);
-
-      var del = { show: 300 };
-
+      
       // build button tooltips
       this.$el.find('#undo-button').tooltip({title: "Ctrl/Cmd Z", delay: del});
       this.$el.find('#redo-button').tooltip({title: "Ctrl/Cmd Y", delay: del});
@@ -96,7 +73,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
     },
 
     focus: function(event){
-      this.$('.search-list').show();
+      this.$list.show();
       this.$('.library-search-input').select();
     },
 
@@ -137,6 +114,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
     },
 
     getWorkspaceCenter: function(){
+
       var w = this.appView.currentWorkspaceView.$el.width()
         , h = this.appView.currentWorkspaceView.$el.height()
         , ho = this.appView.currentWorkspaceView.$el.scrollTop()
@@ -146,32 +124,163 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap'], 
       return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
     },
 
-    addNode: function(name){
+    addNode: function(nodeModel){
 
-      if (name === undefined ) return;
-      this.currentWorkspace().addNodeByNameAndPosition( name, this.getWorkspaceCenter() );
+      this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creatingName'), this.getWorkspaceCenter());
+      this.hideSearch();
+    },
+
+    objConverter: function(x, vertexOffset, index){
+
+        if ( !x || !( x.vertices && x.faces ) ) return "";
+
+        var text = "";
+
+        // OBJ used 1-based indexing
+        vertexOffset = vertexOffset + 1;
+
+        x.vertices.forEach(function(v){
+
+          text += "v"
+          text += " " + v[0];
+          text += " " + v[1];
+          text += " " + v[2];
+          text += "\n";
+
+        });
+
+        x.faces.forEach(function(f){
+          
+          text += "f"
+          text += " " + (vertexOffset + f[0]);
+          text += " " + (vertexOffset + f[1]);
+          text += " " + (vertexOffset + f[2]);
+          text += "\n";
+
+        });
+
+        return text;
+    },
+
+    stlConverter: function(x, vertexOffset, index){
+
+        if ( !x || !( x.vertices && x.faces ) ) return "";
+
+        var text = "solid s" + index + "\n";
+
+        x.faces.forEach(function(f){
+          
+          var v1 = x.vertices[ f[0] ];
+          var v2 = x.vertices[ f[1] ];
+          var v3 = x.vertices[ f[2] ];
+          var n = f[3];
+
+          text += "facet normal"
+          text += " " + n[0];
+          text += " " + n[1];
+          text += " " + n[2];
+          text += "\n";
+
+            text += "\touter loop\n";
+
+              text += "\t\tvertex"
+              text += " " + v1[0];
+              text += " " + v1[1];
+              text += " " + v1[2];
+              text += "\n";
+
+              text += "\t\tvertex"
+              text += " " + v2[0];
+              text += " " + v2[1];
+              text += " " + v2[2];
+              text += "\n";
+
+              text += "\t\tvertex"
+              text += " " + v3[0];
+              text += " " + v3[1];
+              text += " " + v3[2];
+              text += "\n";
+
+            text += "\tendloop\n";
+
+          text += "\tendfacet\n";
+
+        });
+
+        text += "endsolid\n";
+
+        return text;
+    },
+
+    exportClick: function(e){
+
+      var res = this.getFileFromSelected( this.stlConverter );
+
+      var wsName = this.currentWorkspace().get('name');
+
+      this.download(wsName + ".stl", res);
 
     },
 
-    elementClick: function(ele){
+    getFileFromSelected: function(converterFunc){
 
-      this.addNode( ele.model.get('name') );
+      var ws = this.currentWorkspace();
+
+      var text = "";
+      var vertexOffset = 0;
+
+      return ws.get('nodes')
+        .filter(function(x){ return x.get('selected'); })
+        .map(function(x){ return x.get('prettyLastValue'); })
+        .flatten()
+        .reduce(function(a, x, i){
+
+          var t = converterFunc(x, vertexOffset, i) || "";
+
+          if ( x && x.vertices && x.vertices.length != undefined) 
+            vertexOffset += x.vertices.length;
+
+          return a + t;
+
+        }, text);
 
     },
 
-    searchKeyup: function(event) {
+    download: function(filename, text) {
+        var pom = document.createElement('a');
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        pom.setAttribute('download', filename);
+        pom.click();
+    },
 
-      // enter key causes first result to be inserted
-      if ( event.keyCode === 13) {
+    elementClick: function(model){
 
-        var nodeName = this.$list.find('.search-element').first().find('.name').first().html();
-        if (nodeName === undefined ) return;
+      this.addNode(model);
 
-        this.addNode( nodeName );
+    },
+    
+    hideSearch: function(){
+      this.$list.hide();
+    },
 
-      } 
+    searchKeyup: _.debounce(function (event) {            
+        var searchText = this.$input.val();
+        //If the key is Escape or search text is empty, just quit
+        if( event.keyCode === 27 ){
+            this.app.trigger('hide-search');
+            return;
+        }
 
-    } 
+        if (event.keyCode === 13) { // enter key causes first result to be inserted
+            var elementToAdd = this.modelsListView.findElementByCreatingName(searchText);
+            elementToAdd && this.elementClick(elementToAdd.model);                
+
+        } 
+        //Expand categories containing matching elements
+        else {
+            this.modelsListView.expandElements(searchText);
+        }
+    }, 400)
 
   });
 

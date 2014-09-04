@@ -1,4 +1,7 @@
-define(['backbone', 'ComputationResponse', 'ContentResponse'], function (Backbone, ComputationResponse, ContentResponse) {
+﻿define(['backbone', 'ComputationResponse', 'ContentResponse', 'LibraryItemsListResponse',
+        'NodeCreationDataResponse', 'GeometryDataResponse'],
+    function (Backbone, ComputationResponse, ContentResponse, LibraryItemsListResponse,
+              NodeCreationDataResponse, GeometryDataResponse) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -12,12 +15,24 @@ define(['backbone', 'ComputationResponse', 'ContentResponse'], function (Backbon
         messageStack = [],
         responseMap = {
             'DynamoWebServer.Responses.ContentResponse, DynamoWebServer': ContentResponse,
-            'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': ComputationResponse
-        };
+            'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': ComputationResponse,
+            'DynamoWebServer.Responses.LibraryItemsListResponse, DynamoWebServer': LibraryItemsListResponse,
+            'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : NodeCreationDataResponse,
+            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : GeometryDataResponse
+        },
+        responseEventMap = {
+            'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': 'computation-completed:event',
+            'DynamoWebServer.Responses.LibraryItemsListResponse, DynamoWebServer': 'libraryItemsList-received:event',
+            'DynamoWebServer.Responses.SavedFileResponse, DynamoWebServer': 'saved-file-received:event',
+            'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : 'creation-data-received:event',
+            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : 'geometry-data-received:event'
+        },
+        app;
 
     return Backbone.Model.extend({
 
-        initialize: function () {
+        initialize: function (atts) {
+            app = atts.app;
             if (!socket) {
                 socket = new WebSocket(settings.url);
 
@@ -38,9 +53,13 @@ define(['backbone', 'ComputationResponse', 'ContentResponse'], function (Backbon
 
                 socket.onmessage = function (event) {
                     //console.log('Socket success: ' + event.data);
-                    var response = JSON.parse( event.data )
-                    if(responseMap.hasOwnProperty(response.$type)){
-                        new responseMap[response.$type](response);
+                    var response = JSON.parse(event.data)
+                    if (responseMap.hasOwnProperty(response.$type)) {
+                        var resp = new responseMap[response.$type](response);
+
+                        if (responseEventMap.hasOwnProperty(response.$type)) {
+                            app.trigger(responseEventMap[response.$type], resp);
+                        }
                     }
                     else{
                         console.log('Socket received: '+ event.data);
@@ -79,7 +98,7 @@ define(['backbone', 'ComputationResponse', 'ContentResponse'], function (Backbon
             sendTimer = window.setInterval(function () {
                 if(this.socket.readyState === 1){
                     while( messageStack.length ){
-                        this.socket.send(messageStack.pop());
+                        this.socket.send(messageStack.shift());
                     }
 
                     window.clearInterval(sendTimer);

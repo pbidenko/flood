@@ -25,6 +25,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
       this.workspaceView = args.workspaceView;
 
       this.listenTo(this.model, 'requestRender', this.render );
+      this.listenTo(this.model, 'requestRender', this.renderKick );
       this.listenTo(this.model, 'change:position', this.move );
       this.listenTo(this.model, 'change:lastValue', this.renderLastValue );
       this.listenTo(this.model, 'change:failureMessage', this.renderLastValue );
@@ -42,6 +43,10 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
       this.$workspace_canvas = $('#workspace_canvas');
       this.position = this.model.get('position');
 
+    },
+
+    renderKick: function(){
+      console.log(this.model);
     },
 
     onEvalFailed: function(exception){
@@ -209,10 +214,9 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
         this.$el.find('.node-data-container').html( this.getCustomContents() );
       }
 
-      var del = { show: 400 };
-      this.$el.find('.node-port-output').tooltip({title: "Click & drag to create a connection", placement: "right", delay: del});
-      
-      return this;
+            this.$el.find('.node-port-output').tooltip({title: "Click & drag to create a connection", placement: "right", delay:  { show: 400 }});
+
+            return this;
 
     },
 
@@ -242,8 +246,10 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
 
     formatPreview: function( value ){
 
-      var that = this;
-      return JSON.stringify( this.truncatePreview( value ), function(k, v){ return that.prettyPrint.call(that, k, v);} );
+            var that = this;
+            return JSON.stringify(this.truncatePreview(value), function (k, v) {
+                return that.prettyPrint.call(that, k, v);
+            });
 
     },
 
@@ -314,8 +320,12 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
         }
   
       } else {
-        x += parseInt( this.inputPorts[index].getAttribute('cx'))- 5;
-        y += parseInt( this.inputPorts[index].getAttribute('cy'));   
+        try {
+          x += parseInt( this.inputPorts[index].getAttribute('cx')) - 5;
+          y += parseInt( this.inputPorts[index].getAttribute('cy'));   
+        } catch (e){
+
+        }
       }
 
       return [x, y];
@@ -409,7 +419,13 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
       var that = this;
       var inIndex = 0;
       var outIndex = 0;
-      var zoom = 1 / this.model.workspace.get('zoom');
+
+      // set the zoom from the workspace container
+      var zoom = 1.0
+        , ele = this.$el.parent().css('transform');
+
+      if (ele != "none") zoom = ele.match(/-?[0-9\.]+/g)[0];
+        
 
       this.$el.find('.node-port').each(function(index, ele) {
 
@@ -424,12 +440,12 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
         // position input ports on left side, output ports on right side
         if ( $(ele).hasClass('node-port-input') ) {
           nodeCircle.setAttribute('cx', 0);
-          nodeCircle.setAttribute('cy', that.portHeight / 2 + $(ele).position().top); 
+          nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * $(ele).position().top ); 
           that.inputPorts.push(nodeCircle);
           inIndex++;
         } else {
-          nodeCircle.setAttribute('cx', that.$el.width() + 3 );
-          nodeCircle.setAttribute('cy', that.portHeight / 2 + $(ele).position().top); 
+          nodeCircle.setAttribute('cx', that.$el.width() + 2.5 );
+          nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * $(ele).position().top ); 
           that.outputPorts.push(nodeCircle);
           outIndex++;
         }

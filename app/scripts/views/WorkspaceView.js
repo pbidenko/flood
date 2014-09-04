@@ -64,7 +64,6 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
               .renderRunnerStatus()
               .updateZoom()
               .updateOffset();
-
     },
 
     startMarqueeDrag: function(event){
@@ -158,6 +157,10 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
 
       this.$workspace.css('transform', 'scale(' + this.model.get('zoom') + ')' );
       this.$workspace.css('transform-origin', "0 0" );
+
+      // force redraw in chrome, otherwise the nodes look blurry
+      this.$workspace.css('display', 'none').height();
+      this.$workspace.css('display', 'block');
 
       return this;
 
@@ -254,10 +257,11 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
         if ( nodeView === undefined){
 
           var NodeView = NodeViewTypes.Base;
-          if ( NodeViewTypes[ nodeModel.get('typeName') ] != undefined)
+          if ( NodeViewTypes[nodeModel.get('typeName')] )
           {
             NodeView = NodeViewTypes[ nodeModel.get('typeName') ];
           }
+
           nodeView = new NodeView({ model: nodeModel, workspaceView: this_, workspace: this_.model });
           this_.nodeViews[ nodeView.model.get('_id') ] = nodeView;
 
@@ -283,8 +287,12 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       if ( !(e.metaKey || e.ctrlKey) && !isBackspaceOrDelete ) return;
 
       // do not capture from input
-      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "INPUT") return;
-      if (e.target.nodeName === "INPUT") return;
+      if (e.originalEvent.srcElement &&
+         (e.originalEvent.srcElement.nodeName === "INPUT" ||
+          e.originalEvent.srcElement.nodeName === "TEXTAREA"))
+        return;
+      if (e.target.nodeName === "INPUT" || e.target.nodeName === "TEXTAREA")
+        return;
 
       // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
 

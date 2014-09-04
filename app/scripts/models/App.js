@@ -1,5 +1,5 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'SearchElement', 'ModelsListMessage'],
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, SearchElement, ModelsListMessage){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers){
 
   return Backbone.Model.extend({
 
@@ -12,10 +12,13 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     defaults: {
       name: "DefaultSession",
       workspaces: new Workspaces(),
+      backgroundWorkspaces: [],
       currentWorkspace: null,
       showingBrowser: false,
       showingSearch: false,
+      showingFeedback: false,
       showingHelp: false,
+      isFirstExperience: false,
       clipBoard: {}
     },
 
@@ -26,8 +29,9 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.login = new Login({}, { app: this });
 
       this.SearchElements = new SearchElements({app:this});
-	  // the models array has a single empty element at start (not sure why)
-	  this.SearchElements.models.length = 0;
+      this.SearchElements.reset();
+      this.SearchElements.fetch();
+
     },
 
     parse : function(resp) {
@@ -42,15 +46,10 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     },
 
     fetch : function(options){
-      var that = this;
       this.login.fetch();
-      this.SearchElements.fetch().always(function(){
-          Backbone.Model.prototype.fetch.call(that, options);
-      });
+      Backbone.Model.prototype.fetch.call(this, options);
     },
 
-    // override of toJSON to support recursive serialization 
-    // of child attributes
     toJSON : function() {
 
         if (this._isSerializing) {
@@ -78,6 +77,8 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       this.get('workspaces').on('add remove', function(){ this.sync("update", this); }, this );
       this.on('change:currentWorkspace', function(){ this.sync("update", this); }, this);
+      this.on('change:isFirstExperience', function(){ this.sync("update", this); }, this);
+      this.on('change:backgroundWorkspaces', function(){ this.sync("update", this); }, this);
 
     },
 
@@ -165,7 +166,35 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
+    isBackgroundWorkspace: function(id){
+      return this.get('backgroundWorkspaces').indexOf(id) != -1;
+    },
+
+    setWorkspaceToBackground: function(id){
+
+      if ( !this.isBackgroundWorkspace(id) ){
+        var copy = this.get('backgroundWorkspaces').slice(0);
+        copy.push(id);
+        this.set('backgroundWorkspaces', copy);
+      }
+
+    },
+
+    removeWorkspaceFromBackground: function( id ){
+
+      if ( this.isBackgroundWorkspace(id) ){
+
+        var copy = this.get('backgroundWorkspaces').slice(0);
+        copy.remove(copy.indexOf(id));
+        this.set('backgroundWorkspaces', copy);
+
+      }
+
+    },
+
     openWorkspace: function( id, callback ){
+
+      this.removeWorkspaceFromBackground( id );
 
       var ws = this.get('workspaces').get(id);
 

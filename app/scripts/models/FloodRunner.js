@@ -24,6 +24,10 @@ define(['AbstractRunner'], function (AbstractRunner) {
 
         postMessage: function (data, quiet) {
 
+			if (!data.workspace_id){
+				  data.workspace_id = this.workspace.get('_id');				  	
+			}
+			
             this.worker.postMessage(data);
 
             AbstractRunner.prototype.postMessage.call(this, data, quiet);

@@ -9,6 +9,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
           , position: [10, 10]
           , typeName: 'Add'
           , creatingName: 'Add'
+          , displayedName: 'Add'
           , type: null
           , inputConnections: []
           , outputConnections: []
@@ -30,8 +31,9 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
             if (attrs.typeName && FLOOD.nodeTypes[attrs.typeName]) {
                 this.set('type', new FLOOD.nodeTypes[attrs.typeName]());
                 this.set('creatingName', attrs.typeName);
+                this.set('displayedName', attrs.typeName);
             } else {
-                elems = vals.workspace.app.SearchElements.where({ name: attrs.typeName });
+                elems = vals.workspace.app.SearchElements.where({ creatingName: attrs.typeName });
                 if (elems.length === 0) {
                     if (attrs.ignoreDefaults) {
                         inPort = staticHelpers.generatePortNames(attrs.ignoreDefaults.length);
@@ -39,6 +41,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 } else {
                     inPort = elems[0].get('inPort');
                     outPort = elems[0].get('outPort');
+                    this.set('displayedName', elems[0].get('displayedName'));
                     this.set('creatingName', elems[0].get('creatingName'));
                 }
 
@@ -61,7 +64,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 attrs.ignoreDefaults.length > 0 &&
                 this.get('type').inputs.length === attrs.ignoreDefaults.length) {
 
-                for (i = 0; i < attrs.ignoreDefaults.length; i++) {
+                for (var i = 0; i < attrs.ignoreDefaults.length; i++) {
                     this.get('type').inputs[i].useDefault = !attrs.ignoreDefaults[i];
                 }
 
@@ -83,14 +86,15 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
             this.initializePorts();
         },
 
-        // called when saving the node to server
-        serialize: function () {
+    // called when saving the node to server
+    serialize : function() {
 
             var vals = {
                 name: this.get('name')
               , position: this.get('position')
               , typeName: this.get('typeName')
               , creatingName: this.get('creatingName')
+              , displayedName: this.get('displayedName')
               , selected: this.get('selected')
               , visible: this.get('visible')
               , ignoreDefaults: this.get('ignoreDefaults')
@@ -99,16 +103,16 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
               , extra: this.get('extra')
             };
 
-            return vals;
+      return vals;
 
-        },
+    },
 
-        initializePorts: function () {
+    initializePorts: function() {
 
-            var type = this.get('type');
-
-            this.set('inputConnections', new Array(type.inputs.length));
-            this.set('outputConnections', new Array(type.outputs.length));
+      var type = this.get('type');
+   
+      this.set('inputConnections', new Array( type.inputs.length ));
+      this.set('outputConnections', new Array( type.outputs.length ));
 
         },
 
@@ -125,173 +129,174 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
             }
         },
 
-        onRemove: function () {
+    onRemove: function(){
 
-            this.trigger('removed');
+      this.trigger('removed');
 
-        },
+    },
 
-        onEvalFailed: function (ex) {
+    onEvalFailed: function(ex){
 
-            this.trigger('evalFailed', ex);
+      this.trigger('evalFailed', ex);
 
-        },
+    },
 
-        onEvalBegin: function (isNew) {
+    onEvalBegin: function(isNew){
 
-            if (!isNew) return;
-            this.trigger('evalBegin');
-            this.set('isEvaluating', true);
+      if (!isNew) return;
+      this.trigger('evalBegin');
+      this.set('isEvaluating', true);
 
-        },
+    },
 
-        onEvalComplete: function (isNew, value, prettyValue) {
+    onEvalComplete: function(isNew, value, prettyValue){
 
-            if (!isNew) return;
+      if (!isNew) return;
 
-            this.set('lastValue', value);
-            this.set('prettyLastValue', prettyValue);
-            this.set('isEvaluating', false);
-            this.trigger('evalComplete');
+      this.set('lastValue', value);
+      this.set('prettyLastValue', prettyValue);
+      this.set('isEvaluating', false);
+      this.trigger('evalComplete');
 
-        },
+    },
 
-        select: function () {
-            this.set('selected', false);
-        },
+    select: function() {
+      this.set('selected', false);
+    },
 
-        deselect: function () {
-            this.set('selected', true);
-        },
+    deselect: function() {
+      this.set('selected', true);
+    },
 
-        // get the input or output ports of a node
-        getPorts: function (isOutput) {
-            return isOutput ? this.get('outputConnections') : this.get('inputConnections');
-        },
+    // get the input or output ports of a node
+    getPorts: function(isOutput){
+      return isOutput ? this.get('outputConnections') : this.get('inputConnections');
+    },
 
-        // determine if a given port is connected or not
-        isPortConnected: function (index, isOutput) {
+    // determine if a given port is connected or not
+    isPortConnected: function(index, isOutput){
 
-            if (!this.isValidPort(index, isOutput)) {
-                return true;
-            }
+      if ( !this.isValidPort(index, isOutput) ) {
+        return true;
+      }
 
-            var ports = this.getPorts(isOutput);
-            return ports[index] != null && ports[index].length > 0;
+      var ports = this.getPorts(isOutput);
+      return ports[index] != null && ports[index].length > 0;
 
-        },
+    },
 
-        isPartialFunctionApplication: function () {
+    isPartialFunctionApplication: function(){
 
-            var numInPorts = this.get('inputConnections').length;
+      var numInPorts = this.get('inputConnections').length;
 
-            for (var i = 0; i < numInPorts; i++) {
-                if (!this.isPortConnected(i, false) && !this.isInputPortUsingDefault(i)) {
-                    return true;
-                }
-            }
+      for (var i = 0; i < numInPorts; i++){
+        if (!this.isPortConnected(i, false) && !this.isInputPortUsingDefault(i) ){
+          return true;
+        } 
+      }
 
-            return false;
+      return false;
 
-        },
+    },
 
-        isInputPortUsingDefault: function (index) {
+    isInputPortUsingDefault: function(index){
 
-            if (!this.isValidPort(index, false)) {
-                return false;
-            }
+      if ( !this.isValidPort(index, false) ) {
+        return false;
+      }
 
-            return !this.get('ignoreDefaults')[index];
+      return !this.get('ignoreDefaults')[index];
 
-        },
+    },
 
-        // get the type of a given node port
-        getPortType: function (index, isOutput) {
+    // get the type of a given node port
+    getPortType: function(index, isOutput){
+      
+      if (index < 0)
+        return null;
 
-            if (index < 0)
-                return null;
+      var type = this.get('type')
+        , ports = isOutput ? type.outputs : type.inputs;
 
-            var type = this.get('type')
-                , ports = isOutput ? type.outputs : type.inputs;
+      if ( ports.length > index )
+        return ports[index].type;
 
-            if (ports.length > index)
-                return ports[index].type;
+      return null;
 
-            return null;
+    },
 
-        },
+    isValidPort: function(index, isOutput){
+      return this.getPortType(index, isOutput) != null;
+    },
 
-        isValidPort: function (index, isOutput) {
-            return this.getPortType(index, isOutput) != null;
-        },
+    // get the node and index of the opposite end of a port
+    // returns object containing "node", "portIndex" fields
+    // if out of range, returns null
+    getOppositeNodeAndPort: function(index, isOutput){
 
-        // get the node and index of the opposite end of a port
-        // returns object containing 'node', 'portIndex' fields
-        // if out of range, returns null
-        getOppositeNodeAndPort: function (index, isOutput) {
+      if ( !this.isValidPort(index, isOutput) ) {
+        return null;
+      }
 
-            if (!this.isValidPort(index, isOutput)) {
-                return null;
-            }
+      return this.getPorts(isOutput)[index];
+    },
 
-            return this.getPorts(isOutput)[index];
-        },
+    isOutputNode: function(){
+      return this.get('outputConnections').reduce(function(memo, ele){
+        return memo && (ele.length === 0);
+      }, true);
+    },
 
-        isOutputNode: function () {
-            return this.get('outputConnections').reduce(function (memo, ele) {
-                return memo && (ele.length === 0);
-            }, true);
-        },
+    connectPort: function( portIndex, isOutput, connection ) {
 
-        connectPort: function (portIndex, isOutput, connection) {
+      if ( !this.isValidPort(portIndex, isOutput) ) {
+        return null; // the port doesn't exist
+      }
 
-            if (!this.isValidPort(portIndex, isOutput)) {
-                return null; // the port doesn't exist
-            }
+      // initialize if necessary
+      if ( this.getPorts( isOutput )[portIndex] === undefined )
+        this.getPorts( isOutput )[portIndex] = [];
 
-            // initialize if necessary
-            if (this.getPorts(isOutput)[portIndex] === undefined)
-                this.getPorts(isOutput)[portIndex] = [];
+      // add the connection to the array
+      this.getPorts( isOutput )[portIndex].push(connection);
 
-            // add the connection to the array
-            this.getPorts(isOutput)[portIndex].push(connection);
+      // listen for deletion or update of the connection
+      var that = this;
+      this.listenTo( connection, 'remove', (function(){
+        return function(){
+          that.disconnectPort( portIndex, connection, isOutput );
+        };
+      })());
 
-            // listen for deletion or update of the connection
-            var that = this;
-            this.listenTo(connection, 'remove', (function () {
-                return function () {
-                    that.disconnectPort(portIndex, connection, isOutput);
-                };
-            })());
+      this.trigger('connection', portIndex, isOutput, connection);
+      this.trigger('change');
 
-            this.trigger('connection', portIndex, isOutput, connection);
-            this.trigger('change');
+      return this;
 
-            return this;
+    },
 
-        },
+    getConnectionAtIndex: function( portIndex, isOutput, connectionIndex ){
 
-        getConnectionAtIndex: function (portIndex, isOutput, connectionIndex) {
+      var ports = this.getAllConnectionsAtPort( portIndex, isOutput );
 
-            if (!this.isValidPort(portIndex, isOutput)) {
-                return null;
-            }
+      if (ports == null) return null;
+      if ( connectionIndex === undefined ) connectionIndex = 0;
+      if ( connectionIndex >= ports.length || connectionIndex < 0) return null;
 
-            if (isOutput === undefined) isOutput = false;
+      return ports[connectionIndex];
 
-            var port = this.getPorts(isOutput)[portIndex];
+    },
 
-            if (!port) {
-                return null;
-            }
+    getAllConnectionsAtPort: function( portIndex, isOutput ){
 
-            if (connectionIndex === undefined) connectionIndex = 0;
+      if (!this.isValidPort(portIndex, isOutput)) return null;
 
-            if (connectionIndex >= port.length || connectionIndex < 0) return null;
+      if (isOutput === undefined) isOutput = false;
 
-            return port[connectionIndex];
+      var ports = this.getPorts(isOutput)[portIndex];
+      return ports;
 
-        },
+    },
 
         disconnectPort: function (portIndex, connection, isOutput) {
             var port,
@@ -326,35 +331,115 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
         },
 
-        onConnectPort: function (portIndex, isOutput, connection) {
+    onConnectPort: function( portIndex, isOutput, connection){
+      
+      if (isOutput)
+        return;
 
-            if (isOutput)
-                return;
+      // connect the logic nodes
+      var type = this.get('type')
+        , opp = connection.getOpposite( this )
+        , oppType = opp.node.get('type')
+        , oppIndex = opp.portIndex;
 
-            // connect the logic nodes
-            var type = this.get('type')
-                , opp = connection.getOpposite(this)
-                , oppType = opp.node.get('type')
-                , oppIndex = opp.portIndex;
+      type.inputs[portIndex].connect( oppType, oppIndex );
 
-            type.inputs[portIndex].connect(oppType, oppIndex);
+    },
 
-        },
+    onDisconnectPort: function( portIndex, isOutput, connection ){
+      
+      if (isOutput){
+        return;
+      }
 
-        onDisconnectPort: function (portIndex, isOutput, connection) {
+      if (!isOutput){
+        this.get('type').inputs[portIndex].disconnect();
+      }
 
-            if (isOutput) {
-                return;
+      if (this.workspace)
+        this.workspace.run();
+
+    },
+
+    updateNodeGeometry: function(param) {
+        var graphicData = param.geometryData.graphicPrimitivesData;
+
+        graphicData.pointVertices = staticHelpers.getFloatArray(graphicData.pointVertices);
+        graphicData.lineStripVertices = staticHelpers.getFloatArray(graphicData.lineStripVertices);
+        graphicData.lineStripCounts = staticHelpers.getIntArray(graphicData.lineStripCounts);
+        graphicData.triangleVertices = staticHelpers.getFloatArray(graphicData.triangleVertices);
+        graphicData.triangleNormals = staticHelpers.getFloatArray(graphicData.triangleNormals);
+
+        var geometries = []; // prettyLastValue
+        graphicData.numberOfCoordinates = 3;
+
+        this.addPoints(graphicData, geometries);
+        this.addTriangles(graphicData, geometries);
+        this.addCurves(graphicData, geometries);
+
+        this.set('prettyLastValue', geometries);
+    },
+
+    addPoints: function (graphicData, geometries) {
+        // if we have single points
+        if (graphicData.pointVertices && graphicData.pointVertices.length) {
+            var points = {vertices: []}, onePoint;
+            // while there are at least 3 coordinates
+            while (graphicData.pointVertices.length >= graphicData.numberOfCoordinates) {
+                // add [x, y, z]
+                onePoint = graphicData.pointVertices.splice(0, graphicData.numberOfCoordinates);
+                points.vertices.push(onePoint);
             }
 
-            this.get('type').inputs[portIndex].disconnect();
-
-            if (this.workspace)
-                this.workspace.run();
-
+            geometries.push(points);
         }
-    });
+    },
 
+    addCurves: function (graphicData, geometries) {
+        // if we have line strips
+        if (graphicData.lineStripVertices && graphicData.lineStripVertices.length
+            && graphicData.lineStripCounts && graphicData.lineStripCounts.length) {
+            var curve, count, oneVertex;
+            for (var k = 0; k < graphicData.lineStripCounts.length; k++) {
+                curve = { linestrip: []};
+                count = graphicData.lineStripCounts[k];
+
+                while (count > 0 && graphicData.lineStripVertices.length >= graphicData.numberOfCoordinates) {
+                    oneVertex = graphicData.lineStripVertices.splice(0, graphicData.numberOfCoordinates);
+                    curve.linestrip.push(oneVertex);
+                    count--;
+                }
+
+                geometries.push(curve);
+            }
+        }
+    },
+
+    addTriangles: function (graphicData, geometries) {
+        // if we have triangles
+        if (graphicData.triangleVertices && graphicData.triangleVertices.length
+            && graphicData.triangleNormals && graphicData.triangleNormals.length) {
+            var triangles = {vertices: [], faces:[]};
+            var index = 0, oneVertex, vertexCount = 3;
+            // while there are at least 9 coordinates of triangle's vertices
+            // and at least 3 coordinates of normal vector
+            while (graphicData.triangleVertices.length >= (vertexCount * graphicData.numberOfCoordinates)
+                && graphicData.triangleNormals.length >= graphicData.numberOfCoordinates) {
+                for (var i = 0; i < vertexCount; i++)
+                {
+                    // Add vertex - [x, y, z]
+                    oneVertex = graphicData.triangleVertices.splice(0, graphicData.numberOfCoordinates);
+                    triangles.vertices.push(oneVertex);
+                }
+                // add [indexA, indexB, indexC, normal_vector: [x, y, z]]
+                triangles.faces.push([index++, index++, index++,
+                    graphicData.triangleNormals.splice(0, graphicData.numberOfCoordinates)]);
+            }
+
+            geometries.push(triangles);
+        }
+    }
+  });
 });
 
 

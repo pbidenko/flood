@@ -13,7 +13,8 @@ define([  'backbone',
           'Help',
           'LoginView',
           'Login'],
-          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
+          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, WorkspaceTabView, 
+            Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
 
   return Backbone.View.extend({
 
@@ -28,11 +29,18 @@ define([  'backbone',
       this.model.get('workspaces').on('remove', this.removeWorkspaceTab, this);
 
       this.model.on('change:showingSettings', this.viewSettings, this);
-      this.model.on('change:showingLogin', this.viewLogin, this);
+      this.model.on('change:showingFeedback', this.viewFeedback, this);
       this.model.on('change:showingHelp', this.viewHelp, this);
       this.model.on('change:showingBrowser', this.viewBrowser, this);
+      this.model.on('hide-search', this.hideSearch, this);
+
+      this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
+      this.model.login.on('change:showing', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
+
+      // deactivate the context menu
+      $(document).bind("contextmenu",function(e){ return false; });
 
     },
 
@@ -42,23 +50,68 @@ define([  'backbone',
       'click #help-button': 'showHelp',
       'click #settings-button': 'showSettings',
       'click #workspace_hide' : 'toggleViewer',
-      'click #add-workspace-button': 'newWorkspace',
-      'click #add-node-workspace-button': 'newNodeWorkspace',
-      'click #workspace-browser-button': 'toggleBrowser'
+      'click #workspace-browser-button': 'toggleBrowser',
+
+      'click #add-project-workspace' : 'newWorkspace',
+      'click #add-node-workspace' : 'newNodeWorkspace',
+
+      'mouseover #add-workspace-button': 'showAddWorkspaceSelect',
+      'mouseout #add-workspace-button': 'hideAddWorkspaceSelect',
+      'mouseover #add-workspace-select-element': 'showAddWorkspaceSelect',
+      'mouseout #add-workspace-select-element': 'hideAddWorkspaceSelect',
+    },
+
+    showHelpOnFirstExperience: function(){
+
+      var that = this;
+
+      if (that.model.login.get('isLoggedIn')  && that.model.get('isFirstExperience')){
+        setTimeout(function(){
+          that.model.set( 'showingHelp', true);
+          that.model.set( 'isFirstExperience', false );
+         }, 800);
+      } else {
+        that.model.set( 'showingHelp', false);
+      }
+
+    },
+
+    showAddWorkspaceSelect: function(){
+      $('#add-workspace-select-element').show();
+    },
+
+    hideAddWorkspaceSelect: function(){
+      $('#add-workspace-select-element').hide();
     },
 
     newWorkspace: function(){
       this.model.newWorkspace();
+      this.hideAddWorkspaceSelect();
     },
 
     newNodeWorkspace: function(){
       this.model.newNodeWorkspace();
+      this.hideAddWorkspaceSelect();
     },
 
     keydownHandler: function(e){
-      
-      this.currentWorkspaceView.keydownHandler(e);
 
+      var isBackspaceOrDelete = e.keyCode === 46 || e.keyCode === 8;
+
+      if ( !(e.metaKey || e.ctrlKey) && !isBackspaceOrDelete ) return;
+
+      // do not capture from input
+      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "INPUT") return;
+      if (e.target.nodeName === "INPUT") return;
+
+      // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
+      switch (e.keyCode) {
+        case 78:
+          this.newWorkspace();
+          return e.preventDefault();
+      }
+
+      this.currentWorkspaceView.keydownHandler(e);
     },
 
     saveClick: function(e){
@@ -81,6 +134,11 @@ define([  'backbone',
 
     },
 
+    hideSearch: function(){
+      this.model.set('showingSearch', false);
+      this.workspaceControlsView && this.workspaceControlsView.hideSearch();      
+    },
+
     viewBrowser: function(){
       if (!this.browserView){
         this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser() }, { app: this.model });
@@ -97,13 +155,28 @@ define([  'backbone',
     viewHelp: function(){
       if (!this.helpView){
         this.helpView = new HelpView({model: new Help() }, { app: this.model });
+      }
+      
+      if (this.model.get('showingHelp') === true){
+        // the workspace must be focused before showing help
+        this.focusWorkspace();
         this.helpView.render();
+        this.helpView.$el.fadeIn();  
+      } else {
+        this.helpView.$el.fadeOut();
+      }
+    },
+
+    viewFeedback: function(){
+      if (!this.feedbackView){
+        this.feedbackView = new FeedbackView({model: new Feedback() }, { app: this.model });
+        this.feedbackView.render();
       }
 
-      if (this.model.get('showingHelp') === true){
-        this.helpView.$el.show();  
+      if (this.model.get('showingFeedback') === true){
+        this.feedbackView.$el.fadeIn();  
       } else {
-        this.helpView.$el.hide();
+        this.feedbackView.$el.fadeOut();
       }
     },
 
@@ -113,6 +186,14 @@ define([  'backbone',
 
     hideHelp: function(){
       this.model.set('showingHelp', true);
+    },
+
+    showFeedback: function(){
+      this.model.set('showingFeedback', true);
+    },
+
+    hideFeedback: function(){
+      this.model.set('showingFeedback', true);
     },
 
     showLogin: function(){
@@ -169,10 +250,9 @@ define([  'backbone',
 
     workspaceCounter: 1,
 
-
-    // This callback is called when a Workspace is added to
-    // the App's Workspace Collection
     addWorkspaceTab: function(workspace){
+
+      if ( this.model.isBackgroundWorkspace(workspace.id) ) return;
 
       if ( this.workspaceTabViews[workspace.get('_id')] != undefined) return;
 
@@ -184,8 +264,6 @@ define([  'backbone',
 
     },
 
-    // Function is called when a workspace is removed from the 
-    // App's Workspace Collection
     removeWorkspaceTab: function(workspace){
 
       // The Workspace can no longer be current
@@ -244,6 +322,7 @@ define([  'backbone',
     showWorkspace: function(workspaceView){
 
       // if the workspace tab does not exist
+      this.model.removeWorkspaceFromBackground( workspaceView.model.id );
       this.addWorkspaceTab( workspaceView.model );
 
       if (!$.contains(document.documentElement, workspaceView.$el[0])){
@@ -251,17 +330,17 @@ define([  'backbone',
       }
       
       workspaceView.$el.show();
-      
+
     },
 
     render: function(arg) {
 
+      var model = this.model;
       var workspaces = this.model.get('workspaces')
       var currentWorkspaceId = this.model.get('currentWorkspace');
 
       if (!currentWorkspaceId){
         var currentWorkspace = workspaces.first();
-        // this.model.set('currentWorkspace', currentWorkspace.get('_id'));
       } else {
         var currentWorkspace = workspaces.get(currentWorkspaceId);
       }
@@ -273,14 +352,16 @@ define([  'backbone',
 
           this.workspaceControlsView = new WorkspaceControlsView( { model: new Search() }, {app: this.model, appView : this } );
           this.workspaceControlsView.render();
-          this.$el.find('#workspaces').prepend(this.workspaceControlsView.$el);
+
+          this.$el.find('#workspaces').prepend( this.workspaceControlsView.$el );
 
         }
 
       // render tabs
         if (!this.workspaceTabViews){
           this.workspaceTabViews = {};
-          workspaces.each(this.addWorkspaceTab, this);
+
+          workspaces.each( this.addWorkspaceTab, this );
         }
 
       // hide current workspace, show workspace
@@ -294,8 +375,6 @@ define([  'backbone',
           this.currentWorkspaceView.render();
           this.currentWorkspaceId = currentWorkspaceId;
           this.focusWorkspace();
-
-          currentWorkspace.trigger('requestRun');
         }
 
       this.showSearch();
@@ -306,10 +385,12 @@ define([  'backbone',
     },
 
     renderLogin: function(){
+
       if (!this.loginView){
         this.loginView = new LoginView({model: this.model.login }, { app: this.model });
         this.loginView.render();
       }
+
     },
 
     lookingAtViewer: false,

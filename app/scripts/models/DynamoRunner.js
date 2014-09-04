@@ -1,5 +1,5 @@
-define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
-    function (AbstractRunner, SocketConnection, commandsMap, Message, CreateNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
+define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
+    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
 
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
@@ -8,15 +8,17 @@ define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateN
 
         postMessage: function (data, quiet) {
             if (commands.hasOwnProperty(data.kind)) {
-                this.socket.send(commands[data.kind].call(this, data));
+                this.app.socket.send(commands[data.kind].call(this, data));
             }
 
             AbstractRunner.prototype.postMessage.call(this, data, quiet);
         },
 
         reset: function () {
-            this.socket = new SocketConnection();
             AbstractRunner.prototype.reset.call(this);
+        },
+
+        initWorker: function () {
         }
     });
 
@@ -55,14 +57,6 @@ define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateN
         },
         run: function(data){
             return createMessage.call(this, instantiateCommand(data));
-        },
-        addWorkspace: function(data){
-            if(this.workspace.get('isCustomNode') === true)
-            {
-                data.guid = this.workspace.get('guid');
-                data.name = this.workspace.get('name');
-                return createMessage.call(this, instantiateCommand(data));
-            }
         }
     },
     instantiateCommand = function(data){
@@ -74,7 +68,7 @@ define(['AbstractRunner', 'SocketConnection', 'commandsMap', 'Message', 'CreateN
             commands = [commands];
         }
 
-        return JSON.stringify(new Message(commands, this.workspace.get('guid')));
+        return JSON.stringify(new RecordableCommandsMessage(commands, this.workspace.get('guid')));
     };
 
     return DynamoRunner;

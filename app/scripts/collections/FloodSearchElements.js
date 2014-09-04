@@ -18,6 +18,8 @@ define(['backbone', 'SearchElement', 'FLOOD'], function(Backbone, SearchElement,
 
 		fetch: function() {
 
+			this.models.length = 0;
+
 			for (var key in FLOOD.nodeTypes){
 				this.models.push( new SearchElement({name: key, app: this.app}) );	
 			}

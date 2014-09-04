@@ -26,26 +26,22 @@ require.config({
         CSG: {
             exports: 'CSG'
         },
-        FCSG: {
+        FLOODCSG: {
             deps: ['CSG'],
-            exports: 'FCSG'
+            exports: 'FLOODCSG'
         },
-        ThreeCSG: {
-            deps: ['Three', 'CSG'],
-            exports: 'ThreeCSG'
-        },
-        FThree: {
+        Viewport: {
             deps: [
                 'Three',
-                'TrackballControls'
+                'OrbitControls'
             ],
-            exports: 'FThree'
+            exports: 'Viewport'
         },
-        TrackballControls: {
+        OrbitControls: {
             deps: [
                 'Three'
             ],
-            exports: 'TrackballControls'
+            exports: 'OrbitControls'
         },
         jqueryuislider: {
             deps: [
@@ -111,7 +107,8 @@ require.config({
         Connection: 'models/Connection',
         Marquee: 'models/Marquee',
         Node: 'models/nodes/Node',
-        CustomNode: 'models/nodes/CustomNode',
+        NumberNode: 'models/nodes/NumberNode',
+        CodeBlockNode: 'models/nodes/CodeBlockNode',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
@@ -132,18 +129,21 @@ require.config({
         RecordableCommand: 'models/commands/RecordableCommand',
         RunCancelCommand: 'models/commands/RunCancelCommand',
         UpdateModelValueCommand: 'models/commands/UpdateModelValueCommand',
-        CreateCustomNodeCommand: 'models/commands/CreateCustomNodeCommand',
 
-        Message: 'models/messages/Message',
-        ModelsListMessage: 'models/messages/ModelsListMessage',
+        RecordableCommandsMessage: 'models/messages/RecordableCommandsMessage',
+        LibraryItemsListMessage: 'models/messages/LibraryItemsListMessage',
+        GeometryMessage: 'models/messages/GeometryMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
         ContentResponse: 'models/responses/ContentResponse',
+        LibraryItemsListResponse: 'models/responses/LibraryItemsListResponse',
+        NodeCreationDataResponse: 'models/responses/NodeCreationDataResponse',
+        GeometryDataResponse: 'models/responses/GeometryDataResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',
-        NodesFactory: 'helpers/NodesFactory',
+        NodeFactory: 'helpers/NodeFactory',
         staticHelpers: 'helpers/StaticHelpers',
         augment: 'helpers/augment',
 
@@ -160,22 +160,26 @@ require.config({
         LoginView: 'views/LoginView',
         WorkspaceBrowserElementView: 'views/WorkspaceBrowserElementView',
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
-
+        ModelsListView: 'views/ModelsListView',
+        SearchCategoryView: 'views/SearchCategoryView',
+        
         // node backbone views
         NodeViewTypes: 'views/NodeViews/NodeViews',
         BaseNodeView: 'views/NodeViews/Base',
         WatchNodeView: 'views/NodeViews/Watch',
         NumNodeView: 'views/NodeViews/Num',
+        CodeBlockView: 'views/NodeViews/CodeBlock',
         FormulaView: 'views/NodeViews/Formula',
+        InputView: 'views/NodeViews/Input',
+        OutputView: 'views/NodeViews/Output',
 
         CSGNodeView: 'views/NodeViews/ThreeCSG',
 
-        TrackballControls: 'lib/TrackballControls',
-        FThree: 'lib/3d',
-        ThreeCSG: 'lib/ThreeCSG',
-        FCSG: 'lib/flood/flood_csg',
+        OrbitControls: 'lib/OrbitControls',
+        Viewport: 'lib/Viewport',
+        FLOODCSG: 'lib/flood/flood_csg',
         FLOOD: 'lib/flood/flood',
-        CSG: 'lib/csg',
+        CSG: 'lib/flood/csg',
         scheme: 'lib/flood/scheme',
 
         // bower

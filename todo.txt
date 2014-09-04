@@ -1,51 +1,48 @@
-CURRENT
+CUSTOM NODES
 
-node port heights are messed up when zoomed
-save zoom when changed
+interactive help on first experience
+icons for undo/redo/copy/paste/switch focus
+send feedback
+polygon node
 
-POLISH
+preview scroll-x blocks view
 
-share workspaces
-fork a workspace
-OBJ export
-example workspaces
-initial user walkthrough of interface
+cleanup dependencies has flawed logic
+dropping in a previously created, nested custom node causes placed node to return null value
+insure unnecessary deps are removed on startup
+enter custom node by double clicking on the node instance
+
+paste should be offset to workspace center
+
+UI
+
+drop down to export to STL, or OBJ
+
+WORKSPACES MENU
+
 formula node input should change width based on how much user inputs, allow multiple lines
-desktop zoom is too slow
-login/signup sucks should work with oauth - initially
-too many workspaces?  you need to hide the excess one
 formula node does not allow "quotes"
 disable node lacing
 icons for nodes
-don't keep workspaces that haven't been saved at least once
 should remember the old 3d orientation
-workspaces menu should update when you reopen it
-icons, tooltips for undo, redo, etc.
 
-optimize css:
-	eliminate inline css 
-	get rid of excess bootstrap css, jquery.ui css
 
 FEATURE
 
-before release
-
-easily add a new library of nodes
-custom nodes
-archive workspaces
+example workspaces
+fork a workspace
+share workspaces
 describe workspace
-proxy server for doing remote http
-curves - whats the minimum requirement - line - polyline?
-transforms?
-canvas marquee selection
 arbitrary javascript node - better than formula
 NURBS in flood
-
 run execution in ui thread, make calls to ui thread from worker
 
-promise-based execution
+
+THOUGHTS
 
 verb: 
+	breps
+	use distributed computation
 	use a neural network to train system for local or remote exec
 flood: 
 	promise-based execution would allow multiple execution paths to proceed in parallel if nodes are dispatched async - this is a VERY good idea
