@@ -7,45 +7,43 @@ define(['backbone', 'helpers/BaseStorage', 'settings'], function (Backbone, Base
             return baseUrl + url;
         };
 
-    mongoStorage = {
-        createNewWorkspace: function () {
+    mongoStorage.createNewWorkspace = function () {
 
-            return $.get(createUrl('/nws'));
-        },
+        return $.get(createUrl('/nws'));
+    };
 
-        createNewNodeWorkspace: function () {
+    mongoStorage.createNewNodeWorkspace = function () {
 
-            return $.get(createUrl('/nws'));
-        },
+        return $.get(createUrl('/nws'));
+    };
 
-        loadWorkspace: function (id) {
+    mongoStorage.loadWorkspace = function (id) {
 
-            return $.get(createUrl('/ws/' + id));
-        },
+        return $.get(createUrl('/ws/' + id));
+    };
 
-        fetchLogin: function () {
+    mongoStorage.fetchLogin = function () {
 
-            return $.get(createUrl('/email'));
-        },
+        return $.get(createUrl('/email'));
+    };
 
-        logout: function () {
+    mongoStorage.logout = function () {
 
-            return $.get(createUrl('/logout'));
-        },
+        return $.get(createUrl('/logout'));
+    };
 
-        fetchWorkspaces: function () {
+    mongoStorage.fetchWorkspaces = function () {
 
-            return $.get(createUrl('/mys'));
-        },
+        return $.get(createUrl('/mys'));
+    };
 
-        fetchWorkspaceBrowserElements: function () {
+    mongoStorage.fetchWorkspaceBrowserElements = function () {
 
-            return $.get(createUrl('/ws'));
-        },
+        return $.get(createUrl('/ws'));
+    };
 
-        syncWorkspace: function (method, model, options) {
-            return Backbone.sync(method, model, options);
-        }
+    mongoStorage.syncWorkspace = function (method, model, options) {
+        return Backbone.sync(method, model, options);
     };
 
     return mongoStorage;
