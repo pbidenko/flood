@@ -1,48 +1,50 @@
-define(['backbone', 'helpers/BaseStorage'], function(Backbone, BaseStorage) {
+define(['backbone', 'helpers/BaseStorage', 'settings'], function (Backbone, BaseStorage, settings) {
 
-  var mongoStorage = {
+    var mongoStorage = Object.create(BaseStorage),
+        //Create local variable with url just to release settings object so it can be garbage collected
+        baseUrl = settings.storageUrl,
+        createUrl = function (url) {
+            return baseUrl + url;
+        };
 
-    createNewWorkspace: function() {
+    mongoStorage.createNewWorkspace = function () {
 
-      return $.get('/nws');
-    },
+        return $.get(createUrl('/nws'));
+    };
 
-    createNewNodeWorkspace: function() {
+    mongoStorage.createNewNodeWorkspace = function () {
 
-      return $.get('/nws');
-    },
+        return $.get(createUrl('/nws'));
+    };
 
-    loadWorkspace: function(id) {
+    mongoStorage.loadWorkspace = function (id) {
 
-      return $.get('/ws/' + id);
-    },
+        return $.get(createUrl('/ws/' + id));
+    };
 
-    fetchLogin: function() {
+    mongoStorage.fetchLogin = function () {
 
-      return $.get('/email');
-    },
+        return $.get(createUrl('/email'));
+    };
 
-    logout: function() {
+    mongoStorage.logout = function () {
 
-      return $.get('/logout');
-    },
+        return $.get(createUrl('/logout'));
+    };
 
-    fetchWorkspaces: function() {
+    mongoStorage.fetchWorkspaces = function () {
 
-      return $.get('/mys');
-    },
+        return $.get(createUrl('/mys'));
+    };
 
-    fetchWorkspaceBrowserElements: function() {
+    mongoStorage.fetchWorkspaceBrowserElements = function () {
 
-      return $.get('/ws');
-    },
+        return $.get(createUrl('/ws'));
+    };
 
-    syncWorkspace: function(method, model, options) {
-      return Backbone.sync(method, model, options);
-    }
+    mongoStorage.syncWorkspace = function (method, model, options) {
+        return Backbone.sync(method, model, options);
+    };
 
-  };
-
-  mongoStorage.prototype = BaseStorage;
-  return mongoStorage;
+    return mongoStorage;
 });
