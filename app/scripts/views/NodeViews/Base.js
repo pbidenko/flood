@@ -419,6 +419,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
       var that = this;
       var inIndex = 0;
       var outIndex = 0;
+      var ex = this.model.get('extra') || {};
+      var portIndex = 0;
 
       // set the zoom from the workspace container
       var zoom = 1.0
@@ -444,8 +446,11 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
           that.inputPorts.push(nodeCircle);
           inIndex++;
         } else {
+          if(ex.portIndexes)
+            portIndex = outIndex > 0 ? ex.portIndexes[outIndex] - ex.portIndexes[outIndex - 1] - 1 : ex.portIndexes[outIndex];
           nodeCircle.setAttribute('cx', that.$el.width() + 2.5 );
-          nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * $(ele).position().top ); 
+          // that.portHeight is equal to 29, but actual height of port is 25
+          nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * ($(ele).position().top + portIndex * 25) );
           that.outputPorts.push(nodeCircle);
           outIndex++;
         }
