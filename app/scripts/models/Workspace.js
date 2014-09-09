@@ -94,9 +94,12 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
                 this.set('nodes', new Nodes());
                 for(var i = 0; i < data.nodes.length; i++) {
+                    var node = data.nodes[i];
+                    node.duringUploading = true;
                     this.get('nodes').add(nodeFactory.create({
-                        config: data.nodes[i],
-                        workspace: this }))
+                        config: node,
+                        workspace: this
+                    }));
                 }
             },
 
@@ -1116,16 +1119,21 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
         for (; i < len; i++) {
             resultNode = param.result[i];
-            node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeID);
+            node = this.app.getCurrentWorkspace().get('nodes').get(resultNode.nodeID);
             if (node) {
-                node.updateValue(param.result[i]);
-                this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeID)));
+                node.updateValue(resultNode);
+                if (resultNode.containsGeometryData) {
+                     this.app.socket.send(JSON.stringify(new GeometryMessage(resultNode.nodeID)));
+                }
+                else {
+                     node.clearGeometry();
+                }
             }
         }
     },
 
     updateNodeGeometry: function(param) {
-        var node = this.app.getCurrentWorkspace().get('nodes').get(param.geometryData.nodeID);
+        var node = this.get('nodes').get(param.geometryData.nodeID);
         if (node && param.geometryData.graphicPrimitivesData) {
             node.updateNodeGeometry(param);
         }

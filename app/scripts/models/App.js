@@ -100,70 +100,68 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newWorkspace: function( callback ){
+    newWorkspace: function( callback ) {
 
-      var that = this;
+        $.get("/nws", function (data) {
 
-      $.get("/nws", function(data){
+            var ws = new Workspace(data, {app: this });
+            this.get('workspaces').add(ws);
+            this.set('currentWorkspace', ws.get('_id'));
+            if (callback) {
+                callback(ws);
+            }
 
-        var ws = new Workspace(data, {app: that });
-        that.get('workspaces').add( ws );
-        that.set('currentWorkspace', ws.get('_id') );
-        if (callback) callback( ws );
+        }.bind(this)).fail(function () {
 
-      }).fail(function(){
+            console.error("failed to get new workspace");
 
-        console.error("failed to get new workspace");
-
-      });
-
+        });
     },
 
     newNodeWorkspace: function( callback ){
 
-      var that = this;
+        $.get("/nws", function (data) {
 
-      $.get("/nws", function(data){
+            data.isCustomNode = true;
+            data.guid = this.makeId();
 
-        data.isCustomNode = true;
-        data.guid = that.makeId();
+            var ws = new Workspace(data, { app: this });
 
-        var ws = new Workspace(data, { app: that });
+            this.get('workspaces').add(ws);
+            this.set('currentWorkspace', ws.get('_id'));
+            if (callback) {
+                callback(ws);
+            }
 
-        that.get('workspaces').add( ws );
-        that.set('currentWorkspace', ws.get('_id') );
-        if (callback) callback( ws );
+        }.bind(this)).fail(function () {
 
-      }).fail(function(){
+            console.error("failed to get new workspace");
 
-        console.error("failed to get new workspace");
-
-      });
-
+        });
     },
 
-    loadWorkspace: function( id, callback ){
+    loadWorkspace: function( id, callback ) {
 
-      var ws = this.get('workspaces').get(id);
-      if(ws) return;
+        var ws = this.get('workspaces').get(id);
+        if (ws)
+            return;
 
-      var that = this;
+        $.get("/ws/" + id, function (data) {
 
-      $.get("/ws/" + id, function(data){
+            var ws = this.get('workspaces').get(id);
+            if (ws) return;
 
-        var ws = that.get('workspaces').get(id);
-        if(ws) return;
+            var ws = new Workspace(data, {app: this});
+            this.get('workspaces').add(ws);
+            if (callback) {
+                callback(ws);
+            }
 
-        var ws = new Workspace(data, {app: that});
-        that.get('workspaces').add( ws );
-        if (callback) callback( ws );
+        }.bind(this)).fail(function () {
 
-      }).fail(function(){
+            console.error("failed to get workspace with id: " + id);
 
-        console.error("failed to get workspace with id: " + id);
-
-      });
-
+        });
     },
 
     isBackgroundWorkspace: function(id){
@@ -202,15 +200,13 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         this.set('currentWorkspace', id);
       }
 
-      var that = this;
+        this.loadWorkspace(id, function (ws) {
 
-      this.loadWorkspace( id, function(ws){
-
-        that.set('currentWorkspace', ws.get('_id') );
-        if (callback) callback( ws );
-
-      });
-
+            this.set('currentWorkspace', ws.get('_id'));
+            if (callback) {
+                callback(ws);
+            }
+        });
     },
 
     updateCurrentWorkspace: function(){

@@ -426,7 +426,7 @@ define([  'backbone',
     },
 
     getCurrentWorkspace: function(){
-      return this.get('workspaces').get(this.get('currentWorkspace'));
+      return this.model.get('workspaces').get(this.model.get('currentWorkspace'));
     },
 
     toggleViewer: function(event) {
