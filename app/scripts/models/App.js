@@ -1,5 +1,5 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers'],
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'Storage'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, Storage){
 
   return Backbone.Model.extend({
 
@@ -104,7 +104,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       var that = this;
 
-      $.get("/nws", function(data){
+      Storage.createNewWorkspace().done(function(data){
 
         var ws = new Workspace(data, {app: that });
         that.get('workspaces').add( ws );
@@ -123,7 +123,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       var that = this;
 
-      $.get("/nws", function(data){
+      Storage.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
         data.guid = that.makeId();
@@ -149,7 +149,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       var that = this;
 
-      $.get("/ws/" + id, function(data){
+      Storage.loadWorkspace(id).done(function(data){
 
         var ws = that.get('workspaces').get(id);
         if(ws) return;
