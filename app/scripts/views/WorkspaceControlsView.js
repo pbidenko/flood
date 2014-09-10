@@ -37,6 +37,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
       'click #zoomin-button': 'zoominClick',
       'click #zoomout-button': 'zoomoutClick',
       'click #zoomreset-button': 'zoomresetClick',
+      'click #zoomtofit-button': 'zoomToFitClick',
       'click #export-button': 'exportClick'
     },
 
@@ -111,6 +112,10 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
     zoomoutClick: function(){
       this.currentWorkspace().zoomOut();
+    },
+
+    zoomToFitClick: function(){
+      zoomToFit();
     },
 
     getWorkspaceCenter: function(){
