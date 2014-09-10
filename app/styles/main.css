@@ -36,18 +36,6 @@ body {
 	z-index: 100;
 }
 
-.workspace-server-search {
-    bottom: 0px;
-    left: 600px;
-    font-size: 11px;
-    position: absolute;
-    z-index: 100;
-}
-
-#workspace-search-input-container #workspace-server-search-input-container{
-	padding-left: 10px;
-}
-
 .workspace-tab-function {
 	font-style: italic;
 	font-family: serif;
@@ -815,6 +803,7 @@ body {
 
 .node-outputs {
 	margin-bottom: 8px; /* particularly useful for node output collections */
+	margin-top: 6px;
 }
 
 .node-inputs-extra {
@@ -1415,4 +1404,10 @@ li.notmatch{
 
 div.tooltip-inner {
 	max-width: 400px;
+}
+
+.code-block-input {
+	height: auto;
+	font-size: 14px;
+	line-height: 25px;
 }

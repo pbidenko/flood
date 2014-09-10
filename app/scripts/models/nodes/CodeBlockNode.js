@@ -55,12 +55,23 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 updated = true;
             }
 
+            if (!this.get('extra').portIndexes) {
+                this.get('extra').portIndexes = [];
+            }
+
+            if (!this.get('extra').portIndexes.equals(codeBlock.PortIndexes)) {
+                this.get('extra').portIndexes = codeBlock.PortIndexes;
+                updated = true;
+            }
             if (!this.get('extra').inputs) {
                 this.get('extra').inputs = [];
             }
 
             if (!this.get('extra').inputs.equals(codeBlock.InPorts)) {
+
                 this.get('extra').inputs = codeBlock.InPorts;
+                updated = true;
+            }                this.get('extra').inputs = codeBlock.InPorts;
                 updated = true;
             }
 

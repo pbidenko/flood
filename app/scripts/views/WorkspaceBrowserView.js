@@ -34,6 +34,8 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
       this.projects = this.$el.find('#workspace-browser-projects');
       this.projects.empty();
 
+      this.model.fetch();
+
     },
 
     refreshClick: function(e){

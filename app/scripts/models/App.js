@@ -1,5 +1,5 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers'],
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'Storage'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, Storage){
 
   return Backbone.Model.extend({
 
@@ -102,15 +102,12 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     newWorkspace: function( callback ) {
 
-        $.get("/nws", function (data) {
+      Storage.createNewWorkspace().done(function(data){
 
-            var ws = new Workspace(data, {app: this });
-            this.get('workspaces').add(ws);
-            this.set('currentWorkspace', ws.get('_id'));
-            if (callback) {
-                callback(ws);
-            }
-
+        var ws = new Workspace(data, {app: that });
+        this.get('workspaces').add( ws );
+        this.set('currentWorkspace', ws.get('_id') );
+        if (callback) callback( ws );
         }.bind(this)).fail(function () {
 
             console.error("failed to get new workspace");
@@ -120,15 +117,15 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     newNodeWorkspace: function( callback ){
 
-        $.get("/nws", function (data) {
+      Storage.createNewNodeWorkspace().done(function(data){
 
-            data.isCustomNode = true;
-            data.guid = this.makeId();
+        data.isCustomNode = true;
+        data.guid = this.makeId();
 
-            var ws = new Workspace(data, { app: this });
+        var ws = new Workspace(data, { app: this });
 
-            this.get('workspaces').add(ws);
-            this.set('currentWorkspace', ws.get('_id'));
+        this.get('workspaces').add( ws );
+        this.set('currentWorkspace', ws.get('_id') );
             if (callback) {
                 callback(ws);
             }
@@ -146,11 +143,10 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         if (ws)
             return;
 
-        $.get("/ws/" + id, function (data) {
+      Storage.loadWorkspace(id).done(function(data){
 
-            var ws = this.get('workspaces').get(id);
+          var ws = this.get('workspaces').get(id);
             if (ws) return;
-
             var ws = new Workspace(data, {app: this});
             this.get('workspaces').add(ws);
             if (callback) {
