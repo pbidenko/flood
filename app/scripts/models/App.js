@@ -203,7 +203,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
             if (callback) {
                 callback(ws);
             }
-        });
+        }.bind(this));
     },
 
     updateCurrentWorkspace: function(){
