@@ -32,6 +32,10 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 this.set('type', new FLOOD.nodeTypes[attrs.typeName]());
                 this.set('creatingName', attrs.typeName);
                 this.set('displayedName', attrs.typeName);
+            } else if ( attrs.typeName != null && FLOOD.internalNodeTypes[attrs.typeName] != undefined ) {
+                this.set('type', new FLOOD.internalNodeTypes[ attrs.typeName ]());
+                this.set('creatingName', attrs.extra.creatingName);
+                this.set('displayedName', attrs.extra.displayedName);
             } else {
                 elems = vals.workspace.app.SearchElements.where({ creatingName: attrs.typeName });
                 if (elems.length === 0) {

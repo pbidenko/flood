@@ -16,9 +16,6 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
 
         reset: function () {
             AbstractRunner.prototype.reset.call(this);
-        },
-
-        initWorker: function () {
         }
     });
 
@@ -57,6 +54,14 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
         },
         run: function(data){
             return createMessage.call(this, instantiateCommand(data));
+        },
+        addWorkspace: function(data){
+            if(this.workspace.get('isCustomNode') === true)
+            {
+                data.guid = this.workspace.get('guid');
+                data.name = this.workspace.get('name');
+                return createMessage.call(this, instantiateCommand(data));
+            }
         }
     },
     instantiateCommand = function(data){

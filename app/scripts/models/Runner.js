@@ -227,7 +227,6 @@ define(['backbone'], function (Backbone) {
 
 		reset: function(){
 
-			this.initWorker();
 			this.initWorkspace();
 
 		}

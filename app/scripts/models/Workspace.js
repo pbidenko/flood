@@ -25,11 +25,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
       redoStack: [],
       clipBoard: [],
 
-                // for custom nodes
-                workspaceDependencyIds: [],
-                isCustomNode: false,
-                guid: null
-            },
+      // for custom nodes
+      workspaceDependencyIds: [],
+      isCustomNode: false,
+      guid: null
+    },
 
     // connection creation
     draggingProxy: false,
@@ -46,27 +46,27 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
       this.app = arr.app;
 
-                this.createNodes(atts);
-                this.createConnections(atts);
+      this.createNodes(atts);
+      this.createConnections(atts);
 
-                this.subscribeOnNodesConnectionsChanges();
+      this.subscribeOnNodesConnectionsChanges();
 
-                // the proxy connection is what is drawn when the user is 
-                // in the process of creating a new connection - it is not 
-                // persisted.
-                this.proxyConnection = new Connection({
-                    _id: -1,
-                    startProxy: true,
-                    endProxy: true,
-                    startProxyPosition: [0, 0],
-                    endProxyPosition: [0, 0],
-                    hidden: true
-                }, { workspace: this });
+      // the proxy connection is what is drawn when the user is 
+      // in the process of creating a new connection - it is not 
+      // persisted.
+      this.proxyConnection = new Connection({
+        _id: -1,
+        startProxy: true,
+        endProxy: true,
+        startProxyPosition: [0, 0],
+        endProxyPosition: [0, 0],
+        hidden: true
+      }, { workspace: this });
 
-                this.marquee = new Marquee({
-                    _id: -1,
-                    hidden: true
-                }, { workspace: this });
+      this.marquee = new Marquee({
+        _id: -1,
+        hidden: true
+      }, { workspace: this });
 
       this.runAllowed = true;
 
@@ -82,57 +82,56 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
       if ( this.get('isCustomNode') ) this.initializeCustomNode();
 
-      this.awaitedWorkspaceDependencyIds = [];
-      this.cleanupDependencies();
+      //this.cleanupDependencies();
       this.initializeDependencies(this.get('workspaceDependencyIds'));
-		
+
       this.app.trigger('workspaceLoaded', this);
-            
+
     },
     
     createNodes: function(data){
 
-                this.set('nodes', new Nodes());
-                for(var i = 0; i < data.nodes.length; i++) {
-                    this.get('nodes').add(nodeFactory.create({
-                        config: data.nodes[i],
-                        workspace: this }))
-                }
-            },
+      this.set('nodes', new Nodes());
+      for(var i = 0; i < data.nodes.length; i++) {
+        this.get('nodes').add(nodeFactory.create({
+          config: data.nodes[i],
+          workspace: this }));
+      }
+    },
 
-            createConnections: function(data){
+    createConnections: function(data){
 
-                this.set('connections', new Connections(data.connections, { workspace: this }));
+      this.set('connections', new Connections(data.connections, { workspace: this }));
 
-                // tell all nodes about connections
-                _.each(this.get('connections').where({ startProxy: false, endProxy: false }), function (ele) {
-                    this.get('nodes').get(ele.get('startNodeId')).connectPort(ele.get('startPortIndex'), true, ele);
-                    this.get('nodes').get(ele.get('endNodeId')).connectPort(ele.get('endPortIndex'), false, ele);
-                }, this);
-            },
+      // tell all nodes about connections
+      _.each(this.get('connections').where({ startProxy: false, endProxy: false }), function (ele) {
+        this.get('nodes').get(ele.get('startNodeId')).connectPort(ele.get('startPortIndex'), true, ele);
+        this.get('nodes').get(ele.get('endNodeId')).connectPort(ele.get('endPortIndex'), false, ele);
+      }, this);
+    },
 
-            subscribeOnNodesConnectionsChanges: function(){
+    subscribeOnNodesConnectionsChanges: function(){
 
-                this.get('connections').on('add remove', function () {
-                    this.trigger('change:connections');
-                    this.run();
-                }.bind(this));
+      this.get('connections').on('add remove', function () {
+        this.trigger('change:connections');
+        this.trigger('requestRun');
+      }.bind(this));
 
-                this.get('nodes').on('add remove', function () {
-                    this.trigger('change:nodes');
-                    this.run();
-                }.bind(this));
-            },
+      this.get('nodes').on('add remove', function () {
+        this.trigger('change:nodes');
+        this.trigger('requestRun');
+      }.bind(this));
+    },
 
     initializeDependencies: function(depIds){
 
       if (!depIds || depIds.length === 0 ) {
         console.log(this.get('name') + " has no dependencies");
-        this.runAllowed = true;
         this.initializeRunner();
-        this.listenTo( this.app, 'computation-completed:event', this.updateNodesValues);
+        this.listenTo( this.app, 'computation-completed:event', this.updateNodeValues);
         this.listenTo( this.app, 'geometry-data-received:event', this.updateNodeGeometry);
         this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);
+        this.trigger('requestRun');
         return;
       }
 
@@ -186,32 +185,29 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
     
       if (this.runner) return;
 
-      // console.log(this.get('name') + " resolve dep with " + workspace.id );
-      // console.log(this.get('name') + " still awaits " + this.awaitedWorkspaceDependencyIds );
-
+      console.log(this.get('name') + " resolve dep with " + workspace.id );
+      console.log(this.get('name') + " still awaits " + this.awaitedWorkspaceDependencyIds );
       if (workspace.id === this.id) return;
-      if (workspace.awaitedWorkspaceDependencyIds.length > 0) return;
+      if (workspace.awaitedWorkspaceDependencyIds && workspace.awaitedWorkspaceDependencyIds.length > 0) return;
 
       var index = this.awaitedWorkspaceDependencyIds.indexOf( workspace.id );
 
-      if (index < 0) return;
-
-      // console.log('Resolving dependency for ' + this.get("name") + " with " + workspace.id );
-      // console.log("Awaited workspace ids are " + this.awaitedWorkspaceDependencyIds );
-
       if (index >= 0) this.awaitedWorkspaceDependencyIds.remove(index);
-      
+
+      console.log('Resolving dependency for ' + this.get("name") + " with " + workspace.id );
+      console.log("Awaited workspace ids are " + this.awaitedWorkspaceDependencyIds );
+
       this.sendDefinitionToRunner( workspace.id );
       this.watchDependency( workspace );
       this.syncCustomNodesWithWorkspace( workspace );
 
       if (this.awaitedWorkspaceDependencyIds.length === 0) {
-                    this.runAllowed = true;
-                    this.initializeRunner();
-                    this.listenTo( this.app, 'computation-completed:event', this.updateNodesValues);
-                    this.listenTo( this.app, 'geometry-data-received:event', this.updateNodeGeometry);
-                    this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);
-                    this.app.get('workspaces').trigger('add', this);
+        this.initializeRunner();
+        this.listenTo( this.app, 'computation-completed:event', this.updateNodeValues);
+        this.listenTo( this.app, 'geometry-data-received:event', this.updateNodeGeometry);
+        this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);
+        this.app.get('workspaces').trigger('add', this);
+        this.trigger('requestRun');
       }
     },
 
@@ -260,17 +256,17 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
     getCustomNodes: function(){
 
-                return this.get('nodes').filter(function (x) {
-                    return x.get('typeName') === 'CustomNode';
-                });
+      return this.get('nodes').filter(function(x){
+        return x.get('type') instanceof FLOOD.internalNodeTypes.CustomNode;
+      });
 
     },
 
     getCustomNodesWithId: function(functionId){
 
-                return this.getCustomNodes().filter(function (x) {
-                    return x.get('extra').functionId === functionId;
-                });
+      return this.getCustomNodes().filter(function (x) {
+        return x.get('extra').functionId === functionId;
+      });
 
     },
 
@@ -453,7 +449,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
     initializeCustomNode: function(){
 
-      this.customNode = new FLOOD.internalNodeTypes.CustomNode( this.get('name'), this.get('_id') );
+      this.customNode = new FLOOD.internalNodeTypes.CustomNode( this.get('name'), this.get('_id'), this.get('guid') );
 
       var ni = this.get('nodes').where({typeName: "Input"}).length;
       var no = this.get('nodes').where({typeName: "Output"}).length;
@@ -704,7 +700,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
       if (name === undefined || position === undefined ) return;
 
-      var se = this.app.SearchElements.where({ name: name })[0];
+      var se = this.app.SearchElements.where({ creatingName: name })[0];
 
       if (!se) {
         console.warn('Could not find node with name in Library: ' + name)
@@ -719,6 +715,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
         sec.extra = { functionId: se.get('functionId')
                       , functionName: se.get('functionName')
+                      , creatingName: se.get('creatingName')
+                      , displayedName: se.get('displayedName')
                       , numInputs: se.get('numInputs')
                       , numOutputs: se.get('numOutputs')
                     };
