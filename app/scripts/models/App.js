@@ -22,16 +22,17 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       clipBoard: {}
     },
 
-    initialize: function(args, options){
-      this.on('change:currentWorkspace', this.updateCurrentWorkspace, this);
-      this.updateCurrentWorkspace();
+    initialize: function(args, options) {
+        this.on('change:currentWorkspace', this.updateCurrentWorkspace, this);
+        this.updateCurrentWorkspace();
 
-      this.login = new Login({}, { app: this });
+        this.login = new Login({}, { app: this });
 
-      this.SearchElements = new SearchElements({app:this});
-      this.SearchElements.reset();
-      this.SearchElements.fetch();
+        this.SearchElements = new SearchElements({app: this});
+        this.SearchElements.reset();
+        this.SearchElements.fetch();
 
+        this.context = new Storage({ baseUrl: '' });
     },
 
     parse : function(resp) {
@@ -100,70 +101,64 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newWorkspace: function( callback ){
+    newWorkspace: function( callback ) {
 
-      var that = this;
-
-      Storage.createNewWorkspace().done(function(data){
+      this.context.createNewWorkspace().done(function(data){
 
         var ws = new Workspace(data, {app: that });
-        that.get('workspaces').add( ws );
-        that.set('currentWorkspace', ws.get('_id') );
+        this.get('workspaces').add( ws );
+        this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
+        }.bind(this)).fail(function () {
 
-      }).fail(function(){
+            console.error("failed to get new workspace");
 
-        console.error("failed to get new workspace");
-
-      });
-
+        });
     },
 
     newNodeWorkspace: function( callback ){
 
-      var that = this;
-
-      Storage.createNewNodeWorkspace().done(function(data){
+        this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
-        data.guid = that.makeId();
+        data.guid = this.makeId();
 
-        var ws = new Workspace(data, { app: that });
+        var ws = new Workspace(data, { app: this });
 
-        that.get('workspaces').add( ws );
-        that.set('currentWorkspace', ws.get('_id') );
-        if (callback) callback( ws );
+        this.get('workspaces').add( ws );
+        this.set('currentWorkspace', ws.get('_id') );
+            if (callback) {
+                callback(ws);
+            }
 
-      }).fail(function(){
+        }.bind(this)).fail(function () {
 
-        console.error("failed to get new workspace");
+            console.error("failed to get new workspace");
 
-      });
-
+        });
     },
 
-    loadWorkspace: function( id, callback ){
+    loadWorkspace: function( id, callback ) {
 
-      var ws = this.get('workspaces').get(id);
-      if(ws) return;
+        var ws = this.get('workspaces').get(id);
+        if (ws)
+            return;
 
-      var that = this;
+        this.context.loadWorkspace(id).done(function(data){
 
-      Storage.loadWorkspace(id).done(function(data){
+          var ws = this.get('workspaces').get(id);
+            if (ws) return;
+            var ws = new Workspace(data, {app: this});
+            this.get('workspaces').add(ws);
+            if (callback) {
+                callback(ws);
+            }
 
-        var ws = that.get('workspaces').get(id);
-        if(ws) return;
+        }.bind(this)).fail(function () {
 
-        var ws = new Workspace(data, {app: that});
-        that.get('workspaces').add( ws );
-        if (callback) callback( ws );
+            console.error("failed to get workspace with id: " + id);
 
-      }).fail(function(){
-
-        console.error("failed to get workspace with id: " + id);
-
-      });
-
+        });
     },
 
     isBackgroundWorkspace: function(id){
@@ -202,15 +197,13 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         this.set('currentWorkspace', id);
       }
 
-      var that = this;
+        this.loadWorkspace(id, function (ws) {
 
-      this.loadWorkspace( id, function(ws){
-
-        that.set('currentWorkspace', ws.get('_id') );
-        if (callback) callback( ws );
-
-      });
-
+            this.set('currentWorkspace', ws.get('_id'));
+            if (callback) {
+                callback(ws);
+            }
+        });
     },
 
     updateCurrentWorkspace: function(){
@@ -230,8 +223,6 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.get('workspaces').get(this.get('currentWorkspace')).set('current', true);
     }
   });
-
-
 });
 
 

@@ -1,50 +1,54 @@
 define(['backbone', 'helpers/BaseStorage', 'settings'], function (Backbone, BaseStorage, settings) {
 
-    var mongoStorage = Object.create(BaseStorage),
-        //Create local variable with url just to release settings object so it can be garbage collected
-        baseUrl = settings.storageUrl,
-        createUrl = function (url) {
-            return baseUrl + url;
-        };
+    var createUrl = function (url) {
+        return this.baseUrl + url;
+    };
 
-    mongoStorage.createNewWorkspace = function () {
+    function MongoStorage(options) {
+
+        BaseStorage.apply(this, arguments);
+    }
+
+    MongoStorage.prototype = Object.create(BaseStorage.prototype);
+
+    MongoStorage.prototype.createNewWorkspace = function () {
 
         return $.get(createUrl('/nws'));
     };
 
-    mongoStorage.createNewNodeWorkspace = function () {
+    MongoStorage.prototype.createNewNodeWorkspace = function () {
 
         return $.get(createUrl('/nws'));
     };
 
-    mongoStorage.loadWorkspace = function (id) {
+    MongoStorage.prototype.loadWorkspace = function (id) {
 
         return $.get(createUrl('/ws/' + id));
     };
 
-    mongoStorage.fetchLogin = function () {
+    MongoStorage.prototype.fetchLogin = function () {
 
         return $.get(createUrl('/email'));
     };
 
-    mongoStorage.logout = function () {
+    MongoStorage.prototype.logout = function () {
 
         return $.get(createUrl('/logout'));
     };
 
-    mongoStorage.fetchWorkspaces = function () {
+    MongoStorage.prototype.fetchWorkspaces = function () {
 
         return $.get(createUrl('/mys'));
     };
 
-    mongoStorage.fetchWorkspaceBrowserElements = function () {
+    MongoStorage.prototype.fetchWorkspaceBrowserElements = function () {
 
         return $.get(createUrl('/ws'));
     };
 
-    mongoStorage.syncWorkspace = function (method, model, options) {
+    MongoStorage.prototype.syncWorkspace = function (method, model, options) {
         return Backbone.sync(method, model, options);
     };
 
-    return mongoStorage;
+    return MongoStorage;
 });

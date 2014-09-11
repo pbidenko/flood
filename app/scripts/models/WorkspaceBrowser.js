@@ -2,18 +2,22 @@ define(['backbone', 'WorkspaceBrowserElements'], function(Backbone, WorkspaceBro
 
 	return Backbone.Model.extend({
 
-	  defaults: {
-      workspaces: new WorkspaceBrowserElements()
-	  },
+        defaults: {
+            workspaces: null
+        },
 
-	  fetch: function(atts, vals) {
-	  	this.get('workspaces').fetch();
-	  },
+        initialize: function (attr) {
+            this.app = attr.app;
+            this.set('workspaces', new WorkspaceBrowserElements({app: this.app}));
+        },
 
-	  refresh: function(){
-	  	this.get('workspaces').reset();
-	  	this.get('workspaces').fetch();
-	  }
+        fetch: function (atts, vals) {
+            this.get('workspaces').fetch();
+        },
 
-	});
+        refresh: function () {
+            this.get('workspaces').reset();
+            this.get('workspaces').fetch();
+        }
+    });
 });
