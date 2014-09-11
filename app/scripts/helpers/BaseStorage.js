@@ -19,8 +19,7 @@ define(['backbone', 'staticHelpers'], function(Backbone, helpers) {
             return deferred.promise();
         };
 
-    function BaseStorage(options) {
-        this.baseUrl = options.baseUrl || '';
+    function BaseStorage() {
         this.session = {
             __v: 0,
             _id: "540429880879db500f0f2be8",
@@ -32,13 +31,13 @@ define(['backbone', 'staticHelpers'], function(Backbone, helpers) {
 
     BaseStorage.prototype.createNewWorkspace = function () {
         var nws = $.extend({}, workspace, { _id: helpers.guid() });
-        session.workspaces.push(nws);
+        this.session.workspaces.push(nws);
         return createPromise(nws);
     };
 
     BaseStorage.prototype.createNewNodeWorkspace = function () {
         var nws = $.extend({}, workspace, { _id: helpers.guid(), guid: helpers.guid(), isCustomNode: true });
-        session.workspaces.push(nws);
+        this.session.workspaces.push(nws);
         return createPromise(nws);
     };
 
@@ -61,15 +60,15 @@ define(['backbone', 'staticHelpers'], function(Backbone, helpers) {
 
     BaseStorage.prototype.fetchWorkspaces = function () {
         var nws = $.extend({}, workspace, { _id: helpers.guid() });
-        session.workspaces.push(nws);
-        return createPromise($.extend({}, session));
+        this.session.workspaces.push(nws);
+        return createPromise($.extend({}, this.session));
     };
 
     BaseStorage.prototype.fetchWorkspaceBrowserElements = function () {
 
         var arr = [];
 
-        session.workspaces.map(function (ws) {
+        this.session.workspaces.map(function (ws) {
             arr.push({
                 _id: ws._id,
                 name: ws.name,
@@ -85,7 +84,7 @@ define(['backbone', 'staticHelpers'], function(Backbone, helpers) {
     };
 
     BaseStorage.prototype.syncWorkspace = function (method, model, options) {
-        session.workspaces.map(function (ws) {
+        this.session.workspaces.map(function (ws) {
             if (ws._id === model.get('_id'))
                 ws.name = model.get('name');
         });
