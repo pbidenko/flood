@@ -40,6 +40,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
 
     runAllowed: false,
 
+    pendingRequestsCount: 0,
+
     initialize: function(atts, arr) {
 
       atts = atts || {};
@@ -1118,6 +1120,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
             if (node) {
                 node.updateValue(param.result[i]);
                 this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeID)));
+
+                if(this.pendingRequestsCount === 0){
+                    this.app.trigger('show-progress');
+                }
+                this.pendingRequestsCount++;
             }
         }
     },
@@ -1126,6 +1133,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
         var node = this.app.getCurrentWorkspace().get('nodes').get(param.geometryData.nodeID);
         if (node && param.geometryData.graphicPrimitivesData) {
             node.updateNodeGeometry(param);
+        }
+
+        this.pendingRequestsCount--;
+        if(this.pendingRequestsCount === 0) {
+            this.app.trigger('hide-progress');
         }
     },
 

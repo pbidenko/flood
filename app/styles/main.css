@@ -736,7 +736,7 @@ body {
 
 .node-number-input {
 	padding:2px;
-	margin:2px;`
+	margin:2px;
 }
 
 .node-evaluating {
@@ -1410,4 +1410,15 @@ div.tooltip-inner {
 	height: auto;
 	font-size: 14px;
 	line-height: 25px;
+}
+
+.busy-indicator{
+	width: 50px;
+	height: 30px;
+	background-image: url('/images/busy-indicator.gif');
+	background-size: 40px 10px;
+	background-repeat: no-repeat;
+	background-position: center center;
+	float: right;
+	display: inline-block;
 }
