@@ -32,7 +32,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView'], fun
         },
 
         addNode: function (nodeModel) {
-            this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creatingName'), this.app.newNodePosition);
+            this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creationName'), this.app.newNodePosition);
         },
 
         elementClick: function (model) {
@@ -49,7 +49,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView'], fun
             }
 
             if (event.keyCode === 13) { // enter key causes first result to be inserted
-                var elementToAdd = this.modelsListView.findElementByCreatingName(searchText);
+                var elementToAdd = this.modelsListView.findElementByCreationName(searchText);
                 elementToAdd && this.elementClick(elementToAdd.model);                
 
             } 

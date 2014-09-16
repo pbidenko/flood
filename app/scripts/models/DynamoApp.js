@@ -29,8 +29,8 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'Storage'
 
         mapLibraryItems: function(param) {
           this.SearchElements.models = param.libraryItems.map(function(item){
-            return new SearchElement({name: item.name, creatingName: item.creatingName,
-              displayedName: item.displayedName, category: item.category,
+            return new SearchElement({name: item.name, creationName: item.creationName,
+              displayName: item.displayName, category: item.category,
               description: item.description, inPort: item.parameters,
               outPort: item.returnKeys, app: this});
           });

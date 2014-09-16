@@ -77,14 +77,14 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
             return result;
         },
 
-        findElementByCreatingName: function(name){
+        findElementByCreationName: function(name){
             var result = null,
                 i = 0,
                 len = this.searchElements.length;
 
             name = name.toLowerCase();
             for( ; i < len; i++ ) {
-                if( this.searchElements[i].model.get('creatingName').toLowerCase().indexOf(name) > -1 ){
+                if( this.searchElements[i].model.get('creationName').toLowerCase().indexOf(name) > -1 ){
                     result = this.searchElements[i];
                     break;
                 }

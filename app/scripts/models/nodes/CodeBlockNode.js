@@ -27,7 +27,7 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
             }
 
             this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort));
-            this.set('creatingName', 'Code Block');
+            this.set('creationName', 'Code Block');
             this.set('lastValue', '');
 
             this.initAttrs(attrs, vals);

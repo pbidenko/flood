@@ -1,22 +1,24 @@
 CUSTOM NODES
 
-interactive help on first experience
-icons for undo/redo/copy/paste/switch focus
-send feedback
+if you close a workspace and it's still in use 
+	- add it to hidden workspaces
+	- otherwise completely remove it
+
+don't show previews in custom node workspaces
+
 polygon node
+configure node-webkit endpoint URL
 
-preview scroll-x blocks view
-
-cleanup dependencies has flawed logic
 dropping in a previously created, nested custom node causes placed node to return null value
-insure unnecessary deps are removed on startup
 enter custom node by double clicking on the node instance
-
 paste should be offset to workspace center
+
+deletion is too slow
 
 UI
 
 drop down to export to STL, or OBJ
+
 
 WORKSPACES MENU
 

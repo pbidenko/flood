@@ -5,7 +5,7 @@
 				var execFile = require('child_process').execFile,
 					child;
 
-				child = execFile('dynamo/DynamoWebServer.exe', function(error,stdout,stderr) { 
+				child = execFile('DynamoWebServer.exe' , [], { cwd: 'dynamo' } , function(error,stdout,stderr) { 
 					if (error) {
 						console.log(error.stack); 
 						console.log('Error code: '+ error.code); 
@@ -19,10 +19,9 @@
 					console.log('Child process exited with exit code '+ code);
 				});
 
-				require('./app.js');
 				setTimeout(function () {
-					window.location.assign('http://localhost:3000/');
-				}, 1000);
+					window.location.href = 'app.html';
+				}, 5000);
 			}
 		</script>
 	</head>

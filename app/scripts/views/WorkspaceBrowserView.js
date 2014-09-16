@@ -11,6 +11,7 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
       this.model.get('workspaces').on('add', this.addWorkspaceElement, this );
       this.model.get('workspaces').on('remove', this.removeWorkspaceElement, this );
 
+      this.model.fetch();
       this.render();
     },
 
@@ -33,9 +34,6 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
 
       this.projects = this.$el.find('#workspace-browser-projects');
       this.projects.empty();
-
-      this.model.fetch();
-
     },
 
     refreshClick: function(e){

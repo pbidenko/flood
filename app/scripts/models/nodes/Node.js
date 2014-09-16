@@ -8,8 +8,8 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
             name: 'DefaultNodeName'
           , position: [10, 10]
           , typeName: 'Add'
-          , creatingName: 'Add'
-          , displayedName: 'Add'
+          , creationName: 'Add'
+          , displayName: 'Add'
           , type: null
           , inputConnections: []
           , outputConnections: []
@@ -30,14 +30,14 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
             // Need to know the type in order to create the node
             if (attrs.typeName && FLOOD.nodeTypes[attrs.typeName]) {
                 this.set('type', new FLOOD.nodeTypes[attrs.typeName]());
-                this.set('creatingName', attrs.typeName);
-                this.set('displayedName', attrs.typeName);
+                this.set('creationName', attrs.typeName);
+                this.set('displayName', attrs.typeName);
             } else if ( attrs.typeName != null && FLOOD.internalNodeTypes[attrs.typeName] != undefined ) {
                 this.set('type', new FLOOD.internalNodeTypes[ attrs.typeName ]());
-                this.set('creatingName', attrs.extra.creatingName);
-                this.set('displayedName', attrs.extra.displayedName);
+                this.set('creationName', attrs.extra.creationName);
+                this.set('displayName', attrs.extra.displayName);
             } else {
-                elems = vals.workspace.app.SearchElements.where({ creatingName: attrs.typeName });
+                elems = vals.workspace.app.SearchElements.where({ creationName: attrs.typeName });
                 if (elems.length === 0) {
                     if (attrs.ignoreDefaults) {
                         inPort = staticHelpers.generatePortNames(attrs.ignoreDefaults.length);
@@ -45,8 +45,8 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 } else {
                     inPort = elems[0].get('inPort');
                     outPort = elems[0].get('outPort');
-                    this.set('displayedName', elems[0].get('displayedName'));
-                    this.set('creatingName', elems[0].get('creatingName'));
+                    this.set('displayName', elems[0].get('displayName'));
+                    this.set('creationName', elems[0].get('creationName'));
                 }
 
                 this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort));
@@ -97,8 +97,8 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 name: this.get('name')
               , position: this.get('position')
               , typeName: this.get('typeName')
-              , creatingName: this.get('creatingName')
-              , displayedName: this.get('displayedName')
+              , creationName: this.get('creationName')
+              , displayName: this.get('displayName')
               , selected: this.get('selected')
               , visible: this.get('visible')
               , ignoreDefaults: this.get('ignoreDefaults')

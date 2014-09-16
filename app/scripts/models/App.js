@@ -32,14 +32,20 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.SearchElements.reset();
       this.SearchElements.fetch();
 
+      this.get('workspaces').on('remove', this.workspaceRemoved, this);
     },
+
+    workspaceIdsAwaitingParse : [],
 
     parse : function(resp) {
 
       var old = this.get('workspaces').slice();
+      this.workspaceIdsAwaitingParse = _.pluck( resp.workspaces, '_id');
+
       this.get('workspaces').add(resp.workspaces, {app: this});
       this.get('workspaces').remove(old);
 
+      this.workspaceIdsAwaitingParse = [];
       resp.workspaces = this.get('workspaces');
       return resp;
 
@@ -66,6 +72,12 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
         this._isSerializing = false;
 
+      // dont save the background workspaces, they will be dynamically
+      // loaded on startup
+      var backWs = this.get('backgroundWorkspaces');
+      json.workspaces = json.workspaces.filter(function(x){
+        return !_.contains( backWs, x._id );
+      });
         return json;
     },
 
@@ -89,15 +101,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     },
 
     getLoadedWorkspace: function(id){
-
-      var workspaces = this.get('workspaces').where({ _id: id });
-
-      if (workspaces.length === 0) {
-        return undefined;
-      }
-
-      return workspaces[0];
-
+      return this.get('workspaces').get(id);
     },
 
     newWorkspace: function( callback ){
@@ -142,10 +146,16 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    loadWorkspace: function( id, callback ){
+    loadWorkspaceDependency: function(id){
 
-      var ws = this.get('workspaces').get(id);
-      if(ws) return;
+      if ( _.contains( this.workspaceIdsAwaitingParse, id ) ) return;
+
+      this.setWorkspaceToBackground( id );
+      this.loadWorkspace( id );
+
+    },
+
+    loadWorkspace: function( id, callback ){
 
       var that = this;
 
@@ -182,12 +192,10 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     removeWorkspaceFromBackground: function( id ){
 
-      if ( this.isBackgroundWorkspace(id) ){
-
+      if ( _.contains( this.get('backgroundWorkspaces'), id) ){
         var copy = this.get('backgroundWorkspaces').slice(0);
         copy.remove(copy.indexOf(id));
         this.set('backgroundWorkspaces', copy);
-
       }
 
     },

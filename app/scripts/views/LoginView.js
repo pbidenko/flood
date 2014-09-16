@@ -22,7 +22,7 @@ define(['backbone'], function(Backbone) {
       this.model.on('change:failureMessage', this.render, this);
 
       var that = this;
-      $('#login-button').click(function(){ that.tabClick.apply(that); });
+      $('#login-button').click(function(){ that.tabClick.call(that); });
     },
 
     rendered : false,
@@ -30,8 +30,10 @@ define(['backbone'], function(Backbone) {
     render: function() {
 
       if ( !this.rendered ) {
-        this.$el.html( this.template( this.model.toJSON() ) );
+        this.$el.find('.login-container').html( this.template( this.model.toJSON() ) );
         this.rendered = true;
+
+        this.$el.find('.login-container').show(); 
       }
 
       var failureMessage = this.$el.find('#login-failure-message');
@@ -76,10 +78,8 @@ define(['backbone'], function(Backbone) {
     renderLoginState: function(){
 
       if( this.model.get('isLoggedIn') ){
-        $('#login-button').html("Logout");
         this.model.hide();
       } else {
-        $('#login-button').html("Login");
         this.$el.show();
       }
 
