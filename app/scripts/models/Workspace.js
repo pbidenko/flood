@@ -1,5 +1,7 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee', 'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers', 'GeometryMessage', 'Storage'],
-    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee, nodeFactory, FLOOD, scheme, SearchElement, staticHelpers, GeometryMessage, Storage) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Marquee',
+        'NodeFactory', 'FLOOD', 'scheme', 'SearchElement', 'staticHelpers', 'GeometryMessage'],
+    function (Backbone, Nodes, Connection, Connections, Runner, Node, Marquee,
+              nodeFactory, FLOOD, scheme, SearchElement, staticHelpers, GeometryMessage) {
 
   return Backbone.Model.extend({
 
@@ -1130,7 +1132,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'Runner', 'Node', 'Mar
     },
 
     sync: function( method, model, options ) {
-      return Storage.syncWorkspace(method, model, options);
+      return this.app.context.syncWorkspace(method, model, options);
     }
 
   });

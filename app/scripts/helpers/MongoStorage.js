@@ -1,50 +1,55 @@
 define(['backbone', 'helpers/BaseStorage', 'settings'], function (Backbone, BaseStorage, settings) {
 
-    var mongoStorage = Object.create(BaseStorage),
-        //Create local variable with url just to release settings object so it can be garbage collected
-        baseUrl = settings.storageUrl,
-        createUrl = function (url) {
-            return baseUrl + url;
-        };
-
-    mongoStorage.createNewWorkspace = function () {
-
-        return $.get(createUrl('/nws'));
+    var createUrl = function (url) {
+        return this.baseUrl + url;
     };
 
-    mongoStorage.createNewNodeWorkspace = function () {
+    function MongoStorage(options) {
 
-        return $.get(createUrl('/nws'));
+        this.baseUrl = options.baseUrl || '';
+        BaseStorage.apply(this, arguments);
+    }
+
+    MongoStorage.prototype = Object.create(BaseStorage.prototype);
+
+    MongoStorage.prototype.createNewWorkspace = function () {
+
+        return $.get(createUrl.call(this, '/nws'));
     };
 
-    mongoStorage.loadWorkspace = function (id) {
+    MongoStorage.prototype.createNewNodeWorkspace = function () {
 
-        return $.get(createUrl('/ws/' + id));
+        return $.get(createUrl.call(this, '/nws'));
     };
 
-    mongoStorage.fetchLogin = function () {
+    MongoStorage.prototype.loadWorkspace = function (id) {
 
-        return $.get(createUrl('/email'));
+        return $.get(createUrl.call(this, '/ws/' + id));
     };
 
-    mongoStorage.logout = function () {
+    MongoStorage.prototype.fetchLogin = function () {
 
-        return $.get(createUrl('/logout'));
+        return $.get(createUrl.call(this, '/email'));
     };
 
-    mongoStorage.fetchWorkspaces = function () {
+    MongoStorage.prototype.logout = function () {
 
-        return $.get(createUrl('/mys'));
+        return $.get(createUrl.call(this, '/logout'));
     };
 
-    mongoStorage.fetchWorkspaceBrowserElements = function () {
+    MongoStorage.prototype.fetchWorkspaces = function () {
 
-        return $.get(createUrl('/ws'));
+        return $.get(createUrl.call(this, '/mys'));
     };
 
-    mongoStorage.syncWorkspace = function (method, model, options) {
+    MongoStorage.prototype.fetchWorkspaceBrowserElements = function () {
+
+        return $.get(createUrl.call(this, '/ws'));
+    };
+
+    MongoStorage.prototype.syncWorkspace = function (method, model, options) {
         return Backbone.sync(method, model, options);
     };
 
-    return mongoStorage;
+    return MongoStorage;
 });

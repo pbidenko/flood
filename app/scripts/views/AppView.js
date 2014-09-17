@@ -141,7 +141,7 @@ define([  'backbone',
 
     viewBrowser: function(){
       if (!this.browserView){
-        this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser() }, { app: this.model });
+        this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser({ app: this.model }) }, { app: this.model });
         this.browserView.render();
       }
 
