@@ -36,6 +36,8 @@ define([  'backbone',
       this.model.on('change:showingHelp', this.viewHelp, this);
       this.model.on('change:showingBrowser', this.viewBrowser, this);
       this.model.on('hide-search', this.hideSearch, this);
+      this.model.on('show-progress', this.showProgress, this);
+      this.model.on('hide-progress', this.hideProgress, this);
 
       this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
@@ -144,7 +146,7 @@ define([  'backbone',
 
     viewBrowser: function(){
       if (!this.browserView){
-        this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser() }, { app: this.model });
+        this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser({ app: this.model }) }, { app: this.model });
         this.browserView.render();
       }
 
@@ -449,6 +451,14 @@ define([  'backbone',
         this.focusWorkspace();
       }
 
+    },
+
+    showProgress: function(){
+      this.$el.find('.busy-indicator').show();
+    },
+
+    hideProgress: function(){
+      this.$el.find('.busy-indicator').hide();
     }
 
   });

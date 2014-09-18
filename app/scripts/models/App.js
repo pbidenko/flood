@@ -1,5 +1,5 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'Storage'],
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, Storage){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'Storage', 'settings'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, Storage, settings){
 
   return Backbone.Model.extend({
 
@@ -31,6 +31,8 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.SearchElements = new SearchElements({app:this});
       this.SearchElements.reset();
       this.SearchElements.fetch();
+
+      this.context = new Storage({ baseUrl: settings.storageUrl });
 
       this.get('workspaces').on('remove', this.workspaceRemoved, this);
     },
@@ -106,16 +108,14 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     newWorkspace: function( callback ){
 
-      var that = this;
+      this.context.createNewWorkspace().done(function(data){
 
-      Storage.createNewWorkspace().done(function(data){
-
-        var ws = new Workspace(data, {app: that });
-        that.get('workspaces').add( ws );
-        that.set('currentWorkspace', ws.get('_id') );
+        var ws = new Workspace(data, {app: this });
+        this.get('workspaces').add( ws );
+        this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
 
-      }).fail(function(){
+      }.bind(this)).fail(function(){
 
         console.error("failed to get new workspace");
 
@@ -125,20 +125,18 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     newNodeWorkspace: function( callback ){
 
-      var that = this;
-
-      Storage.createNewNodeWorkspace().done(function(data){
+      this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
-        data.guid = that.makeId();
+        data.guid = this.makeId();
 
-        var ws = new Workspace(data, { app: that });
+        var ws = new Workspace(data, { app: this });
 
-        that.get('workspaces').add( ws );
-        that.set('currentWorkspace', ws.get('_id') );
+        this.get('workspaces').add( ws );
+        this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
 
-      }).fail(function(){
+      }.bind(this)).fail(function(){
 
         console.error("failed to get new workspace");
 
@@ -157,18 +155,16 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     loadWorkspace: function( id, callback ){
 
-      var that = this;
+      this.context.loadWorkspace(id).done(function(data){
 
-      Storage.loadWorkspace(id).done(function(data){
-
-        var ws = that.get('workspaces').get(id);
+        var ws = this.get('workspaces').get(id);
         if(ws) return;
 
-        var ws = new Workspace(data, {app: that});
-        that.get('workspaces').add( ws );
+        var ws = new Workspace(data, {app: this});
+        this.get('workspaces').add( ws );
         if (callback) callback( ws );
 
-      }).fail(function(){
+      }.bind(this)).fail(function(){
 
         console.error("failed to get workspace with id: " + id);
 
@@ -210,14 +206,12 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         this.set('currentWorkspace', id);
       }
 
-      var that = this;
-
       this.loadWorkspace( id, function(ws){
 
-        that.set('currentWorkspace', ws.get('_id') );
+        this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
 
-      });
+      }.bind(this));
 
     },
 

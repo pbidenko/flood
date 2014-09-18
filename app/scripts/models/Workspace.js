@@ -1,5 +1,5 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node', 'Marquee', 'WorkspaceResolver', 'Storage', 'NodeFactory', 'GeometryMessage'], 
-    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node, Marquee, WorkspaceResolver, Storage, nodeFactory, GeometryMessage) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node', 'Marquee', 'WorkspaceResolver', 'NodeFactory', 'GeometryMessage'], 
+    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node, Marquee, WorkspaceResolver, nodeFactory, GeometryMessage) {
 
   return Backbone.Model.extend({
 
@@ -39,6 +39,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
     dragSelect: false,
 
     runAllowed: false,
+
+    pendingRequestsCount: 0,
 
     initialize: function(atts, arr) {
 
@@ -86,7 +88,6 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.resolver.resolveAll();
 
       this.app.trigger('workspaceLoaded', this);
-      //this.app.get('workspaces').trigger('atata', this);
 
     },
     
@@ -850,6 +851,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
             if (node) {
                 node.updateValue(param.result[i]);
                 this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeID)));
+
+                if(this.pendingRequestsCount === 0){
+                    this.app.trigger('show-progress');
+                }
+                this.pendingRequestsCount++;
             }
         }
     },
@@ -859,10 +865,15 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         if (node && param.geometryData.graphicPrimitivesData) {
             node.updateNodeGeometry(param);
         }
+
+        this.pendingRequestsCount--;
+        if(this.pendingRequestsCount === 0) {
+            this.app.trigger('hide-progress');
+        }
     },
 
     sync: function( method, model, options ) {
-      return Storage.syncWorkspace(method, model, options);
+      return this.app.context.syncWorkspace(method, model, options);
     }
 
   });
