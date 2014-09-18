@@ -200,7 +200,7 @@ function zoomToFit() {
 
 		var target = new THREE.Vector3(centerX, centerY, centerZ);
 		var vec = new THREE.Vector3();
-		vec.subVectors( new THREE.Vector3( distanceFactor, distanceFactor, distanceFactor ), target );
+		vec.addVectors( new THREE.Vector3( distanceFactor, distanceFactor, distanceFactor ), target );
 		controls.target = target;
 		controls.object.position = vec;
 		camera.updateProjectionMatrix();
