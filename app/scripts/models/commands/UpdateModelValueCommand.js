@@ -1,4 +1,4 @@
-define(['RecordableCommand'], function (RecordableCommand) {
+define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, helpers) {
     'use strict';
 
     var UpdateModelValueCommand = RecordableCommand.extend({
@@ -17,10 +17,12 @@ define(['RecordableCommand'], function (RecordableCommand) {
         }
     });
 
-    function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-    
+    var typeMap = {
+        'Input': {param: 'name', value: 'InputSymbol'},
+        'Output': {param: 'name', value: 'Symbol'},
+        'Code Block': {param: 'code', value: 'Code'}
+    };
+
     var getInstance = function(id, name, value){
         return new UpdateModelValueCommand({}, {
             modelGuid: id,
@@ -33,9 +35,12 @@ define(['RecordableCommand'], function (RecordableCommand) {
         var values = [];
         for(var name in options.extra) {
             if (!options.lastValue || ( options.lastValue[name] !== options.extra[name]) ) {
-                //Dynamo is only able to handle 'Value' now
-                if (name === 'value' || name === 'code') {
-                    values.push(getInstance(options._id, capitalizeFirstLetter(name), options.extra[name]));
+
+                if (typeMap.hasOwnProperty(options.typeName) && typeMap[options.typeName].param === name) {
+                    values.push(getInstance(options._id, typeMap[options.typeName].value, options.extra[name]));
+                }
+                else if (name === 'value') {
+                    values.push(getInstance(options._id, helpers.capitalizeFirstLetter(name), options.extra[name]));
                 }
             }
         }

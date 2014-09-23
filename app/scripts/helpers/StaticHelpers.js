@@ -48,6 +48,10 @@ define(function(){
         getFloatArray: function (base64){
             var buffer = this.getArrayFromBase64string(base64).buffer;
             return Array.apply([], new Float32Array(buffer));
+        },
+
+        capitalizeFirstLetter: function(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
         }
     };
 });
