@@ -4,12 +4,12 @@ define(['backbone'], function (Backbone) {
         this.nodes = data.nodes.map( function(node){
             var returnValue = {
                 _id : node._id,
-                creatingName : node.creatingName,
-                displayedName : node.displayedName,
+                creationName : node.creationName,
+                displayName : node.displayName,
                 position : node.position
             };
 
-            if (node.creatingName === 'Number') {
+            if (node.creationName === 'Number') {
                 returnValue.extra = { value: node.value };
             }
 

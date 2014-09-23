@@ -1,6 +1,6 @@
 define(['backbone', 'WorkspaceBrowserElements'], function(Backbone, WorkspaceBrowserElements) {
 
-	return Backbone.Model.extend({
+    return Backbone.Model.extend({
 
         defaults: {
             workspaces: null

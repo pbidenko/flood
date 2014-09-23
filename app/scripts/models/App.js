@@ -22,25 +22,32 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       clipBoard: {}
     },
 
-    initialize: function(args, options) {
-        this.on('change:currentWorkspace', this.updateCurrentWorkspace, this);
-        this.updateCurrentWorkspace();
+    initialize: function(args, options){
+      this.on('change:currentWorkspace', this.updateCurrentWorkspace, this);
+      this.updateCurrentWorkspace();
 
-        this.login = new Login({}, { app: this });
+      this.login = new Login({}, { app: this });
 
-        this.SearchElements = new SearchElements({app: this});
-        this.SearchElements.reset();
-        this.SearchElements.fetch();
+      this.SearchElements = new SearchElements({app:this});
+      this.SearchElements.reset();
+      this.SearchElements.fetch();
 
-        this.context = new Storage({ baseUrl: settings.storageUrl });
+      this.context = new Storage({ baseUrl: settings.storageUrl });
+
+      this.get('workspaces').on('remove', this.workspaceRemoved, this);
     },
+
+    workspaceIdsAwaitingParse : [],
 
     parse : function(resp) {
 
       var old = this.get('workspaces').slice();
+      this.workspaceIdsAwaitingParse = _.pluck( resp.workspaces, '_id');
+
       this.get('workspaces').add(resp.workspaces, {app: this});
       this.get('workspaces').remove(old);
 
+      this.workspaceIdsAwaitingParse = [];
       resp.workspaces = this.get('workspaces');
       return resp;
 
@@ -67,6 +74,12 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
         this._isSerializing = false;
 
+      // dont save the background workspaces, they will be dynamically
+      // loaded on startup
+      var backWs = this.get('backgroundWorkspaces');
+      json.workspaces = json.workspaces.filter(function(x){
+        return !_.contains( backWs, x._id );
+      });
         return json;
     },
 
@@ -90,35 +103,29 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     },
 
     getLoadedWorkspace: function(id){
-
-      var workspaces = this.get('workspaces').where({ _id: id });
-
-      if (workspaces.length === 0) {
-        return undefined;
-      }
-
-      return workspaces[0];
-
+      return this.get('workspaces').get(id);
     },
 
-    newWorkspace: function( callback ) {
+    newWorkspace: function( callback ){
 
       this.context.createNewWorkspace().done(function(data){
 
-        var ws = new Workspace(data, {app: that });
+        var ws = new Workspace(data, {app: this });
         this.get('workspaces').add( ws );
         this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
-        }.bind(this)).fail(function () {
 
-            console.error("failed to get new workspace");
+      }.bind(this)).fail(function(){
 
-        });
+        console.error("failed to get new workspace");
+
+      });
+
     },
 
     newNodeWorkspace: function( callback ){
 
-        this.context.createNewNodeWorkspace().done(function(data){
+      this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
         data.guid = this.makeId();
@@ -127,38 +134,42 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
         this.get('workspaces').add( ws );
         this.set('currentWorkspace', ws.get('_id') );
-            if (callback) {
-                callback(ws);
-            }
+        if (callback) callback( ws );
 
-        }.bind(this)).fail(function () {
+      }.bind(this)).fail(function(){
 
-            console.error("failed to get new workspace");
+        console.error("failed to get new workspace");
 
-        });
+      });
+
     },
 
-    loadWorkspace: function( id, callback ) {
+    loadWorkspaceDependency: function(id){
+
+      if ( _.contains( this.workspaceIdsAwaitingParse, id ) ) return;
+
+      this.setWorkspaceToBackground( id );
+      this.loadWorkspace( id );
+
+    },
+
+    loadWorkspace: function( id, callback ){
+
+      this.context.loadWorkspace(id).done(function(data){
 
         var ws = this.get('workspaces').get(id);
-        if (ws)
-            return;
+        if(ws) return;
 
-        this.context.loadWorkspace(id).done(function(data){
+        var ws = new Workspace(data, {app: this});
+        this.get('workspaces').add( ws );
+        if (callback) callback( ws );
 
-          var ws = this.get('workspaces').get(id);
-            if (ws) return;
-            var ws = new Workspace(data, {app: this});
-            this.get('workspaces').add(ws);
-            if (callback) {
-                callback(ws);
-            }
+      }.bind(this)).fail(function(){
 
-        }.bind(this)).fail(function () {
+        console.error("failed to get workspace with id: " + id);
 
-            console.error("failed to get workspace with id: " + id);
+      });
 
-        });
     },
 
     isBackgroundWorkspace: function(id){
@@ -177,12 +188,10 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     removeWorkspaceFromBackground: function( id ){
 
-      if ( this.isBackgroundWorkspace(id) ){
-
+      if ( _.contains( this.get('backgroundWorkspaces'), id) ){
         var copy = this.get('backgroundWorkspaces').slice(0);
         copy.remove(copy.indexOf(id));
         this.set('backgroundWorkspaces', copy);
-
       }
 
     },
@@ -197,13 +206,13 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         this.set('currentWorkspace', id);
       }
 
-        this.loadWorkspace(id, function (ws) {
+      this.loadWorkspace( id, function(ws){
 
-            this.set('currentWorkspace', ws.get('_id'));
-            if (callback) {
-                callback(ws);
-            }
-        }.bind(this));
+        this.set('currentWorkspace', ws.get('_id') );
+        if (callback) callback( ws );
+
+      }.bind(this));
+
     },
 
     updateCurrentWorkspace: function(){
@@ -223,6 +232,8 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.get('workspaces').get(this.get('currentWorkspace')).set('current', true);
     }
   });
+
+
 });
 
 

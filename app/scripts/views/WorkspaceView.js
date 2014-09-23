@@ -257,7 +257,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
         if ( nodeView === undefined){
 
           var NodeView = NodeViewTypes.Base;
-          if ( NodeViewTypes[nodeModel.get('typeName')] )
+          if ( NodeViewTypes[ nodeModel.get('typeName') ] != undefined)
           {
             NodeView = NodeViewTypes[ nodeModel.get('typeName') ];
           }

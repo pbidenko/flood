@@ -4,8 +4,8 @@ define(['backbone'], function(Backbone) {
 
     defaults: {
       name: null,
-      creatingName: null,
-      displayedName: null,
+      creationName: null,
+      displayName: null,
       category: null,
       description: null,
       inPort: [],

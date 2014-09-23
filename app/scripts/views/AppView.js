@@ -12,9 +12,12 @@ define([  'backbone',
           'HelpView',
           'Help',
           'LoginView',
-          'Login'],
-          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, WorkspaceTabView, 
-            Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
+          'Login',
+          'FeedbackView',
+          'Feedback' ], 
+          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
+            WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
+            Help, LoginView, Login, FeedbackView, Feedback ) {
 
   return Backbone.View.extend({
 
@@ -37,7 +40,7 @@ define([  'backbone',
       this.model.on('hide-progress', this.hideProgress, this);
 
       this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
-      this.model.login.on('change:showing', this.showHelpOnFirstExperience, this );
+      this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
 
@@ -49,10 +52,11 @@ define([  'backbone',
     events: {
       'click #save-button' : 'saveClick',
       'click .workspaces_curtain' : 'endSearch',
-      'click #help-button': 'showHelp',
+      'click #help-button': 'toggleHelp',
       'click #settings-button': 'showSettings',
       'click #workspace_hide' : 'toggleViewer',
       'click #workspace-browser-button': 'toggleBrowser',
+      'click #feedback-button': 'toggleFeedback',
 
       'click #add-project-workspace' : 'newWorkspace',
       'click #add-node-workspace' : 'newNodeWorkspace',
@@ -67,14 +71,13 @@ define([  'backbone',
 
       var that = this;
 
-      if (that.model.login.get('isLoggedIn')  && that.model.get('isFirstExperience')){
-        setTimeout(function(){
+      setTimeout(function(){
+        if (that.model.login.get('isLoggedIn') && that.model.get('isFirstExperience')){
           that.model.set( 'showingHelp', true);
-          that.model.set( 'isFirstExperience', false );
-         }, 800);
-      } else {
-        that.model.set( 'showingHelp', false);
-      }
+        } else {
+          that.model.set( 'showingHelp', false);
+        }
+      }, 800);
 
     },
 
@@ -160,7 +163,6 @@ define([  'backbone',
       }
       
       if (this.model.get('showingHelp') === true){
-        // the workspace must be focused before showing help
         this.focusWorkspace();
         this.helpView.render();
         this.helpView.$el.fadeIn();  
@@ -182,12 +184,20 @@ define([  'backbone',
       }
     },
 
+    toggleHelp: function(){
+      this.model.set('showingHelp', !this.model.get('showingHelp'));
+    },
+
+    toggleFeedback: function(){
+      this.model.set('showingFeedback', !this.model.get('showingFeedback'));
+    },
+
     showHelp: function(){
       this.model.set('showingHelp', true);
     },
 
     hideHelp: function(){
-      this.model.set('showingHelp', true);
+      this.model.set('showingHelp', false);
     },
 
     showFeedback: function(){
@@ -195,7 +205,7 @@ define([  'backbone',
     },
 
     hideFeedback: function(){
-      this.model.set('showingFeedback', true);
+      this.model.set('showingFeedback', false);
     },
 
     showLogin: function(){

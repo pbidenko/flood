@@ -5,6 +5,10 @@ module.exports = {
 
   localAuth: true,
 
+  feedback: { 
+    email: process.env.FEEDBACK_EMAIL || "Your email"
+  },
+
   mailgun: {
     login: process.env.MAILGUN_LOGIN || 'Your Mailgun SMTP Username',
     password: process.env.MAILGUN_PASSWORD || 'Your Mailgun SMTP Password'
@@ -32,7 +36,7 @@ module.exports = {
     passReqToCallback: true
   },
 
-  githubAuth: true,
+  githubAuth: false,
   github: {
     clientID: process.env.GITHUB_ID || 'Your Client ID',
     clientSecret: process.env.GITHUB_SECRET || 'Your Client Secret',
@@ -40,7 +44,7 @@ module.exports = {
     passReqToCallback: true
   },
 
-  twitterAuth: true,
+  twitterAuth: false,
   twitter: {
     consumerKey: process.env.TWITTER_KEY || 'Your Consumer Key',
     consumerSecret: process.env.TWITTER_SECRET  || 'Your Consumer Secret',
@@ -56,7 +60,7 @@ module.exports = {
     passReqToCallback: true
   },
 
-  linkedinAuth: true,
+  linkedinAuth: false,
   linkedin: {
     clientID: process.env.LINKEDIN_ID || 'Your Client ID',
     clientSecret: process.env.LINKEDIN_SECRET || 'Your Client Secret',

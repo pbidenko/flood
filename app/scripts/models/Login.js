@@ -21,10 +21,10 @@ define(['backbone'], function(Backbone) {
 	  			this.set('email', e.email);
 	  			this.set('isLoggedIn', true);
 	  		}
-            else {
+	  		else {
 	  			this.set('isLoggedIn', false);
 	  		}
-        }.bind(this));
+	  	}.bind(this));
 
 	  },
 

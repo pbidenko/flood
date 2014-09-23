@@ -59,17 +59,24 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       
       // build button tooltips
-      this.$el.find('#undo-button').tooltip({title: "Ctrl/Cmd Z", delay: del});
-      this.$el.find('#redo-button').tooltip({title: "Ctrl/Cmd Y", delay: del});
+      this.$el.find('#undo-button').tooltip({title: "Undo"});
+      this.$el.find('#redo-button').tooltip({title: "Redo"});
 
-      this.$el.find('#copy-button').tooltip({title: "Ctrl/Cmd C", delay: del});
-      this.$el.find('#paste-button').tooltip({title: "Ctrl/Cmd V", delay: del});
+      this.$el.find('#copy-button').tooltip({title: "Copy"});
+      this.$el.find('#paste-button').tooltip({title: "Paste"});
 
-      this.$el.find('#delete-button').tooltip({title: "Backspace/Delete", delay: del});
+      this.$el.find('#delete-button').tooltip({title: "Delete"});
 
-      this.$el.find('#zoomin-button').tooltip({title: "Ctrl/Cmd +", delay: del});
-      this.$el.find('#zoomout-button').tooltip({title: "Ctrl/Cmd -", delay: del});
-      this.$el.find('#zoomreset-button').tooltip({title: "Ctrl/Cmd 0", delay: del});
+      this.$el.find('#zoomin-button').tooltip({title: "Zoom in"});
+      this.$el.find('#zoomout-button').tooltip({title: "Zoom out"});
+      this.$el.find('#zoomreset-button').tooltip({title: "Zoom reset"});
+
+      this.$el.find('#export-button').tooltip({title: "Export as STL"});
+
+      $('#workspace_hide').tooltip({title: "Switch between 3D view and nodes"});
+
+      $('#help-button').tooltip({title: "Help", placement: "left"});
+      $('#feedback-button').tooltip({title: "Feedback", placement: "left"});
 
     },
 
@@ -131,7 +138,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
     addNode: function(nodeModel){
 
-      this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creatingName'), this.getWorkspaceCenter());
+      this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creationName'), this.getWorkspaceCenter());
       this.hideSearch();
     },
 
@@ -255,7 +262,12 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
         var pom = document.createElement('a');
         pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
         pom.setAttribute('download', filename);
+
+        document.body.appendChild( pom );
+
         pom.click();
+
+        document.body.removeChild( pom );
     },
 
     elementClick: function(model){
@@ -277,7 +289,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
         }
 
         if (event.keyCode === 13) { // enter key causes first result to be inserted
-            var elementToAdd = this.modelsListView.findElementByCreatingName(searchText);
+            var elementToAdd = this.modelsListView.findElementByCreationName(searchText);
             elementToAdd && this.elementClick(elementToAdd.model);                
 
         } 

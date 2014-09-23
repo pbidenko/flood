@@ -89,11 +89,14 @@ define(['backbone'], function (Backbone) {
             this.set('isRunning', false);
             this.runCount++;
 
+            this.trigger('runComplete');
+
         },
 
-        cancel: function () {
+        cancel: function(){
 
             this.set('isRunning', false);
+            this.worker.terminate();
             this.reset();
 
         },

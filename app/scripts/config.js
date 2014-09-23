@@ -1,5 +1,4 @@
 /*global require*/
-//TO DO: Move this use strict directive inside modules, because this using is not correct and has influence on 3-rd party JS modules
 'use strict';
 
 require.config({
@@ -96,14 +95,14 @@ require.config({
         // backbone collections
         Connections: 'collections/Connections',
         //Use DynamoSearchElements class in case of websocket connection, otherwise use FloodSearchElements
-        SearchElements: 'collections/DynamoSearchElements', //'collections/FloodSearchElements'
+        SearchElements: 'collections/DynamoSearchElements', // 'collections/FloodSearchElements'
         Nodes: 'collections/Nodes',
         Workspaces: 'collections/Workspaces',
         WorkspaceBrowserElements: 'collections/WorkspaceBrowserElements',
 
         // backbone models
         //Use DynamoApp class in case of websocket connection, otherwise use App
-        App: 'models/DynamoApp',//'models/App',
+        App: 'models/DynamoApp', // 'models/App'
         Connection: 'models/Connection',
         Marquee: 'models/Marquee',
         Node: 'models/nodes/Node',
@@ -116,7 +115,9 @@ require.config({
         //Use DynamoRunner class in case of websocket connection, otherwise use FloodRunner
         Runner: 'models/DynamoRunner', // 'models/FloodRunner'
         Help: 'models/Help',
+        Feedback: 'models/Feedback',
         Login: 'models/Login',
+        WorkspaceResolver: 'models/WorkspaceResolver',
         WorkspaceBrowserElement: 'models/WorkspaceBrowserElement',
         WorkspaceBrowser: 'models/WorkspaceBrowser',
         SocketConnection: 'models/SocketConnection',
@@ -161,6 +162,7 @@ require.config({
         WorkspaceView: 'views/WorkspaceView',
         WorkspaceTabView: 'views/WorkspaceTabView',
         HelpView: 'views/HelpView',
+        FeedbackView: 'views/FeedbackView',
         LoginView: 'views/LoginView',
         WorkspaceBrowserElementView: 'views/WorkspaceBrowserElementView',
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
@@ -176,8 +178,8 @@ require.config({
         FormulaView: 'views/NodeViews/Formula',
         InputView: 'views/NodeViews/Input',
         OutputView: 'views/NodeViews/Output',
-
-        CSGNodeView: 'views/NodeViews/ThreeCSG',
+        CustomNodeView: 'views/NodeViews/CustomNode',
+        ThreeCSGNodeView: 'views/NodeViews/ThreeCSG',
 
         OrbitControls: 'lib/OrbitControls',
         Viewport: 'lib/Viewport',
@@ -196,9 +198,9 @@ require.config({
         jqueryuicore: '../bower_components/jquery.ui/ui/jquery.ui.core',
         jqueryuimouse: '../bower_components/jquery.ui/ui/jquery.ui.mouse',
         jqueryuiwidget: '../bower_components/jquery.ui/ui/jquery.ui.widget',
-        jquery: '../bower_components/jquery/jquery',
-        backbone: '../bower_components/backbone-amd/backbone',
-        underscore: '../bower_components/underscore-amd/underscore'
+        jquery: '../bower_components/jquery/jquery.min',
+        backbone: '../bower_components/backbone-amd/backbone-min',
+        underscore: '../bower_components/underscore-amd/underscore-min',
     }
 });
 

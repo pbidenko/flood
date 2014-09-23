@@ -14,7 +14,7 @@ define(['RecordableCommand'], function (RecordableCommand) {
 
         initialize : function (attr, options) {
             this.set('nodeId', options._id);
-            this.set('nodeName', options.creatingName);
+            this.set('nodeName', options.creationName);
             this.set('x', options.position[0]);
             this.set('y', options.position[1]);
         }
