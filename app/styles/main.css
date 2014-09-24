@@ -1733,7 +1733,7 @@ body {
 	top: 0;
 }
 
-span.expcol, span.category {
+.non-selectable, span.expcol, span.category {
 	cursor:default !important;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
