@@ -34,10 +34,6 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
       'click #redo-button': 'redoClick',
       'click #copy-button': 'copyClick',
       'click #paste-button': 'pasteClick',
-      'click #zoomin-button': 'zoominClick',
-      'click #zoomout-button': 'zoomoutClick',
-      'click #zoomreset-button': 'zoomresetClick',
-      'click #zoomtofit-button': 'zoomToFitClick',
       'click #export-button': 'exportClick'
     },
 
@@ -67,9 +63,10 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       this.$el.find('#delete-button').tooltip({title: "Delete"});
 
-      this.$el.find('#zoomin-button').tooltip({title: "Zoom in"});
-      this.$el.find('#zoomout-button').tooltip({title: "Zoom out"});
-      this.$el.find('#zoomreset-button').tooltip({title: "Zoom reset"});
+      $('#zoomtofit-button').tooltip({title: "Zoom to fit", placement: "left"});
+      $('#zoomin-button').tooltip({title: "Zoom in", placement: "left"});
+      $('#zoomout-button').tooltip({title: "Zoom out", placement: "left"});
+      $('#zoomreset-button').tooltip({title: "Zoom reset", placement: "left"});
 
       this.$el.find('#export-button').tooltip({title: "Export as STL"});
 
@@ -107,22 +104,6 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
     redoClick: function(){
       this.currentWorkspace().redo();
-    },
-
-    zoomresetClick: function(){
-      this.currentWorkspace().set('zoom', 1.0);
-    },
-
-    zoominClick: function(){
-      this.currentWorkspace().zoomIn();
-    },
-
-    zoomoutClick: function(){
-      this.currentWorkspace().zoomOut();
-    },
-
-    zoomToFitClick: function(){
-      zoomToFit();
     },
 
     getWorkspaceCenter: function(){

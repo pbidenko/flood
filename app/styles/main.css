@@ -424,6 +424,27 @@ input[type="button"].btn-block {
 	right: 0px;
 }
 
+#zoom-menu .menu-element {
+	height: 40px;
+	width: 38px;
+	font-size: 14px;
+	border:none;
+}
+
+#zoom-menu .menu-element:hover {
+	background: #444;
+	color: white;
+}
+
+#zoom-menu {
+	z-index: 99;
+	background: #222;
+	position: absolute;
+	width: 38px;
+	top: 200px;
+	right: 0px;
+}
+
 #feedback-box p {
 	font-style: 12px;
 	padding: 5px;
@@ -1729,6 +1750,7 @@ li.notmatch{
 
 div.tooltip-inner {
 	max-width: 400px;
+	white-space: nowrap;
 }
 
 .code-block-input {
