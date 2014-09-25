@@ -596,12 +596,12 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       },
 
-                addNode: function (data) {
+      addNode: function (data) {
 
-        var node = new Node( data, { workspace: this });
+        var node = nodeFactory.create({ config: data, workspace: this });
         this.get('nodes').add( node );
 
-                },
+      },
 
       removeNode: function(data){
 
