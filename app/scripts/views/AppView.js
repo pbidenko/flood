@@ -58,6 +58,11 @@ define([  'backbone',
       'click #workspace-browser-button': 'toggleBrowser',
       'click #feedback-button': 'toggleFeedback',
 
+      'click #zoomin-button': 'zoominClick',
+      'click #zoomout-button': 'zoomoutClick',
+      'click #zoomreset-button': 'zoomresetClick',
+      'click #zoomtofit-button': 'zoomToFitClick',
+
       'click #add-project-workspace' : 'newWorkspace',
       'click #add-node-workspace' : 'newNodeWorkspace',
 
@@ -249,6 +254,38 @@ define([  'backbone',
 
     },
 
+    zoomresetClick: function(){
+      if ( this.lookingAtViewer ){
+        controls.reset();
+      } else {
+        this.getCurrentWorkspace().set('zoom', 1.0);
+      }
+    },
+
+    zoominClick: function(){
+      if ( this.lookingAtViewer ){
+        controls.dollyOut();
+      } else {
+        this.getCurrentWorkspace().zoomIn();
+      }
+    },
+
+    zoomoutClick: function(){
+      if ( this.lookingAtViewer ){
+        controls.dollyIn();
+      } else {
+        this.getCurrentWorkspace().zoomOut();
+      }
+    },
+
+    zoomToFitClick: function(){
+      if ( this.lookingAtViewer ){
+        zoomToFit();
+      } else {
+        this.zoomToFit();
+      }
+    },
+
     showingHelp: false,
     showingBrowser: false,
     showingSettings: false,
@@ -438,7 +475,7 @@ define([  'backbone',
     },
 
     getCurrentWorkspace: function(){
-      return this.get('workspaces').get(this.get('currentWorkspace'));
+      return this.model.get('workspaces').get(this.model.get('currentWorkspace'));
     },
 
     toggleViewer: function(event) {
