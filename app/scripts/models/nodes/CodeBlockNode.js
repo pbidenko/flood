@@ -57,13 +57,12 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 updated = true;
             }
 
-            if (values.state !== 'Active') {
-                if (this.get('failureMessage') !== values.stateMessage) {
-                    this.set('failureMessage', values.stateMessage);
-                }
+            if (values.state === 'Error' || values.state === 'Warning') {
+                this.trigger('evalFailed', values.stateMessage);
             }
-            else if (this.get('failureMessage') !== '') {
+            else {
                 this.set('failureMessage', '');
+                this.trigger('evalBegin');
             }
 
             if (updated) {
