@@ -496,6 +496,63 @@ define([  'backbone',
 
     hideProgress: function(){
       this.$el.find('.busy-indicator').hide();
+    },
+
+    zoomToFit: function(){
+
+      var width = this.currentWorkspaceView.$el.width(),
+          height = this.currentWorkspaceView.$el.height(),
+          ws = this.getCurrentWorkspace(),
+          nodes = ws.get('nodes'),
+          positionsX = [],
+          positionsY = [],
+          node,
+          nodeWidth,
+          nodeHeight;
+
+      for(var i = 0; i < nodes.length; i++){
+
+        node = nodes.models[i];
+
+        nodeWidth = this.currentWorkspaceView.nodeViews[node.get('_id')].$el.width();
+        nodeHeight = this.currentWorkspaceView.nodeViews[node.get('_id')].$el.height();
+
+        positionsX[2*i] = node.get('position')[0];
+        positionsY[2*i] = node.get('position')[1];
+
+        positionsX[2*i + 1] = node.get('position')[0] + nodeWidth;
+        positionsY[2*i + 1] = node.get('position')[1] + nodeHeight;
+
+      };
+
+      var minX = Math.min.apply(this, positionsX) - 25;
+      var minY = Math.min.apply(this, positionsY) - 25;
+      var maxX = Math.max.apply(this, positionsX) + 25;
+      var maxY = Math.max.apply(this, positionsY) + 25;
+
+      var centerX = (maxX + minX) / 2;
+      var centerY = (maxY + minY) / 2;
+
+      var zoomX = width / (maxX - minX);
+      var zoomY = height / (maxY - minY);
+      var zoom = Math.min.apply(this, [zoomX, zoomY]);
+
+      ws.set('zoom', zoom);
+
+      var zoomedCenterX = centerX * zoom;
+      var zoomedCenterY = centerY * zoom;
+
+      var zoomedX = minX * zoom;
+      var zoomedY = minY * zoom;
+
+      var wsCenterX = zoomedX + width / 2;
+      var wsCenterY = zoomedY + height / 2;
+
+      var deltaX = wsCenterX - zoomedCenterX;
+      var deltaY = wsCenterY - zoomedCenterY;
+
+      this.currentWorkspaceView.$el.scrollLeft(zoomedX - deltaX); // X
+      this.currentWorkspaceView.$el.scrollTop(zoomedY - deltaY); // Y
     }
 
   });
