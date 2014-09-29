@@ -125,11 +125,12 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 this.set('lastValue', values.data);
             }
 
-            if (values.state !== 'Active') {
-                this.set('failureMessage', values.stateMessage);
+            if (values.state === 'Error' || values.state === 'Warning') {
+                this.trigger('evalFailed', values.stateMessage);
             }
             else {
                 this.set('failureMessage', '');
+                this.trigger('evalBegin');
             }
         },
 

@@ -22,6 +22,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
         onChangedExtra: function () {
             this.render();
+            this.$el.addClass('node-evaluating');
             this.model.trigger('updateRunner');
             this.model.workspace.run();
         },
@@ -43,6 +44,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             }
 
             this.render();
+            this.$el.removeClass('node-evaluating');
         },
 
         removeConnections: function (ex) {
