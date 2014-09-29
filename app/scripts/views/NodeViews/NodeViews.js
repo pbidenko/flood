@@ -6,11 +6,11 @@ define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'ThreeCSGNodeView', 'For
   };
 
   nodeViewTypes.Base = ThreeCSGNodeView;
-  nodeViewTypes.Watch = WatchNodeView;
+  nodeViewTypes.Show = WatchNodeView;
   nodeViewTypes.Number = NumNodeView;
   nodeViewTypes.CodeBlock = CodeBlockView;
   nodeViewTypes.CustomNode = CustomNodeView;
-  nodeViewTypes.Formula = FormulaView;
+  nodeViewTypes.Script = FormulaView;
   nodeViewTypes.Input = InputView;
   nodeViewTypes.Output = OutputView;
 

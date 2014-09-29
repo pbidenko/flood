@@ -178,7 +178,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 var ex = JSON.parse(JSON.stringify(that.model.get('extra')));
                 if (!that.input.val()) {
                     that.selectable = true;
-                    that.model.workspace.removeNodeByID(that.model.get('_id'));
+                    that.model.workspace.removeNodeById(that.model.get('_id'));
                     return;
                 }
                 if (ex.code === that.input.val())

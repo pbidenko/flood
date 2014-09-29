@@ -61,7 +61,6 @@ define([  'backbone',
       'click #zoomin-button': 'zoominClick',
       'click #zoomout-button': 'zoomoutClick',
       'click #zoomreset-button': 'zoomresetClick',
-      'click #zoomtofit-button': 'zoomToFitClick',
 
       'click #add-project-workspace' : 'newWorkspace',
       'click #add-node-workspace' : 'newNodeWorkspace',
@@ -114,6 +113,10 @@ define([  'backbone',
       if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "INPUT") return;
       if (e.target.nodeName === "INPUT") return;
 
+      // do not capture from textarea
+      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "TEXTAREA" ) return;
+      if (e.target.nodeName === "TEXTAREA") return;
+
       // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
       switch (e.keyCode) {
         case 78:
@@ -146,7 +149,7 @@ define([  'backbone',
 
     hideSearch: function(){
       this.model.set('showingSearch', false);
-      this.workspaceControlsView && this.workspaceControlsView.hideSearch();      
+      this.workspaceControlsView && this.workspaceControlsView.hideSearch();
     },
 
     viewBrowser: function(){
@@ -256,9 +259,9 @@ define([  'backbone',
 
     zoomresetClick: function(){
       if ( this.lookingAtViewer ){
-        controls.reset();
+        zoomToFit();
       } else {
-        this.getCurrentWorkspace().set('zoom', 1.0);
+        this.currentWorkspaceView.zoomAll();
       }
     },
 
@@ -275,14 +278,6 @@ define([  'backbone',
         controls.dollyIn();
       } else {
         this.getCurrentWorkspace().zoomOut();
-      }
-    },
-
-    zoomToFitClick: function(){
-      if ( this.lookingAtViewer ){
-        zoomToFit();
-      } else {
-        this.zoomToFit();
       }
     },
 
@@ -334,6 +329,18 @@ define([  'backbone',
 
       this.workspaceTabViews[workspace.get('_id')].$el.remove();
       delete this.workspaceTabViews[workspace.get('_id')];
+
+    },
+
+    getCurrentWorkspaceCenter: function(){
+
+      var w = this.currentWorkspaceView.$el.width()
+        , h = this.currentWorkspaceView.$el.height()
+        , ho = this.currentWorkspaceView.$el.scrollTop()
+        , wo = this.currentWorkspaceView.$el.scrollLeft()
+        , zoom = 1 / this.model.getCurrentWorkspace().get('zoom');
+
+      return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
 
     },
 
@@ -496,63 +503,6 @@ define([  'backbone',
 
     hideProgress: function(){
       this.$el.find('.busy-indicator').hide();
-    },
-
-    zoomToFit: function(){
-
-      var width = this.currentWorkspaceView.$el.width(),
-          height = this.currentWorkspaceView.$el.height(),
-          ws = this.getCurrentWorkspace(),
-          nodes = ws.get('nodes'),
-          positionsX = [],
-          positionsY = [],
-          node,
-          nodeWidth,
-          nodeHeight;
-
-      for(var i = 0; i < nodes.length; i++){
-
-        node = nodes.models[i];
-
-        nodeWidth = this.currentWorkspaceView.nodeViews[node.get('_id')].$el.width();
-        nodeHeight = this.currentWorkspaceView.nodeViews[node.get('_id')].$el.height();
-
-        positionsX[2*i] = node.get('position')[0];
-        positionsY[2*i] = node.get('position')[1];
-
-        positionsX[2*i + 1] = node.get('position')[0] + nodeWidth;
-        positionsY[2*i + 1] = node.get('position')[1] + nodeHeight;
-
-      };
-
-      var minX = Math.min.apply(this, positionsX) - 25;
-      var minY = Math.min.apply(this, positionsY) - 25;
-      var maxX = Math.max.apply(this, positionsX) + 25;
-      var maxY = Math.max.apply(this, positionsY) + 25;
-
-      var centerX = (maxX + minX) / 2;
-      var centerY = (maxY + minY) / 2;
-
-      var zoomX = width / (maxX - minX);
-      var zoomY = height / (maxY - minY);
-      var zoom = Math.min.apply(this, [zoomX, zoomY]);
-
-      ws.set('zoom', zoom);
-
-      var zoomedCenterX = centerX * zoom;
-      var zoomedCenterY = centerY * zoom;
-
-      var zoomedX = minX * zoom;
-      var zoomedY = minY * zoom;
-
-      var wsCenterX = zoomedX + width / 2;
-      var wsCenterY = zoomedY + height / 2;
-
-      var deltaX = wsCenterX - zoomedCenterX;
-      var deltaY = wsCenterY - zoomedCenterY;
-
-      this.currentWorkspaceView.$el.scrollLeft(zoomedX - deltaX); // X
-      this.currentWorkspaceView.$el.scrollTop(zoomedY - deltaY); // Y
     }
 
   });
