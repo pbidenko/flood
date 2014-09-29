@@ -42,31 +42,6 @@ require.config({
             ],
             exports: 'OrbitControls'
         },
-        jqueryuislider: {
-            deps: [
-                'jquery',
-                'jqueryuimouse',
-                'jqueryuicore',
-                'jqueryuiwidget'
-            ],
-            exports: 'jqueryuislider'
-        },
-        jqueryuidraggable: {
-            deps: [
-                'jquery',
-                'jqueryuimouse',
-                'jqueryuicore',
-                'jqueryuiwidget'
-            ],
-            exports: 'jqueryuidraggable'
-        },
-        jqueryuimouse: {
-            deps: [
-                'jquery',
-                'jqueryuiwidget'
-            ],
-            exports: 'jqueryuimouse'
-        },
         jqueryuicore: {
             deps: [
                 'jquery'
@@ -78,6 +53,41 @@ require.config({
                 'jquery'
             ],
             exports: 'jqueryuiwidget'
+        },
+        jqueryuimouse: {
+            deps: [
+                'jquery',
+                'jqueryuiwidget'
+            ],
+            exports: 'jqueryuimouse'
+        },
+        jqueryuitouchpunch: {
+            deps: [
+                'jquery',
+                'jqueryuicore',
+                'jqueryuimouse'
+            ],
+            exports: 'jqueryuitouchpunch'
+        },
+        jqueryuislider: {
+            deps: [
+                'jquery',
+                'jqueryuitouchpunch',
+                'jqueryuimouse',
+                'jqueryuicore',
+                'jqueryuiwidget'
+            ],
+            exports: 'jqueryuislider'
+        },
+        jqueryuidraggable: {
+            deps: [
+                'jquery',
+                'jqueryuitouchpunch',
+                'jqueryuimouse',
+                'jqueryuicore',
+                'jqueryuiwidget'
+            ],
+            exports: 'jqueryuidraggable'
         },
         bootstrap: {
             deps: [
@@ -189,10 +199,12 @@ require.config({
         scheme: 'lib/flood/scheme',
 
         // bower
+        Hammer: '../bower_components/hammerjs/hammer',
         almond: '../bower_components/almond/almond',
         bootstrap: '../bower_components/bootstrap/dist/js/bootstrap',
         List: '../bower_components/listjs/dist/list.min',
         Three: '../bower_components/threejs/build/three.min',
+        jqueryuitouchpunch: '../bower_components/jqueryui-touch-punch/jquery.ui.touch-punch',
         jqueryuislider: '../bower_components/jquery.ui/ui/jquery.ui.slider',
         jqueryuidraggable: '../bower_components/jquery.ui/ui/jquery.ui.draggable',
         jqueryuicore: '../bower_components/jquery.ui/ui/jquery.ui.core',

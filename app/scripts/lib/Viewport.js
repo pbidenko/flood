@@ -39,8 +39,6 @@ function init() {
 	container.appendChild( renderer.domElement );
 	renderer.domElement.setAttribute("id", "renderer_canvas");
 
-	makeGrid();
-
 	// add subtle ambient lighting
 	var ambientLight = new THREE.AmbientLight(0x555555);
 	scene.add(ambientLight);
@@ -59,6 +57,19 @@ function init() {
 	controls = new THREE.OrbitControls(camera, container);
 
 	window.addEventListener( 'resize', onWindowResize, false );
+
+	// full screen blur
+	// composer = new THREE.EffectComposer( renderer );
+	// composer.addPass( new THREE.RenderPass( scene, camera ) );
+
+	// hblur = new THREE.ShaderPass( THREE.HorizontalBlurShader );
+	// composer.addPass( hblur );
+
+	// vblur = new THREE.ShaderPass( THREE.VerticalBlurShader );
+	// // set this shader pass to render to screen so we can see the effects
+	// vblur.renderToScreen = true;
+	// composer.addPass( vblur );
+
 
 	animate();
 
@@ -144,9 +155,17 @@ function animate() {
 
 }
 
+var doBlur = true;
+
 function render() {
+
 	controls.update();
 	renderer.render( scene, camera );
+	
+	if (doBlur){
+		// composer.render();
+	}
+
 }
 
 function zoomToFit() {
@@ -193,7 +212,9 @@ function zoomToFit() {
 		var centerY = (bounds.maxY + bounds.minY) / 2;
 		var centerZ = (bounds.maxZ + bounds.minZ) / 2;
 
-		var radius = Math.max.apply(Math, [radiusX, radiusY, radiusZ]);;
+		var radius = Math.max.apply(Math, [radiusX, radiusY, radiusZ]);
+		if(radius < 1)
+			radius = 1;
 		var distanceFactor = Math.abs( camera.aspect * radius / Math.sin( camera.fov / 2 ));
 
 		controls.reset();

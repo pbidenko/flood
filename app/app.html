@@ -8,7 +8,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>Editor Beta - Flood</title>
         <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
+        <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
 
         <!-- build:css style.min.css -->
         <link rel="stylesheet" href="bower_components/jquery.ui/themes/base/jquery.ui.all.css">
@@ -19,6 +19,12 @@
 
         <style>
 
+          body {
+            margin: 0;
+            padding: 0;
+            font-family:Helvetica, Arial, "Lucida Grande", sans-serif;
+          }
+
           #login {
             background: #e3e3e3;
             text-align: center;
@@ -27,39 +33,64 @@
             left: 0;
             top: 0;
             bottom: 0;
-            padding: 40px;
+
+            background-image: -ms-radial-gradient(center, circle closest-corner, #E3E3E3 0%, #C4C4C4 100%);
+            background-image: -moz-radial-gradient(center, circle closest-corner, #E3E3E3 0%, #C4C4C4 100%);
+            background-image: -o-radial-gradient(center, circle closest-corner, #E3E3E3 0%, #C4C4C4 100%);
+            background-image: -webkit-gradient(radial, center center, 0, center center, 497, color-stop(0, #E3E3E3), color-stop(1, #C4C4C4));
+            background-image: -webkit-radial-gradient(center, circle closest-corner, #E3E3E3 0%, #C4C4C4 100%);
+            background-image: radial-gradient(circle closest-corner at center, #E3E3E3 0%, #C4C4C4 100%);
           }
 
-          #login h1 { 
-            padding: 0;
-            margin: 0;
-            font-size: 150px;
+          .editor-container {
+            letter-spacing: 60px;
+            padding-top: 230px;
+            width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 16px;
+            color: #666;
             text-shadow: 0 1px white;
           }
 
+          .editor-container span {
+            margin-left: 45px;
+          }
+
+          #title a {
+            text-decoration: none;
+          }
+
           .title-box {
-            width: 350px;
+            font-family:Helvetica, Arial, "Lucida Grande", sans-serif;
+            padding: 0;
+            margin: 0;
+            font-size: 180px;
+
+            text-shadow: 0 1px white;
+            width: 500px;
             left: 50%;
-            margin-left: -175px;
+            margin-left: -250px;
 
             position: absolute;
             overflow: hidden;
 
-            transition: height 3s;
+            transition: height 5s;
             transition-timing-function: ease-out;
           }
+
 
           #title-grey {
             height: 145px;
             z-index: 122;
-            color: #333;
-            width: 350px;
+            color: #272822;
+            width: 500px;
           }
-  
+
           #title-blue {
             position: absolute;
             color: #589cc8;
-            width: 350px;
+            width: 500px;
           }
 
           .form-group {padding: 5px;}
@@ -67,7 +98,7 @@
           .form-group label { color: #AAA; }
 
           .login-container {
-            padding-top: 170px;
+            padding-top: 50px;
             width: 300px;
             margin-left: auto;
             margin-right: auto;
@@ -142,7 +173,7 @@
 
             <div id="more-menu">
               <div id="login-button" class="menu-element">
-                <i class="fa fa-user fa-fw"></i>
+                <i class="fa fa-sign-out fa-fw"></i>
                 Logout
               </div>
               <div id="workspace-browser-button" class="menu-element">
@@ -163,10 +194,6 @@
           </div>
 
           <div id="zoom-menu" class="non-selectable">
-
-            <div id="zoomtofit-button" class="menu-element">
-              FIT
-            </div>
 
             <div id="zoomin-button" class="menu-element">
               <i class="fa fa-search-plus fa-fw"></i>
@@ -191,17 +218,14 @@
 
           </div>
 
-          <div id="login" class="row col">
-              
-            <div id="title-container">
-              <div class="title-box" id="title-grey">
-                <h1>flood</h1>
-              </div>
+          <div id="login" class="row col scroll-y">
 
-              <div class="title-box" id="title-blue">
-                <h1>flood</h1>
-              </div>
+            <div id="title-container">
+              <div class="title-box" id="title-grey">flood</div>
+              <div class="title-box" id="title-blue">flood</div>
             </div>
+
+            <div class="editor-container"><span>EDITOR</span></div>
 
             <div class="login-container">
               <h5>Wait for it...</h5>
@@ -269,10 +293,20 @@
 
                 <a data-toggle="dropdown" href="#">&#8942;</a>
 
-                <ul class="dropdown-menu" role="menu" style="padding: 5px;" aria-labelledby="dLabel">
+                <ul class="dropdown-menu node-dropdown-menu" role="menu" aria-labelledby="dLabel">
+
+                  <% if (ele.typeName) { %>
+                    <li class="dropdown-header">Type</li>
+                    <span class="node-dropown-menu-item"><%= ele.typeName %></span>
+                  <% } %>
 
                   <li role="presentation" style="color: black">
-                      <input type="checkbox" class="use-default-checkbox" data-index="<%= index %>" <%= !ignoreDefaults[index] ? "checked" : ""%> > Use default : <%= ele.defaultVal != undefined ? JSON.stringify( ele.defaultVal ) : "None" %>
+                    <li class="dropdown-header" style="padding: 0">Use Default</li>
+                    
+                    <span class="node-dropown-menu-item"> 
+                      <input type="checkbox" class="use-default-checkbox" data-index="<%= index %>" <%= !ignoreDefaults[index] ? "checked" : ""%> >
+                      <%= ele.defaultVal != undefined ? JSON.stringify( ele.defaultVal ) : "None" %>
+                    </span>
                   </li>
 
                 </ul>
@@ -298,17 +332,17 @@
             <span style="color:black; padding: 1px">...</span>
           </a>
 
-          <ul class="dropdown-menu" role="menu" style="padding: 5px; font-size: 10px" aria-labelledby="dLabel">
+          <ul class="dropdown-menu node-dropdown-menu" role="menu" aria-labelledby="dLabel">
 
-            <li class="toggle-vis">
-              <a role="menuitem" tabindex="-1" href="#" style="font-size: 10px" >
-                <i class="icon-eye-open"></i><span style="padding-left: 5px">Hide geometry</span>
-              </a>
+            <li class="dropdown-header" style="font-size: 10px; padding: 0" >Visibility</li>
+
+            <li class="toggle-vis node-dropown-menu-item">
+              <i class="icon-eye-open"></i><span style="padding-left: 5px">Hide geometry</span>
             </li>
 
-            <li class="dropdown-header" style="font-size: 10px; padding: 0" >Replication</li>
+            <li class="dropdown-header">Replication</li>
 
-            <li >
+            <li class="node-dropown-menu-item">
               <div class="btn-group btn-group-xs" style="padding: 0px; padding-top: 5px; font-size: 10px">
                 <button type="button" class="rep-type btn btn-default"  style="font-size: 10px" data-rep-type="applyLongest">Long</button>
                 <button type="button" class="rep-type btn btn-default"  style="font-size: 10px" data-rep-type="applyCartesian">Cross</button>
@@ -401,7 +435,7 @@
           <div class="slider" style="display: inline-block; width: 140px; height: 8px; margin: 0; padding: 0"></div>
 
           <div class="num-data-container" style="display: inline-block;">
-            <input type="number" class="currentValue" value="<%= type.value %>" />
+            <input type="number" class="currentValue" style="number-node-input" value="<%= type.value %>" />
           </div>
 
         </div>
@@ -418,19 +452,16 @@
             <span style="color:black; padding: 1px">...</span>
           </a>
 
-          <ul class="dropdown-menu" role="menu" style="padding: 5px; color: black" aria-labelledby="dLabel">
+          <ul class="dropdown-menu node-dropdown-menu" role="menu" style="color: black" aria-labelledby="dLabel">
 
-            <li role="presentation">
-               Min:<input type="number" class="num-min">
-            </li>
+            <span class="dropdown-header">Min</span>
+            <input type="number" class="num-min">
 
-            <li role="presentation">
-               Max: <input type="number" class="num-max">
-            </li>
+            <span class="dropdown-header">Max</span>
+            <input type="number" class="num-max">
 
-            <li role="presentation">
-               Step: <input type="number" class="num-step">
-            </li>
+            <span class="dropdown-header">Stepsize</span>
+            <input type="number" class="num-step">
 
           </ul>
         </div>
@@ -440,7 +471,8 @@
       <script type="text/template" id="search-template">
         <div class="search-top-container">
           <input placeholder="Add a node..." class="library-search-input search"></input>
-        </div>        
+          <ul class="list search-list"></ul>
+        </div>
       </script>
 
       <script type="text/template" id="search-category-template">
@@ -479,7 +511,7 @@
 
           <a data-toggle="dropdown" href="#">&#8230;</a>
 
-          <ul class="dropdown-menu" role="menu" style="padding: 5px;" aria-labelledby="dLabel">
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
 
             <li role="presentation" class="deleteWorkspace">
               <a role="menuitem" tabindex="-1" href="#">
@@ -568,18 +600,13 @@
 
       <script type="text/template" id="login-template">
 
-        <h5>Visual programming on the web</h5>
-        
-        <a href="/auth/google" class="btn btn-block btn-google-plus btn-social"><i class="fa fa-google-plus"></i>Sign in with Google</a>
-        <a href="/auth/facebook" class="btn btn-block btn-facebook btn-social"><i class="fa fa-facebook"></i>Sign in with Facebook</a>
+        <div id="login-failure-message">
 
-        <div id="tab-button-container">
-          <div id="login-tab-button" class="tab-button tab-button-hilite"><a href="#">Login</a></div>
-          <div id="signup-tab-button" class="tab-button"><a href="#">Signup</a></div>
 
         </div>
 
-        <div id="login-failure-message">
+        <div id="tab-button-container">
+          <a id="login-tab-button" href="#" class="btn btn-block btn-flood btn-social"><i class="fa fa-check"></i>Sign in with Flood</a>
         </div>
 
         <form id="signup-form" style="display:none">
@@ -613,7 +640,7 @@
 
           <div class="form-group">
             <label for="email" class="control-label">Email</label>
-            <input type="text" name="email" id="login-email" placeholder="Email" autofocus="" class="form-control">
+            <input type="email" name="email" id="login-email" placeholder="Email" autofocus="" class="form-control">
           </div>
 
           <div class="form-group">
@@ -625,9 +652,12 @@
             <button type="submit" id="submit-login" class="btn btn-primary"><i class="fa fa-fw fa-unlock-alt"></i>Login</button>
           </div>
 
-          
+        </form> 
 
-        </form>
+        <div id="signup-tab-button" class="tab-button"><a href="#">New account...</a></div>
+
+        <a href="/auth/google" class="btn btn-block btn-google-plus btn-social"><i class="fa fa-google-plus"></i>Sign in with Google</a>
+        <a href="/auth/facebook" class="btn btn-block btn-facebook btn-social"><i class="fa fa-facebook"></i>Sign in with Facebook</a>
 
       </script>
 
@@ -704,18 +734,22 @@
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-        <!-- <script>
-            var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
-            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-            s.parentNode.inertBefore(g,s)}(document,'script'));
-        </script> -->
-
     <!-- Application source. -->
     <!-- build:[src] source.min.js -->
     <script data-main="/scripts/main" src="/bower_components/requirejs/require.js"></script>
     <!-- /build -->
+
+    <script>
+
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-54947421-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
 
 </body>
 </html>

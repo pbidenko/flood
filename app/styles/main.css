@@ -169,6 +169,22 @@ body {
   background-image: none;
 }
 
+.btn-flood {
+  margin-top: 40px;
+  color: #ffffff;
+  background-color: #AAA;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+.btn-flood:hover,
+.btn-flood:focus,
+.btn-flood:active,
+.btn-flood.active,
+.open .dropdown-toggle .btn-flood {
+  color: #ffffff;
+  background-color: #999;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
 .btn-google-plus {
   margin-top: 40px;
   color: #ffffff;
@@ -321,7 +337,7 @@ input[type="button"].btn-block {
 .connection {
 	fill:none; 
 	stroke-width: 3.2;
-	stroke:#555;
+	stroke:#333;
 }
 
 .partial-function-connection {
@@ -410,6 +426,26 @@ input[type="button"].btn-block {
 	color: #589cc8;
 } 
 
+.node-dropdown-menu .dropdown-header {
+	text-transform: uppercase;
+	font-size: 9px;
+	padding: 2px;
+}
+
+.node-dropown-menu-item {
+	display: inline-block;
+	margin: 5px 0px 5px 10px;
+	color: black;
+}
+
+.node-dropown-menu-item:hover {
+	color: black;
+}
+
+.node-dropdown-menu {
+	padding: 10px;
+}
+
 #extra-menu .menu-element:hover {
 	background: #444;
 	color: white;
@@ -493,10 +529,7 @@ input[type="button"].btn-block {
 
 .tab-button {
 	display: inline-block;
-	padding: 10px;
-	padding-bottom: 30px;
-	padding-top: 26px;
-	size: 20px;
+	padding: 5px;
 }
 
 .menu-element i {
@@ -519,8 +552,7 @@ input[type="button"].btn-block {
 #tab-button-container {
 	margin-left: auto;
 	margin-right: auto;
-	width: 150px;
-	text-shadow: 0 1px white;
+	width: 300px;
 }
 
 #workspace-browser {
@@ -954,21 +986,21 @@ input[type="button"].btn-block {
 .workspace {
 	z-index: 90;
 	position: absolute;
-	width: 8000px;
-	height: 8000px;
+	width: 20000px;
+	height: 20000px;
 }
 
 .workspace_back {
 	z-index: 50;
 	position: absolute;
-	width: 8000px;
-	height: 8000px;
+	width: 20000px;
+	height: 20000px;
 }
 
 .workspace_canvas {
 	position: absolute;
-	width: 8000px;
-	height: 8000px;
+	width: 20000px;
+	height: 20000px;
 	background-color: rgba(0,0,0,0.3);
 }
 
@@ -1054,8 +1086,6 @@ input[type="button"].btn-block {
 	color:black;
 }
 
-
-
 .node-settings {
 	position: absolute;
 	bottom: 0;
@@ -1075,6 +1105,15 @@ input[type="button"].btn-block {
 .node-number-input {
 	padding:2px;
 	margin:2px;
+}
+
+.currentValue {
+	box-shadow: none;
+}
+
+.currentValue:-moz-placeholder,
+.currentValue:focus {
+	box-shadow:none !important;
 }
 
 .node-evaluating {
