@@ -88,6 +88,24 @@ module.exports = function (grunt) {
                 }
             }
         },
+        replace: {
+            mongo2base: {
+                src: ['app/scripts/config.js'],
+                overwrite: true,
+                replacements: [{
+                  from: "Storage: 'helpers/MongoStorage'",
+                  to: "Storage: 'helpers/BaseStorage'"
+                }]
+            },
+            base2mongo: {
+                src: ['app/scripts/config.js'],
+                overwrite: true,
+                replacements: [{
+                  from: "Storage: 'helpers/BaseStorage'",
+                  to: "Storage: 'helpers/MongoStorage'"
+                }]
+            }
+        },
         // This task uses James Burke's excellent r.js AMD builder to take all
         // modules and concatenate them into a single file.
         requirejs: {
@@ -170,7 +188,7 @@ module.exports = function (grunt) {
                         '*.html',
                         '*.json',
                         'images/{,*/}*.{webp,gif,png}',
-                        'bower_components/jquery/jquery.js',
+                        'bower_components/jquery/jquery.min.js',
                         'bower_components/components-font-awesome/css/font-awesome.min.css',
                         'bower_components/components-font-awesome/fonts/*.{ttf,eot,svg,woff,otf}',
                         'scripts/lib/flood/*.js'
@@ -239,20 +257,24 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:dist',
-        'requirejs',
-        'imagemin',
-        'cssmin',
-        'copy',
-        'processhtml'
-    ]);
-
-    grunt.registerTask('desktop', [
-        'clean:dist',
+        'replace:mongo2base',
         'requirejs',
         'imagemin',
         'cssmin',
         'copy',
         'processhtml',
+        'replace:base2mongo'
+    ]);
+
+    grunt.registerTask('desktop', [
+        'clean:dist',
+        'replace:mongo2base',
+        'requirejs',
+        'imagemin',
+        'cssmin',
+        'copy',
+        'processhtml',
+        'replace:base2mongo',
         'nodewebkit'
     ]);
 
