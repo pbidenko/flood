@@ -14,7 +14,6 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
         getCustomContents: function () {
 
             var json = this.model.toJSON();
-            if (!json.extra.code) json.extra.code = this.model.get('type').code;
 
             return this.innerTemplate(json);
 
