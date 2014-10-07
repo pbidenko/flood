@@ -270,7 +270,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
         }
 
         if (event.keyCode === 13) { // enter key causes first result to be inserted
-            var elementToAdd = this.modelsListView.findElementByCreationName(searchText);
+            var elementToAdd = this.modelsListView.topResult;
             elementToAdd && this.elementClick(elementToAdd.model);                
 
         } 

@@ -31,7 +31,7 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
         mapLibraryItems: function(param) {
           this.SearchElements.models = param.libraryItems.map(function(item){
             return new SearchElement({name: item.name, creationName: item.creationName,
-              displayName: item.displayName, category: item.category,
+              displayName: item.displayName, category: item.category, searchTags: item.keywords,
               description: item.description, inPort: item.parameters,
               outPort: item.returnKeys, app: this});
           });
