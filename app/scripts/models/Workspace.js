@@ -18,7 +18,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       isPublic: false,
       isRunning: false,
       lastSaved: Date.now(),
-      offset: [0,0],
+      offset: [4000,4000],
 
       // undo/redo stack
       undoStack: [],
@@ -45,6 +45,12 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
     initialize: function(atts, arr) {
 
       atts = atts || {};
+
+      // if offset is not defined
+      if (!atts.offset || isNaN( atts.offset[0] ) || isNaN( atts.offset[1] )){
+        atts.offset = this.defaults.offset;
+        this.set( 'offset', this.defaults.offset );
+      }
 
       this.app = arr.app;
 
@@ -79,6 +85,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.on('runCommand', throttledSync, this);
       this.on('change:name', throttledSync, this);
       this.on('change:zoom', throttledSync, this);
+      this.on('change:offset', throttledSync, this);
       this.on('change:workspaceDependencyIds', throttledSync, this);
       this.on('requestRun', this.run, this);
 
@@ -209,26 +216,25 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     zoomIn: function(){
 
-      if ( this.get('zoom') > 4 ){
-        return;
+      if ( this.get('zoom') + 0.2 > 1 ){
+        return this.set('zoom', 1);
       }
 
-      this.set('zoom', this.get('zoom') + 0.05);
+      this.set('zoom', this.get('zoom') + 0.2);
 
     },
 
     zoomOut: function(){
 
-      if ( this.get('zoom') < 0.2 ){
-        return;
+      if ( this.get('zoom') - 0.2 < 0.2 ){
+        return this.set('zoom', 0.2);
       }
 
-      this.set('zoom', this.get('zoom') - 0.05);
+      this.set('zoom', this.get('zoom') - 0.2);
 
     },
 
     parse : function(resp) {
-
       resp.nodes = new Nodes( resp.nodes );
       resp.connections = new Connections( resp.connections );
       return resp;
@@ -342,7 +348,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       var that = this;
 
       var nodes = {};
-      var nodeOffset = Math.min( 20, Math.abs( 80 * Math.random() ) );
+
+      var centerX = (1 / this.get('zoom')) * (this.get('offset')[0] + 80);
+      var centerY = (1 / this.get('zoom')) * (this.get('offset')[1] + 80);
+
+      var topLeft = _.reduce(cb.nodes, function(a, x){
+        return [ Math.min(a[0], x.position[0] ), Math.min(a[1], x.position[1] )];
+      }, [ 1e8, 1e8 ] );
 
       var nodeCount = 0;
 
@@ -350,7 +362,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
         // give new id for building the paste
         nodes[x._id] = x;
-        nodes[x._id].position = [ x.position[0] + nodeOffset, x.position[1] + nodeOffset ];
+
+        var posX = x.position[0] - topLeft[0] + centerX;
+        var posY = x.position[1] - topLeft[1] + centerY;
+
+        nodes[x._id].position = [ posX, posY ];
         nodes[x._id]._id = that.makeId();
         nodeCount++;
 
@@ -444,6 +460,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
     },
 
     addNode: function(data){
+
+      this.get('nodes').deselectAll();
 
       if ( data.typeName === "CustomNode" ){
         var id = data.extra.functionId;
@@ -847,10 +865,10 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
         for (; i < len; i++) {
             resultNode = param.result[i];
-            node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeID);
+            node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeId);
             if (node) {
                 node.updateValue(param.result[i]);
-                this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeID)));
+                this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeId)));
 
                 if(this.pendingRequestsCount === 0){
                     this.app.trigger('show-progress');
@@ -861,7 +879,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
     },
 
     updateNodeGeometry: function(param) {
-        var node = this.app.getCurrentWorkspace().get('nodes').get(param.geometryData.nodeID);
+        var node = this.app.getCurrentWorkspace().get('nodes').get(param.geometryData.nodeId);
         if (node && param.geometryData.graphicPrimitivesData) {
             node.updateNodeGeometry(param);
         }
@@ -870,6 +888,21 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         if(this.pendingRequestsCount === 0) {
             this.app.trigger('hide-progress');
         }
+    },
+
+    removeNodeById: function ( id ) {
+        if ( !id )
+            return;
+        // select only node that is needed to be deleted
+        this.get( 'nodes' ).each(function (x) {
+            if (x.get('_id') === id) {
+                x.set('selected', true);
+            }
+            else {
+                x.set('selected', false);
+            }
+        });
+        this.removeSelected();
     },
 
     sync: function( method, model, options ) {

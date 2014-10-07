@@ -61,7 +61,6 @@ define([  'backbone',
       'click #zoomin-button': 'zoominClick',
       'click #zoomout-button': 'zoomoutClick',
       'click #zoomreset-button': 'zoomresetClick',
-      'click #zoomtofit-button': 'zoomToFitClick',
 
       'click #add-project-workspace' : 'newWorkspace',
       'click #add-node-workspace' : 'newNodeWorkspace',
@@ -114,6 +113,10 @@ define([  'backbone',
       if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "INPUT") return;
       if (e.target.nodeName === "INPUT") return;
 
+      // do not capture from textarea
+      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "TEXTAREA" ) return;
+      if (e.target.nodeName === "TEXTAREA") return;
+
       // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
       switch (e.keyCode) {
         case 78:
@@ -146,7 +149,7 @@ define([  'backbone',
 
     hideSearch: function(){
       this.model.set('showingSearch', false);
-      this.workspaceControlsView && this.workspaceControlsView.hideSearch();      
+      this.workspaceControlsView && this.workspaceControlsView.hideSearch();
     },
 
     viewBrowser: function(){
@@ -256,9 +259,9 @@ define([  'backbone',
 
     zoomresetClick: function(){
       if ( this.lookingAtViewer ){
-        controls.reset();
+        zoomToFit();
       } else {
-        this.getCurrentWorkspace().set('zoom', 1.0);
+        this.currentWorkspaceView.zoomAll();
       }
     },
 
@@ -275,14 +278,6 @@ define([  'backbone',
         controls.dollyIn();
       } else {
         this.getCurrentWorkspace().zoomOut();
-      }
-    },
-
-    zoomToFitClick: function(){
-      if ( this.lookingAtViewer ){
-        zoomToFit();
-      } else {
-        this.zoomToFit();
       }
     },
 
@@ -334,6 +329,18 @@ define([  'backbone',
 
       this.workspaceTabViews[workspace.get('_id')].$el.remove();
       delete this.workspaceTabViews[workspace.get('_id')];
+
+    },
+
+    getCurrentWorkspaceCenter: function(){
+
+      var w = this.currentWorkspaceView.$el.width()
+        , h = this.currentWorkspaceView.$el.height()
+        , ho = this.currentWorkspaceView.$el.scrollTop()
+        , wo = this.currentWorkspaceView.$el.scrollLeft()
+        , zoom = 1 / this.model.getCurrentWorkspace().get('zoom');
+
+      return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
 
     },
 
