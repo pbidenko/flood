@@ -8,6 +8,7 @@ define(['backbone'], function(Backbone) {
       displayName: null,
       category: null,
       description: null,
+      searchTags: [],
       inPort: [],
       outPort: [],
       isCustomNode: false,
