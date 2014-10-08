@@ -49,8 +49,8 @@ define(['RecordableCommand'], function (RecordableCommand) {
                     portType: portTypes.input,
                     mode: portModes.cancel
                 });
-                mode = portModes.begin;
             }
+            mode = portModes.begin;
         }
         else {
             mode = prefix === nodePrefixes.start ? portModes.begin : portModes.end;
