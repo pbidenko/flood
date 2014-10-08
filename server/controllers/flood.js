@@ -3,7 +3,8 @@ var mongoose = require('mongoose')
 	, Workspace = require('../models/Workspace').WorkspaceModel
 	, User = require('../models/User')
 	, async = require('async')
-	, _ = require('underscore');
+	, _ = require('underscore')
+	, ExampleWorkspaces = require('./exampleWorkspaces');
 
 var initNonUserSession = function(req, res){
 
@@ -35,19 +36,27 @@ var initNonUserSession = function(req, res){
 var initUserSession = function(req, res){
 
 	var user = req.user;
-	var nws = new Workspace({name : "My first workspace"});
-	var newSesh = new Session({name : "Empty session", workspaces : [ nws ]});
+	var nws = new Workspace(ExampleWorkspaces.myFirstProject);
+	var nws1 = new Workspace(ExampleWorkspaces.myFirstCustomNode);
+	var newSesh = new Session({name : "Session", workspaces : [ nws, nws1 ]});
+
+	nws.maintainers = [ req.user ];
+	nws1.maintainers = [ req.user ];
 
 	nws.save(function(errWs){
 
 		if (errWs) return res.status(500).send("Failed to initialize user workspace");
 
-		newSesh.save(function(errSesh){
+		nws1.save(function(errWs1){
+
+			if (errWs1) return res.status(500).send("Failed to initialize user workspace");
+
+			newSesh.save(function(errSesh){
 				
 				if (errSesh) return res.status(500).send("Failed to initialize user session");
 
 				user.lastSession = newSesh;
-				user.workspaces = [ nws ];
+				user.workspaces = [ nws, nws1 ];
 				user.markModified("lastSession workspaces");		
 
 				user.save(function(err){
@@ -63,6 +72,9 @@ var initUserSession = function(req, res){
 					});
 				});
 			});
+
+		});
+		
 	});
 	
 };
@@ -119,17 +131,17 @@ exports.putMySession = function(req, res) {
 				w.currentWorkspace = x.currentWorkspace || w.currentWorkspace;
 				w.selectedNodes = x.selectedNodes || w.selectedNodes;
 				w.zoom = x.zoom || w.zoom;
+				w.offset = x.offset || w.offset;
 				w.lastSaved = Date.now();
 				w.redoStack = x.redoStack || w.redoStack;
 				w.undoStack = x.undoStack || w.undoStack;
-
 				w.workspaceDependencyIds = x.workspaceDependencyIds || w.workspaceDependencyIds;
 				w.isCustomNode = ( x.isCustomNode != undefined ) ? x.isCustomNode : w.isCustomNode;
 				w.isModified = true;
 
 				w.guid = x.guid || w.guid;
 
-				w.markModified("workspaceDependencyIds isCustomNode isModified name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack guid");
+				w.markModified("workspaceDependencyIds offset isCustomNode isModified name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack guid");
 
 				w.save(function(se){
 					if (se) return callback(se);
@@ -229,10 +241,7 @@ exports.getWorkspaces = function(req, res) {
 	User.findById( user._id )
 		.populate('workspaces', 'name lastSaved isPublic maintainers isModified isCustomNode')
 		.exec(function(e, u) {
-			console.log(u);
 			var filtered = u.workspaces.filter(function(x, i){ return x.isModified === true || i === 0; }).sort(dateSort);
-			console.log(filtered);
-
 			return res.send( filtered );
 	}); 
 
@@ -281,9 +290,10 @@ exports.putWorkspace = function(req, res) {
 		w.isCustomNode = ( x.isCustomNode != undefined ) ? x.isCustomNode : w.isCustomNode;
 		w.guid = x.guid || w.guid;
 		w.workspaceDependencyIds = x.workspaceDependencyIds || w.workspaceDependencyIds;
+		w.offset = x.offset || w.offset;
 		w.isModified = true;
 
-		w.markModified("workspaceDependencyIds name nodes connections currentWorkspace selectedNodes zoom lastSaved undoStack redoStack isModified guid");
+		w.markModified("workspaceDependencyIds name nodes connections currentWorkspace selectedNodes zoom offset lastSaved undoStack redoStack isModified guid");
 
 		w.save(function(se){
 			if (se) return res.status(500).send('Could not save the workspace');

@@ -47,7 +47,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
       this.$input = this.$('.library-search-input');
 
       this.modelsListView = new ModelsListView({}, {
-                app: this.app,                
+                app: this.app,
                 searchView: this
       });
 
@@ -63,7 +63,6 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       this.$el.find('#delete-button').tooltip({title: "Delete"});
 
-      $('#zoomtofit-button').tooltip({title: "Zoom to fit", placement: "left"});
       $('#zoomin-button').tooltip({title: "Zoom in", placement: "left"});
       $('#zoomout-button').tooltip({title: "Zoom out", placement: "left"});
       $('#zoomreset-button').tooltip({title: "Zoom reset", placement: "left"});
@@ -82,44 +81,29 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
       this.$('.library-search-input').select();
     },
 
-    currentWorkspace: function(){
-      return this.app.get('workspaces').get( this.app.get('currentWorkspace') );
-    },
-
     deleteClick: function(){
-      this.currentWorkspace().removeSelected();
+      this.app.getCurrentWorkspace().removeSelected();
     },
 
     copyClick: function(){
-      this.currentWorkspace().copy();
+      this.app.getCurrentWorkspace().copy();
     },
 
     pasteClick: function(){
-      this.currentWorkspace().paste();
+      this.app.getCurrentWorkspace().paste();
     },
 
     undoClick: function(){
-      this.currentWorkspace().undo();
+      this.app.getCurrentWorkspace().undo();
     },
 
     redoClick: function(){
-      this.currentWorkspace().redo();
-    },
-
-    getWorkspaceCenter: function(){
-
-      var w = this.appView.currentWorkspaceView.$el.width()
-        , h = this.appView.currentWorkspaceView.$el.height()
-        , ho = this.appView.currentWorkspaceView.$el.scrollTop()
-        , wo = this.appView.currentWorkspaceView.$el.scrollLeft()
-        , zoom = 1 / this.currentWorkspace().get('zoom');
-
-      return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
+      this.app.getCurrentWorkspace().redo();
     },
 
     addNode: function(nodeModel){
 
-      this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creationName'), this.getWorkspaceCenter());
+      this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creationName'), this.appView.getCurrentWorkspaceCenter());
       this.hideSearch();
     },
 
@@ -209,7 +193,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       var res = this.getFileFromSelected( this.stlConverter );
 
-      var wsName = this.currentWorkspace().get('name');
+      var wsName = this.app.getCurrentWorkspace().get('name');
 
       this.download(wsName + ".stl", res);
 
@@ -217,7 +201,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
     getFileFromSelected: function(converterFunc){
 
-      var ws = this.currentWorkspace();
+      var ws = this.app.getCurrentWorkspace();
 
       var text = "";
       var vertexOffset = 0;
