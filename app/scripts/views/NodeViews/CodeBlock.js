@@ -202,8 +202,8 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                         delay: del
                     });
 
-                    if(ex.portIndexes) {
-                      index = i > 0 ? ex.portIndexes[i] - ex.portIndexes[i - 1] - 1 : ex.portIndexes[i];
+                    if(ex.lineIndices) {
+                      index = i > 0 ? ex.lineIndices[i] - ex.lineIndices[i - 1] - 1 : ex.lineIndices[i];
                       this.$el.find('.node-port-output[data-index=\' ' + i + ' \']').css("margin-top", index * 25);
                     }
                 }
