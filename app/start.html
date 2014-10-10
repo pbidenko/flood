@@ -19,7 +19,7 @@
 
 				interval = setInterval(function(){
 				
-					socket = new WebSocket(settings.url);
+					socket = new WebSocket("ws://127.0.0.1:2100");
 
 					socket.onopen = function () {
 						clearInterval(interval);
