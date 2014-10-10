@@ -18,7 +18,7 @@ define(['RecordableCommand'], function (RecordableCommand) {
 
     MakeConnectionCommand =  RecordableCommand.extend({
         defaults: {
-            $type: 'Dynamo.ViewModels.DynamoViewModel+MakeConnectionCommand, DynamoCore',
+            $type: 'Dynamo.Models.DynamoModel+MakeConnectionCommand, DynamoCore',
             nodeId: null,
             portIndex: 0,
             portType: 0,

@@ -3,14 +3,9 @@
 		<script>
 			function bodyOnLoad(){
 				var execFile = require('child_process').execFile,
-					child,
-					interval,
-					socket,
-					settings = {
-						maxMessageStack: 100,
-						pingTimeout: 1000,
-						url: 'ws://127.0.0.1:2100'
-					};
+					child;
+					
+				require('nw.gui').Window.get().showDevTools();
 
 				child = execFile('DynamoWebServer.exe' , ['headless'], { cwd: 'dynamo' } , function(error,stdout,stderr) { 
 					if (error) {

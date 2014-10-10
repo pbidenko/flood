@@ -3,7 +3,7 @@ define(['RecordableCommand'], function (RecordableCommand) {
 
     return RecordableCommand.extend({
         defaults: {
-            $type: 'Dynamo.ViewModels.DynamoViewModel+RunCancelCommand, DynamoCore',
+            $type: 'Dynamo.Models.DynamoModel+RunCancelCommand, DynamoCore',
             cancelRun: false,
             showErrors: false
         }

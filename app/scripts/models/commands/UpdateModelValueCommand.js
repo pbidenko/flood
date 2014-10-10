@@ -3,7 +3,7 @@ define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, help
 
     var UpdateModelValueCommand = RecordableCommand.extend({
         defaults: {
-            $type: 'Dynamo.ViewModels.DynamoViewModel+UpdateModelValueCommand, DynamoCore',
+            $type: 'Dynamo.Models.DynamoModel+UpdateModelValueCommand, DynamoCore',
             modelGuid: '00000000-0000-0000-0000-000000000000',
             name: '',
             value: null
