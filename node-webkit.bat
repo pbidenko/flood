@@ -23,4 +23,6 @@
 
 @echo All done! Now you can run application from .\dist_desktop\releases\flood\win\flood
 
+@call %SystemRoot%\explorer.exe %CD%\dist_desktop\releases\flood\win\flood
+
 @pause

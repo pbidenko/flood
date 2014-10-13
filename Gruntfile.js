@@ -166,7 +166,7 @@ module.exports = function (grunt) {
         cssmin: {
             dist: {
                 files: {
-                    '<%= yeoman.dist %>/style.min.css': [
+                    '<%= yeoman.dist %>/styles/style.min.css': [
                         '.tmp/styles/{,*/}*.css',
                         '<%= yeoman.app %>/bower_components/jquery.ui/themes/base/*.css',
                         '<%= yeoman.app %>/bower_components/components-font-awesome/css/font-awesome.min.css',
