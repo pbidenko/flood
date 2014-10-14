@@ -19,7 +19,9 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       showingFeedback: false,
       showingHelp: false,
       isFirstExperience: false,
-      clipBoard: {}
+      clipBoard: {},
+      proxyNodesDependencies: [],
+      availableCustomNodeDefinitions: []
     },
 
     initialize: function(args, options){
@@ -31,14 +33,78 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.SearchElements = new SearchElements({app:this});
       this.SearchElements.reset();
       this.SearchElements.fetch();
+      this.listenTo( this, 'saved-file-received:event', this.downloadFile);
+      // when we upload a custom node definition we should make all its instances not proxy anymore
+      this.listenTo( this, 'proxy-nodes-data-received:event', this.setProxyNodesDependenciesData);
 
       this.context = new Storage({ baseUrl: settings.storageUrl });
 
       this.get('workspaces').on('remove', this.workspaceRemoved, this);
     },
 
-    workspaceIdsAwaitingParse : [],
+    setProxyNodesDependenciesData: function (data) {
+        if (this.get('proxyNodesDependencies').indexOf(data) == -1) {
+            this.get('proxyNodesDependencies').push(data);
+        }
 
+        if (this.get('availableCustomNodeDefinitions').indexOf(data.customNodeId) > -1) {
+            this.updateDependenciesAndNodes(data);
+        }
+    },
+
+    setAvailableCustomNodeDefinitions: function(guid) {
+        if (this.get('availableCustomNodeDefinitions').indexOf(guid) == -1) {
+            this.get('availableCustomNodeDefinitions').push(guid);
+        }
+
+        var data = this.get('proxyNodesDependencies').filter(function (element) {
+            return element.customNodeId === guid;
+        });
+
+        if (data.length) {
+            this.updateDependenciesAndNodes(data[0]);
+        }
+    },
+    
+    workspaceIdsAwaitingParse : [],
+    
+    updateDependenciesAndNodes: function(data) {
+        // get workspace that contains proxy instances
+        var workspaces = data.workspaceId ? this.get('workspaces').where({ guid: data.workspaceId }) :
+            this.get('workspaces').where({ isCustomNode: false });
+        // get workspace-custom node definition, we need its id to set dependency
+        var customNode = this.get('workspaces').where({ guid: data.customNodeId });
+        var customNodeId;
+
+        if (workspaces.length > 0 && customNode.length > 0) {
+            var workspace = workspaces[0];
+            customNodeId = customNode[0].get('_id');
+
+            for (var i = 0; i < data.nodesIds.length; i++) {
+                var nodes = workspace.get('nodes').where({ _id: data.nodesIds[i] });
+                if (nodes.length) {
+                    var node = nodes[0];
+
+                    if (node.get('extra')) {
+                        node.get('extra').isProxy = false;
+                    }
+
+                    node.set('isProxy', false);
+
+                    if (customNodeId && workspace.get('workspaceDependencyIds').indexOf(customNodeId) == -1) {
+                        node.get('extra').functionId = customNodeId;
+                        workspace.addWorkspaceDependency(customNodeId);
+                    }
+                }
+            }
+        }
+
+        var index = this.get('availableCustomNodeDefinitions').indexOf(data.customNodeId);
+        this.get('availableCustomNodeDefinitions').remove(index, index);
+
+        index = this.get('proxyNodesDependencies').indexOf(data);
+        this.get('proxyNodesDependencies').remove(index, index);
+    },
     parse : function(resp) {
 
       var old = this.get('workspaces').slice();
@@ -123,13 +189,17 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newNodeWorkspace: function( callback ){
+    newNodeWorkspace: function( callback, silent ) {
 
       this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
         data.guid = this.makeId();
 
+        // if we need to not send it to the dynamo
+        if (silent) {
+            data.notNotifyServer = true;
+        }
         var ws = new Workspace(data, { app: this });
 
         this.get('workspaces').add( ws );
@@ -160,7 +230,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         var ws = this.get('workspaces').get(id);
         if(ws) return;
 
-        var ws = new Workspace(data, {app: this});
+        ws = new Workspace(data, {app: this});
         this.get('workspaces').add( ws );
         if (callback) callback( ws );
 
@@ -230,10 +300,21 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       } 
 
       this.get('workspaces').get(this.get('currentWorkspace')).set('current', true);
+    },
+
+    downloadFile: function (param) {
+          var byteArray = helpers.getByteArray(param.fileContent);
+
+          var blob = new Blob([byteArray], { type : 'application/octet-stream' });
+          var url = window.URL || window.webkitURL;
+          var downloadUrl = url.createObjectURL(blob);
+          var downloadElement = document.createElement('a');
+          downloadElement.style = 'display: none;';
+          downloadElement.href = downloadUrl;
+          downloadElement.download = param.fileName;
+          downloadElement.click();
     }
   });
-
-
 });
 
 

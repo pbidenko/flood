@@ -179,6 +179,11 @@
               <div id="workspace-browser-button" class="menu-element">
                 <i class="fa fa-list-ul fa-fw"></i>Workspaces
               </div>
+              <div id="save-file-button" class="menu-element">Save as file</div>
+              <div id="open-file-button" class="menu-element">
+                <input id="file" type="file" class="hidden-file-input" accept=".dyn,.dyf" />
+                <div class="over-hidden-file-input">Open file</div>
+              </div>
               <div class="busy-indicator" style="display: none"></div>
             </div>
   
@@ -355,8 +360,8 @@
       </script>
 
       <script type="text/template" id="node-custom-template">
-
-          <i class="fa fa-fw fa-bolt"></i>          
+          <span style="color:red;"><%= isProxy? "Proxy node " : "" %></span>
+          <i class="fa fa-fw fa-bolt"></i>
           <span class="name searchfield"><%= type.functionName  %></span>
 
       </script>

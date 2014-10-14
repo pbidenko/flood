@@ -21,7 +21,6 @@ define(['backbone', 'FLOOD'],
         this.workspace.initializeRunner();
         this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
         this.workspace.listenTo( this.app, 'geometry-data-received:event', this.workspace.updateNodeGeometry);
-        this.workspace.listenTo( this.app, 'saved-file-received:event', this.workspace.downloadFile);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
         return;
@@ -81,7 +80,6 @@ define(['backbone', 'FLOOD'],
         this.workspace.initializeRunner();
         this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
         this.workspace.listenTo( this.app, 'geometry-data-received:event', this.workspace.updateNodeGeometry);
-        this.workspace.listenTo( this.app, 'saved-file-received:event', this.workspace.downloadFile);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
         this.app.get('workspaces').add(this.workspace);
@@ -319,7 +317,7 @@ define(['backbone', 'FLOOD'],
 
       });
 
-    },
+    }
 
 
   });

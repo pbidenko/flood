@@ -1,7 +1,7 @@
 ﻿define(['backbone', 'ComputationResponse', 'ContentResponse', 'LibraryItemsListResponse',
-        'NodeCreationDataResponse', 'GeometryDataResponse'],
+        'SavedFileResponse', 'NodeCreationDataResponse', 'GeometryDataResponse', 'UpdateProxyNodesResponse' ],
     function (Backbone, ComputationResponse, ContentResponse, LibraryItemsListResponse,
-              NodeCreationDataResponse, GeometryDataResponse) {
+              SavedFileResponse, NodeCreationDataResponse, GeometryDataResponse, UpdateProxyNodesResponse ) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -17,15 +17,18 @@
             'DynamoWebServer.Responses.ContentResponse, DynamoWebServer': ContentResponse,
             'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': ComputationResponse,
             'DynamoWebServer.Responses.LibraryItemsListResponse, DynamoWebServer': LibraryItemsListResponse,
+            'DynamoWebServer.Responses.SavedFileResponse, DynamoWebServer': SavedFileResponse,
             'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : NodeCreationDataResponse,
-            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : GeometryDataResponse
+            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : GeometryDataResponse,
+            'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : UpdateProxyNodesResponse
         },
         responseEventMap = {
             'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': 'computation-completed:event',
             'DynamoWebServer.Responses.LibraryItemsListResponse, DynamoWebServer': 'libraryItemsList-received:event',
             'DynamoWebServer.Responses.SavedFileResponse, DynamoWebServer': 'saved-file-received:event',
             'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : 'creation-data-received:event',
-            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : 'geometry-data-received:event'
+            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : 'geometry-data-received:event',
+            'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : 'proxy-nodes-data-received:event'
         },
         app;
 

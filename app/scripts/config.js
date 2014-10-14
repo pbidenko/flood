@@ -133,6 +133,7 @@ require.config({
         SocketConnection: 'models/SocketConnection',
 
         CreateNodeCommand: 'models/commands/CreateNodeCommand',
+        CreateProxyNodeCommand: 'models/commands/CreateProxyNodeCommand',
         CreateNoteCommand: 'models/commands/CreateNoteCommand',
         DeleteModelCommand: 'models/commands/DeleteModelCommand',
         MakeConnectionCommand: 'models/commands/MakeConnectionCommand',
@@ -144,13 +145,16 @@ require.config({
 
         RecordableCommandsMessage: 'models/messages/RecordableCommandsMessage',
         LibraryItemsListMessage: 'models/messages/LibraryItemsListMessage',
+        SaveFileMessage: 'models/messages/SaveFileMessage',
         GeometryMessage: 'models/messages/GeometryMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
         ContentResponse: 'models/responses/ContentResponse',
         LibraryItemsListResponse: 'models/responses/LibraryItemsListResponse',
+        SavedFileResponse: 'models/responses/SavedFileResponse',
         NodeCreationDataResponse: 'models/responses/NodeCreationDataResponse',
+        UpdateProxyNodesResponse: 'models/responses/UpdateProxyNodesResponse',
         GeometryDataResponse: 'models/responses/GeometryDataResponse',
 
         //helpers

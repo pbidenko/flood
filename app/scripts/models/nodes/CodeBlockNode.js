@@ -2,12 +2,19 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
 
     return Node.extend({
 
+        defaults: {
+            duringUploading: false
+        },
+
         initialize: function (attrs, vals) {
             var inPort = [],
                 outPort = [],
                 i = 0,
                 len = 0;
 
+            if (attrs.duringUploading) {
+                this.set('duringUploading', true);
+            }
             if (attrs.extra && attrs.extra.inputs) {
                 len = attrs.extra.inputs.length;
             }
@@ -29,6 +36,12 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
             this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort));
             this.set('creationName', 'Code Block');
             this.set('lastValue', '');
+            if (!this.get('failureMessage'))
+                this.set('failureMessage', '');
+            if (!this.get('extra'))
+                this.set('extra',{});
+            if (!this.get('displayName'))
+                this.set('displayName', '');
 
             this.initAttrs(attrs, vals);
         },
@@ -41,9 +54,9 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 this.get('extra').code = codeBlock.Code;
                 updated = true;
             }
-
-            if (codeBlock.PortIndexes && !this.get('extra').portIndexes.equals(codeBlock.PortIndexes)) {
-                this.get('extra').portIndexes = codeBlock.PortIndexes;
+            if ((!this.get('extra').lineIndices && codeBlock.LineIndices.length > 0)
+                || (this.get('extra').lineIndices && !this.get('extra').lineIndices.equals(codeBlock.LineIndices))) {
+                this.get('extra').lineIndices = codeBlock.LineIndices;
                 updated = true;
             }
 

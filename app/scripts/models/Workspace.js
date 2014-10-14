@@ -28,7 +28,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       // for custom nodes
       workspaceDependencyIds: [],
       isCustomNode: false,
-      guid: null
+      guid: null,
+      notNotifyServer: false
     },
 
     // connection creation
@@ -58,6 +59,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.createConnections(atts);
 
       this.subscribeOnNodesConnectionsChanges();
+      if (atts.notNotifyServer) {
+          this.set('notNotifyServer', true);
+      }
 
       // the proxy connection is what is drawn when the user is 
       // in the process of creating a new connection - it is not 
@@ -101,10 +105,34 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
     createNodes: function(data){
 
       this.set('nodes', new Nodes());
+      var guid, workspaces, id;
+      var allWorkspaces = this.app.get('workspaces');
       for(var i = 0; i < data.nodes.length; i++) {
+          var node = data.nodes[i];
+          node.duringUploading = true;
+          // besides creating nodes we should set all dependencies
+          if (node.isCustomNode){
+              guid = node.extra.guid;
+              workspaces = allWorkspaces.where({ guid: guid });
+              // if this custom node definition is not loaded make the node proxy
+              if ( workspaces.length === 0 ) {
+                  node.extra.isProxy = true;
+              }
+              else {
+                  id = workspaces[0].get('_id');
+                  node.extra.functionId = id;
+              }
+          }
         this.get('nodes').add(nodeFactory.create({
-          config: data.nodes[i],
-          workspace: this }));
+          config: node,
+          workspace: this 
+	}));
+        // if this custom node is not proxy and dependency haven't been added yet
+        if (id && this.get('workspaceDependencyIds').indexOf(id) == -1) {
+            this.addWorkspaceDependency(id);
+        }
+        // reset id
+        id = null;
       }
     },
 
@@ -495,6 +523,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.resolver.syncCustomNodesWithWorkspace(workspace);
 
     },
+
     sendCompleteDefinitionRunner: function( id ){
 
       // custom node workspace
@@ -549,7 +578,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       var multiCmd = { kind: "multiple", commands: [] };
 
       // remove any existing connection
-      var endNode = this.get('nodes').get(endNodeId)
+      var endNode = this.get('nodes').get(endNodeId);
       if ( !endNode ) return this;
       var existingConnection = endNode.getConnectionAtIndex( endPort );
 
@@ -868,8 +897,12 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
             node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeId);
             if (node) {
                 node.updateValue(param.result[i]);
-                this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeId)));
-
+                if (resultNode.containsGeometryData) {
+                    this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeId)));
+                }
+                else {
+                    node.clearGeometry();
+                }
                 if(this.pendingRequestsCount === 0){
                     this.app.trigger('show-progress');
                 }

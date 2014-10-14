@@ -21,6 +21,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
           , extra: {}
           , ignoreDefaults: []
           , isEvaluating: false
+          , isProxy: false
         },
 
         initialize: function (attrs, vals) {
@@ -58,7 +59,13 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         initAttrs: function (attrs, vals) {
             if (attrs.extra) {
                 this.get('type').extend(attrs.extra);
+                if (attrs.extra.isProxy)
+                    this.set('isProxy', true);
+                else
+                    this.set('isProxy', false);
             }
+            else
+                this.set('isProxy', false);
 
             if (attrs.lastValue) {
                 this.get('type').value = attrs.lastValue;
@@ -383,6 +390,10 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         this.addCurves(graphicData, geometries);
 
         this.set('prettyLastValue', geometries);
+        },
+
+        clearGeometry: function() {
+            this.set('prettyLastValue', {});
     },
 
     addPoints: function (graphicData, geometries) {
