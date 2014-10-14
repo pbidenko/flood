@@ -15,7 +15,7 @@
 
 @call grunt build
 
-@xcopy %dynamoBin% "dist/dynamo" /E /C /I /Y
+@xcopy %dynamoBin% "dist/dynamo" /E /K /C /I /Y
 
 @call grunt desktop_dynamo
 

@@ -159,7 +159,7 @@ module.exports = function (grunt) {
                     flatten: true,
                     cwd: '<%= yeoman.app %>',
                     src: 'bower_components/jquery.ui/themes/base/images/*.png',
-                    dest: '<%= yeoman.dist %>/style/images'
+                    dest: '<%= yeoman.dist %>/styles/images'
                 }]
             }
         },
