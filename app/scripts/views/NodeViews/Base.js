@@ -491,8 +491,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
           that.inputPorts.push(nodeCircle);
           inIndex++;
         } else {
-          if(ex.portIndexes)
-            portIndex = outIndex > 0 ? ex.portIndexes[outIndex] - ex.portIndexes[outIndex - 1] - 1 : ex.portIndexes[outIndex];
+          if(ex.lineIndices)
+            portIndex = outIndex > 0 ? ex.lineIndices[outIndex] - ex.lineIndices[outIndex - 1] - 1 : ex.lineIndices[outIndex];
           nodeCircle.setAttribute('cx', that.$el.width() + 2.5 );
           // that.portHeight is equal to 29, but actual height of port is 25
           nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * ($(ele).position().top + portIndex * 25) );
