@@ -3,9 +3,16 @@
 		<script>
 			function bodyOnLoad(){
 				var execFile = require('child_process').execFile,
-					child;
+					child,
+					interval,
+					socket,
+					settings = {
+						maxMessageStack: 100,
+						pingTimeout: 1000,
+						url: 'ws://127.0.0.1:2100'
+					};
 
-				child = execFile('DynamoWebServer.exe' , [], { cwd: 'dynamo' } , function(error,stdout,stderr) { 
+				child = execFile('DynamoWebServer.exe' , ['headless'], { cwd: 'dynamo' } , function(error,stdout,stderr) { 
 					if (error) {
 						console.log(error.stack); 
 						console.log('Error code: '+ error.code); 
@@ -13,16 +20,21 @@
 					} 
 					console.log('Child Process stdout: '+ stdout);
 					console.log('Child Process stderr: '+ stderr);
-				}); 
-				
-				child.on('exit', function (code) { 
-					console.log('Child process exited with exit code '+ code);
 				});
 
-				setTimeout(function () {
-					window.location.href = 'app.html';
-				}, 5000);
-			}
+				interval = setInterval(function(){
+				
+					socket = new WebSocket(settings.url);
+
+					socket.onopen = function () {
+						clearInterval(interval);
+						socket.close();
+						window.location.href = 'app.html';
+					};
+					
+				}, 2000);
+
+			}	
 		</script>
 	</head>
 	<body onload="bodyOnLoad()">
