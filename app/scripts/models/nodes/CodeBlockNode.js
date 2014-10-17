@@ -10,6 +10,7 @@
 
             if (attrs.extra && attrs.extra.inputs) {
                 len = attrs.extra.inputs.length;
+                attrs.extra.oldInputs = attrs.extra.inputs;
             }
 
             for (; i < len; i++) {
@@ -18,6 +19,7 @@
 
             if (attrs.extra && attrs.extra.outputs) {
                 len = attrs.extra.outputs.length;
+                attrs.extra.oldOutputs = attrs.extra.outputs;
             } else {
                 len = 0;
             }
