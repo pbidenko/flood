@@ -43,7 +43,8 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 updated = true;
             }
 
-            if ((!extraCopy.lineIndices && codeBlock.LineIndices.length > 0) || (extraCopy.lineIndices && !extraCopy.lineIndices.equals(codeBlock.LineIndices))) {
+            if ((!extraCopy.lineIndices && codeBlock.LineIndices.length > 0) 
+	    || (extraCopy.lineIndices && !extraCopy.lineIndices.equals(codeBlock.LineIndices))) {
                 extraCopy.lineIndices = codeBlock.LineIndices;
                 updated = true;
             }
@@ -77,6 +78,9 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
             if (updated) {
                 this.set('extra', extraCopy);
                 this.trigger('connections-update');
+            }
+            else {
+                this.trigger('cbn-up-to-date');
             }
         }
     });
