@@ -37,12 +37,12 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             this.removeConnections(ex);
 
             if (ex.inputs !== undefined) {
-                this.setNumInputConnections(ex.inputs.length);
+                this.setInputConnections();
                 this.setInputsProperty(ex.inputs);
                 this.model.get('type').setInputs(ex.inputs);
             }
             if (ex.outputs !== undefined) {
-                this.setNumOutputConnections(ex.outputs.length);
+                this.setOutputConnections();
                 this.setOutputsProperty(ex.outputs);
                 this.model.get('type').setOutputs(ex.outputs);
             }
@@ -56,12 +56,19 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 len,
                 conn,
                 ports,
-                port;
+                port,
+                oldPort,
+                newIndex;
 
             ports = this.model.getPorts(false);
             len = ports.length;
-            if (len > ex.inputs.length) {
-                for (i = len - 1; i >= ex.inputs.length; i--) {
+            // need to delete connections from all input ports
+            // that doesn't exist anymore
+            for (i = len - 1; i >= 0; i--) {
+                oldPort = ex.oldInputs[i];
+                newIndex = ex.inputs.indexOf(oldPort);
+                // if this input port was deleted
+                if (newIndex == -1) {
                     port = ports[i];
                     if (port && port[0]) {
                         // Dynamo has already deleted this connection
@@ -74,75 +81,90 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
             ports = this.model.getPorts(true);
             len = ports.length;
-            if (len > ex.outputs.length) {
-                for (i = len - 1; i >= ex.outputs.length; i--) {
-                    if (this.model.isPortConnected(i, true)) {
-                        while (ports[i].length) {
-                            conn = ports[i][0];
-                            // Dynamo has already deleted this connection
-                            conn.silentRemove = true;
-                            this.model.disconnectPort(i, conn, true);
-                            this.model.workspace.get('connections').remove(conn);
+            // need to delete connections from all output ports
+            // that doesn't exist anymore
+            for (i = len - 1; i >= 0; i--) {
+                oldPort = ex.oldOutputs[i];
+                newIndex = ex.outputs.indexOf(oldPort);
+                // if this output port was deleted
+                // and there are connectors from it
+                if (newIndex == -1 && this.model.isPortConnected(i, true)) {
+                    port = ports[i];
+                    while (port.length) {
+                        conn = port[0];
+                        // Dynamo has already deleted this connection
+                        conn.silentRemove = true;
+                        this.model.disconnectPort(i, conn, true);
+                        this.model.workspace.get('connections').remove(conn);
+                    }
+                }
+            }
+        },
+
+        setInputConnections: function () {
+
+            var inputConnections = this.model.get('inputConnections');
+            // copy array of connections into separate array
+            var inputsCopy = inputConnections.slice(0);
+            var ex = this.model.get('extra');
+            var i, j, index, port;
+            var oldLength = ex.oldInputs.length,
+                newLength = ex.inputs.length;
+
+            for (i = 0; i < newLength; i++) {
+                index = ex.oldInputs.indexOf(ex.inputs[i]);
+                // if it's new added input port
+                if (index == -1) {
+                    inputConnections[i] = [];
+                }
+                else {
+                    // if this input port has already been
+                    // and it could change its index
+                    port = inputsCopy[index];
+                    inputConnections[i] = port;
+                    if (port && i != index) {
+                        for (j = 0; j < port.length; j++) {
+                            port[j].set('endPortIndex', i);
                         }
                     }
                 }
             }
+
+            if (newLength < oldLength)
+                inputConnections.remove(newLength, oldLength - 1);
         },
 
-        setNumInputConnections: function (num) {
+        setOutputConnections: function () {
 
-            if (num === undefined) return;
+            var outputConnections = this.model.get('outputConnections');
+            // copy array of connections into separate array
+            var outputsCopy = outputConnections.slice(0);
+            var ex = this.model.get('extra');
+            var i, j, index, port;
+            var oldLength = ex.oldOutputs.length,
+                newLength = ex.outputs.length;
 
-            var inputConns = this.model.get('inputConnections');
-
-            var diff = num - inputConns.length;
-
-            if (diff === 0) return;
-
-            if (diff > 0) {
-                for (var i = 0; i < diff; i++) {
-                    inputConns.push([]);
+            for (i = 0; i < newLength; i++) {
+                index = ex.oldOutputs.indexOf(ex.outputs[i]);
+                // if it's new added output port
+                if (index == -1) {
+                    outputConnections[i] = [];
                 }
-            } else {
-                for (var i = 0; i < -diff; i++) {
-
-                    var conn = this.model.getConnectionAtIndex(inputConns.length - 1);
-
-                    if (conn != null) {
-                        this.model.workspace.removeConnection(conn);
+                else {
+                    // if this output port has already been
+                    // and it could change its index
+                    port = outputsCopy[index];
+                    outputConnections[i] = port;
+                    if (port && i != index) {
+                        for (j = 0; j < port.length; j++) {
+                            port[j].set('startPortIndex', i);
+                        }
                     }
-
-                    inputConns.pop();
                 }
             }
-        },
 
-        setNumOutputConnections: function (num) {
-
-            if (num === undefined) return;
-
-            var outputConns = this.model.get('outputConnections');
-
-            var diff = num - outputConns.length;
-
-            if (diff === 0) return;
-
-            if (diff > 0) {
-                for (var i = 0; i < diff; i++) {
-                    outputConns.push([]);
-                }
-            } else {
-                for (var i = 0; i < -diff; i++) {
-
-                    var conn = this.model.getConnectionAtIndex(outputConns.length - 1);
-
-                    if (conn != null) {
-                        this.model.workspace.removeConnection(conn);
-                    }
-
-                    outputConns.pop();
-                }
-            }
+            if (newLength < oldLength)
+                outputConnections.remove(newLength, oldLength - 1);
         },
 
         setInputsProperty: function (inputs) {
