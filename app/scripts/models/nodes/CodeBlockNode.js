@@ -52,7 +52,7 @@
             }
 
             if(!extraCopy.inputs) {
-                extraCopy.oldInputs =
+                extraCopy.oldInputs = [];
                 extraCopy.inputs = [];
             }
 
@@ -63,8 +63,8 @@
             }
 
             if (!extraCopy.outputs) {
-                extraCopy.oldOutputs =
-                    extraCopy.outputs = [];
+                extraCopy.oldOutputs = [];
+                extraCopy.outputs = [];
             }
 
             if (!extraCopy.outputs.equals(codeBlock.OutPorts)) {
