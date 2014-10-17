@@ -156,11 +156,14 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 that = this,
                 ex,
                 i = 0,
-                len;
+                len,
+                index = 0;
 
             BaseNodeView.prototype.renderNode.apply(this, arguments);
 
             this.input = this.$el.find('.code-block-input');
+
+            this.input.height( this.input[0].scrollHeight );
 
             this.input.focus(function (e) {
                 that.selectable = false;
@@ -171,11 +174,13 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             this.input.blur(function () {
 
                 var ex = JSON.parse(JSON.stringify(that.model.get('extra')));
+
                 if (!that.input.val()) {
                     that.selectable = true;
                     that.model.workspace.removeNodeByID(that.model.get('_id'));
                     return;
                 }
+
                 if (ex.code === that.input.val())
                     return;
 
@@ -196,13 +201,18 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                         placement: "right",
                         delay: del
                     });
+
+                    if(ex.portIndexes) {
+                      index = i > 0 ? ex.portIndexes[i] - ex.portIndexes[i - 1] - 1 : ex.portIndexes[i];
+                      this.$el.find('.node-port-output[data-index=\' ' + i + ' \']').css("margin-top", index * 25);
+                    }
                 }
             }
 
-            this.input.focus();
+            if (!this.model.get('duringUploading'))
+                this.input.focus();
 
             return this;
-
         },
 
         render: function () {

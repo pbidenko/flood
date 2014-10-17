@@ -1,4 +1,4 @@
-define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'], function(Backbone, App, SocketConnection, SearchElement) {
+define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'Storage'], function(Backbone, App, SocketConnection, SearchElement, Storage) {
 
     return App.extend({
 
@@ -17,7 +17,12 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'], function
               this.SearchElements.fetchFromProto();
             }
 
-            Backbone.Model.prototype.fetch.call(this, options);
+            Storage.fetchWorkspaces().done(function(workspaces) {
+               var result = App.prototype.parse.call(this, workspaces);
+               this.set(result, options);
+            }.bind(this)).fail(function(workspaces) {
+              options.error(workspaces);
+            });
 
           }.bind(this), 3000);
         },

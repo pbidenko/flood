@@ -378,7 +378,12 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         this.addCurves(graphicData, geometries);
 
         this.set('prettyLastValue', geometries);
-    },
+
+        },
+
+        clearGeometry: function() {
+            this.set('prettyLastValue', {});
+        },
 
     addPoints: function (graphicData, geometries) {
         // if we have single points
