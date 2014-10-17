@@ -3,7 +3,7 @@ define(['RecordableCommand'], function (RecordableCommand) {
 
     return RecordableCommand.extend({
         defaults: {
-            $type: 'Dynamo.ViewModels.DynamoViewModel+ModelEventCommand, DynamoCore',
+            $type: 'Dynamo.Models.DynamoModel+ModelEventCommand, DynamoCore',
             modelGuid: '00000000-0000-0000-0000-000000000000',
             eventName: ''
         }

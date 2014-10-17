@@ -3,7 +3,7 @@ define(['RecordableCommand'], function (RecordableCommand) {
 
     return RecordableCommand.extend({
         defaults: {
-            $type: 'Dynamo.ViewModels.DynamoViewModel+CreateNodeCommand, DynamoCore',
+            $type: 'Dynamo.Models.DynamoModel+CreateNodeCommand, DynamoCore',
             nodeId: '00000000-0000-0000-0000-000000000000',
             nodeName: '',
             x: 0,

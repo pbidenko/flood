@@ -163,7 +163,7 @@ require.config({
         staticHelpers: 'helpers/StaticHelpers',
         augment: 'helpers/augment',
         // Use BaseStorage if no actual data storage is required
-        Storage: 'helpers/MongoStorage', //'helpers/BaseStorage',
+        Storage: 'helpers/BaseStorage',//'helpers/MongoStorage'
         settings: 'helpers/Settings',
 
         // backbone views

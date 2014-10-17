@@ -449,7 +449,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 }
                 // add [indexA, indexB, indexC, normal_vector: [x, y, z]]
                 triangles.faces.push([index++, index++, index++,
-                    graphicData.triangleNormals.splice(0, graphicData.numberOfCoordinates)]);
+                    graphicData.triangleNormals.splice(0, graphicData.numberOfCoordinates * 3)]);
             }
 
             geometries.push(triangles);

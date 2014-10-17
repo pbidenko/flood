@@ -257,9 +257,9 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
         this.$el.find('.node-data-container').html( this.getCustomContents() );
       }
 
-            this.$el.find('.node-port-output').tooltip({title: "Click & drag to create a connection", placement: "right", delay:  { show: 400 }});
+      this.$el.find('.node-port-output').tooltip({title: "Click & drag to create a connection", placement: "right", delay:  { show: 400 }});
 
-            return this;
+      return this;
 
     },
 
@@ -289,10 +289,10 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
 
     formatPreview: function( value ){
 
-            var that = this;
-            return JSON.stringify(this.truncatePreview(value), function (k, v) {
-                return that.prettyPrint.call(that, k, v);
-            });
+      var that = this;
+      return JSON.stringify(this.truncatePreview(value), function (k, v) {
+        return that.prettyPrint.call(that, k, v);
+      });
 
     },
 

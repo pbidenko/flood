@@ -3,7 +3,7 @@ define(['backbone'], function (Backbone) {
 
     return Backbone.Model.extend({
         defaults: {
-            $type: 'Dynamo.ViewModels.DynamoViewModel+RecordableCommand, DynamoCore'
+            $type: 'Dynamo.Models.DynamoModel+RecordableCommand, DynamoCore'
         }
     });
 });
