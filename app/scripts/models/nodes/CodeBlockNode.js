@@ -43,25 +43,30 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 updated = true;
             }
 
-            if ((!extraCopy.lineIndices && codeBlock.LineIndices.length > 0) || (extraCopy.lineIndices && !extraCopy.lineIndices.equals(codeBlock.LineIndices))) {
+            if ((!extraCopy.lineIndices && codeBlock.LineIndices.length) 
+                || (extraCopy.lineIndices && !extraCopy.lineIndices.equals(codeBlock.LineIndices))) {
                 extraCopy.lineIndices = codeBlock.LineIndices;
                 updated = true;
             }
 
             if(!extraCopy.inputs) {
+                this.get('extra').oldInputs =
                 extraCopy.inputs = [];
             }
 
             if (!extraCopy.inputs.equals(codeBlock.InPorts)) {
+                extraCopy.oldInputs = extraCopy.inputs;
                 extraCopy.inputs = codeBlock.InPorts;
                 updated = true;
             }
 
-            if(!extraCopy.outputs) {
-                extraCopy.outputs = [];
+            if (!extraCopy.outputs) {
+                extraCopy.oldOutputs =
+                    extraCopy.outputs = [];
             }
 
             if (!extraCopy.outputs.equals(codeBlock.OutPorts)) {
+                extraCopy.oldOutputs = extraCopy.outputs;
                 extraCopy.outputs = codeBlock.OutPorts;
                 updated = true;
             }

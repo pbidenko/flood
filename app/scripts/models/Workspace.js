@@ -495,6 +495,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.resolver.syncCustomNodesWithWorkspace(workspace);
 
     },
+
     sendCompleteDefinitionRunner: function( id ){
 
       // custom node workspace
@@ -865,7 +866,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
         for (; i < len; i++) {
             resultNode = param.result[i];
-            node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeId);
+            node = this.get('nodes').get(param.result[i].nodeId);
             if (node) {
                 node.updateValue(param.result[i]);
                 this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeId)));
