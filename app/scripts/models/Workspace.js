@@ -102,21 +102,36 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     },
     
-    createNodes: function(data){
+    createNodes: function(data, browserViewWorkspaces){
 
       this.set('nodes', new Nodes());
-      var guid, workspaces, id;
+      var guid, workspaces, id, node, index;
       var allWorkspaces = this.app.get('workspaces');
       for(var i = 0; i < data.nodes.length; i++) {
-          var node = data.nodes[i];
+          node = data.nodes[i];
           node.duringUploading = true;
           // besides creating nodes we should set all dependencies
-          if (node.isCustomNode){
-              guid = node.extra.guid;
+          if (node.isCustomNode) {
+              guid = node.extra.creationName;
               workspaces = allWorkspaces.where({ guid: guid });
-              // if this custom node definition is not loaded make the node proxy
-              if ( workspaces.length === 0 ) {
-                  node.extra.isProxy = true;
+              // if this custom node definition is not loaded
+              if (workspaces.length === 0) {
+                  index = -1;
+                  // try find custom node definition in browser view
+                  if (browserViewWorkspaces) {
+                      index = browserViewWorkspaces.map(function (pair) {
+                          return pair.guid;
+                      }).indexOf(guid);
+                  }
+                  if (index > -1) {
+                      id = browserViewWorkspaces[index].id;
+                      node.extra.functionId = id;
+                  }
+                  // if there is no needed custom node definition
+                  // make the node proxy
+                  else {
+                      node.extra.isProxy = true;
+                  }
               }
               else {
                   id = workspaces[0].get('_id');
@@ -129,7 +144,20 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 	}));
         // if this custom node is not proxy and dependency haven't been added yet
         if (id && this.get('workspaceDependencyIds').indexOf(id) == -1) {
-            this.addWorkspaceDependency(id);
+            if (workspaces.length)
+                this.addWorkspaceDependency(id);
+            else {
+                // add id here as well because
+                // loadWorkspace will be executed after this method
+                // and in this way we won't call loadWorkspace
+                // for the same id more than once
+                this.get('workspaceDependencyIds').push(id);
+                this.app.loadWorkspace(id, function(ws) {
+                    // it will delete duplicates in the dependencies
+                    // and add dependencies of ws
+                    this.addWorkspaceDependency(ws.get('_id'));
+                }.bind(this));
+            }
         }
         // reset id
         id = null;

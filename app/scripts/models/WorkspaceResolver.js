@@ -92,7 +92,8 @@ define(['backbone', 'FLOOD'],
 
       var ws = this.app.getLoadedWorkspace(id);
 
-      if (!ws) throw new Error("You tried to add an unloaded workspace as a dependency!")
+      if (!ws)
+          throw new Error("You tried to add an unloaded workspace as a dependency!");
 
       var depDeps = ws.get('workspaceDependencyIds')
         , currentDeps = this.workspace.get('workspaceDependencyIds')
@@ -100,8 +101,8 @@ define(['backbone', 'FLOOD'],
 
       this.workspace.set( 'workspaceDependencyIds', unionDeps );
 
-      if (watch) this.watchDependency( id );
-
+      if (watch)
+          this.watchDependency( id );
     },
 
     watchDependency: function( id ){

@@ -40,6 +40,8 @@ define([  'backbone',
       this.model.on('show-progress', this.showProgress, this);
       this.model.on('hide-progress', this.hideProgress, this);
 
+      this.viewBrowser();
+
       this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
@@ -76,12 +78,21 @@ define([  'backbone',
     
     createWorkspaceWithData: (function() {
         var data = null;
-        var prepareWorkspace = function (ws) {
+        function mapWorkspaceFromBrowserView(ws){
+            return {
+                guid: ws.get('guid'),
+                id: ws.get('_id')
+            };
+        }
+
+        function prepareWorkspace (ws) {
             if (data.workspaceId) {
                 ws.set('guid', data.workspaceId);
             }
 
-            ws.createNodes(data);
+            var browserViewWorkspaces = this.browserView.model.get('workspaces')
+                .map(mapWorkspaceFromBrowserView);
+            ws.createNodes(data, browserViewWorkspaces);
             this.model.changed.currentWorkspace = ws.get('_id');
             this.render(true);
             ws.createConnections(data);
@@ -97,7 +108,7 @@ define([  'backbone',
             }
 
             this.zoomresetClick();
-        };
+        }
 
         return function (params) {
             var i;
@@ -127,7 +138,13 @@ define([  'backbone',
                 prepareWorkspace.call(this, currentWorkspace);
             }
             else if (params.workspaceId) {
-                this.model.newNodeWorkspace(prepareWorkspace.bind(this), true);
+                workspaces = this.browserView.model.get('workspaces').where({ guid: params.workspaceId });
+                if (workspaces.length > 0) {
+                    this.model.loadWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true, true);
+                }
+                else {
+                    this.model.newNodeWorkspace(prepareWorkspace.bind(this), true);
+                }
             }
             else {
                 this.model.newWorkspace(prepareWorkspace.bind(this));

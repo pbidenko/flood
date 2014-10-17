@@ -223,23 +223,30 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    loadWorkspace: function( id, callback ){
+    loadWorkspace: function( id, callback, silent, makeCurrent ) {
 
-      this.context.loadWorkspace(id).done(function(data){
+        this.context.loadWorkspace(id).done(function (data) {
 
-        var ws = this.get('workspaces').get(id);
-        if(ws) return;
+            var ws = this.get('workspaces').get(id);
+            if (ws) return;
 
-        ws = new Workspace(data, {app: this});
-        this.get('workspaces').add( ws );
-        if (callback) callback( ws );
+            // if we need to not send it to the dynamo
+            if (silent) {
+                data.notNotifyServer = true;
+            }
+            ws = new Workspace(data, {app: this});
+            this.get('workspaces').add(ws);
 
-      }.bind(this)).fail(function(){
+            if (makeCurrent)
+                this.set('currentWorkspace', ws.get('_id'));
 
-        console.error("failed to get workspace with id: " + id);
+            if (callback)
+                callback(ws);
 
-      });
+        }.bind(this)).fail(function () {
 
+            console.error("failed to get workspace with id: " + id);
+        });
     },
 
     isBackgroundWorkspace: function(id){
