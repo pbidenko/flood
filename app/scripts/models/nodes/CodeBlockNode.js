@@ -1,4 +1,4 @@
-define(['Node', 'FLOOD'], function (Node, FLOOD) {
+﻿define(['Node', 'FLOOD'], function (Node, FLOOD) {
 
     return Node.extend({
 
@@ -50,7 +50,7 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
             }
 
             if(!extraCopy.inputs) {
-                this.get('extra').oldInputs =
+                extraCopy.oldInputs =
                 extraCopy.inputs = [];
             }
 
