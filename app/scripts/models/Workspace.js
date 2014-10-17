@@ -272,7 +272,10 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         .each(function(x){
           if ( nodesToRemove[ x.get('startNodeId') ] || nodesToRemove[ x.get('endNodeId') ] ){
             if ( !connsToRemove[ x.get('_id')  ] ){
-              connsToRemove[ x.get('_id') ] = x.toJSON();
+                // no need to notify Dynamo
+                // it will delete this connectors itself
+                x.silentRemove = true;
+                connsToRemove[ x.get('_id') ] = x.toJSON();
             } 
           }
         });
@@ -550,11 +553,14 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       var multiCmd = { kind: "multiple", commands: [] };
 
       // remove any existing connection
-      var endNode = this.get('nodes').get(endNodeId)
+      var endNode = this.get('nodes').get(endNodeId);
       if ( !endNode ) return this;
       var existingConnection = endNode.getConnectionAtIndex( endPort );
 
       if (existingConnection != null){
+        // no need to notify Dynamo
+        // it will delete this connector itself
+        existingConnection.silentRemove = true;
         var rmConn = existingConnection.toJSON();
         rmConn.kind = "removeConnection";
         multiCmd.commands.push( rmConn );

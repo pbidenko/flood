@@ -259,7 +259,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
       }
 
       // initialize if necessary
-      if ( this.getPorts( isOutput )[portIndex] === undefined )
+      if ( !this.getPorts( isOutput )[portIndex] )
         this.getPorts( isOutput )[portIndex] = [];
 
       // add the connection to the array
@@ -383,6 +383,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         this.addCurves(graphicData, geometries);
 
         this.set('prettyLastValue', geometries);
+
     },
 
     addPoints: function (graphicData, geometries) {

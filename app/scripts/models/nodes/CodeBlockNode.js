@@ -1,4 +1,4 @@
-﻿define(['Node', 'FLOOD'], function (Node, FLOOD) {
+define(['Node', 'FLOOD'], function (Node, FLOOD) {
 
     return Node.extend({
 
@@ -84,6 +84,9 @@
             if (updated) {
                 this.set('extra', extraCopy);
                 this.trigger('connections-update');
+            }
+            else {
+                this.trigger('cbn-up-to-date');
             }
         }
     });
