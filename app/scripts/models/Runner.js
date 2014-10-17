@@ -170,6 +170,8 @@ define(['backbone'], function (Backbone) {
 
 		removeConnection: function(connection){
 
+                        if (connection.silentRemove)
+                             return;
 			var c = connection.toJSON();
 			c.kind = "removeConnection";
 			c.id = connection.get('endNodeId');

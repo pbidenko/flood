@@ -9,6 +9,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             BaseNodeView.prototype.initialize.apply(this, arguments);
             this.model.on('change:extra', this.onChangedExtra, this);
             this.model.on('connections-update', this.onConnectionsUpdate, this);
+            this.model.on('cbn-up-to-date', this.finishEvaluating, this);
         },
 
         getCustomContents: function () {
@@ -17,6 +18,10 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
             return this.innerTemplate(json);
 
+        },
+
+        finishEvaluating: function() {
+            this.$el.removeClass('node-evaluating');
         },
 
         onChangedExtra: function () {
@@ -43,19 +48,26 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             }
 
             this.render();
-            this.$el.removeClass('node-evaluating');
+            this.finishEvaluating();
         },
 
         removeConnections: function (ex) {
             var i,
                 len,
                 conn,
-                ports;
+                ports,
+                port;
 
             ports = this.model.getPorts(false);
             len = ports.length;
             if (len > ex.inputs.length) {
                 for (i = len - 1; i >= ex.inputs.length; i--) {
+                    port = ports[i];
+                    if (port && port[0]) {
+                        // Dynamo has already deleted this connection
+                        port[0].silentRemove = true;
+                    }
+
                     this.model.disconnectPort(i, null, false);
                 }
             }
@@ -67,6 +79,8 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                     if (this.model.isPortConnected(i, true)) {
                         while (ports[i].length) {
                             conn = ports[i][0];
+                            // Dynamo has already deleted this connection
+                            conn.silentRemove = true;
                             this.model.disconnectPort(i, conn, true);
                             this.model.workspace.get('connections').remove(conn);
                         }
@@ -175,11 +189,13 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             this.input.blur(function () {
 
                 var ex = JSON.parse(JSON.stringify(that.model.get('extra')));
+
                 if (!that.input.val()) {
                     that.selectable = true;
                     that.model.workspace.removeNodeById(that.model.get('_id'));
                     return;
                 }
+
                 if (ex.code === that.input.val())
                     return;
 
@@ -212,7 +228,6 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 this.input.focus();
 
             return this;
-
         },
 
         render: function () {

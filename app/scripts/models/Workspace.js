@@ -328,7 +328,10 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         .each(function(x){
           if ( nodesToRemove[ x.get('startNodeId') ] || nodesToRemove[ x.get('endNodeId') ] ){
             if ( !connsToRemove[ x.get('_id')  ] ){
-              connsToRemove[ x.get('_id') ] = x.toJSON();
+                // no need to notify Dynamo
+                // it will delete this connectors itself
+                x.silentRemove = true;
+                connsToRemove[ x.get('_id') ] = x.toJSON();
             } 
           }
         });
@@ -611,6 +614,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       var existingConnection = endNode.getConnectionAtIndex( endPort );
 
       if (existingConnection != null){
+        // no need to notify Dynamo
+        // it will delete this connector itself
+        existingConnection.silentRemove = true;
         var rmConn = existingConnection.toJSON();
         rmConn.kind = "removeConnection";
         multiCmd.commands.push( rmConn );
@@ -922,7 +928,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
         for (; i < len; i++) {
             resultNode = param.result[i];
-            node = this.app.getCurrentWorkspace().get('nodes').get(param.result[i].nodeId);
+            node = this.get('nodes').get(param.result[i].nodeId);
             if (node) {
                 node.updateValue(param.result[i]);
                 if (resultNode.containsGeometryData) {

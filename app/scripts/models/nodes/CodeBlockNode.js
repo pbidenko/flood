@@ -92,6 +92,9 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 this.set('extra', extraCopy);
                 this.trigger('connections-update');
             }
+            else {
+                this.trigger('cbn-up-to-date');
+            }
         }
     });
 
