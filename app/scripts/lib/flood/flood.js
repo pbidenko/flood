@@ -323,8 +323,19 @@ define('FLOOD', function() {
 
 	FLOOD.baseTypes.NodePort = function(name, type, parentNode, parentIndex, oppNode, oppIndex) {
 		
+		function constructPortTypeName(type) { 
+			if (!type) return;
+			if (type instanceof Array) return type.map( constructPortTypeName ).join(" of ");
+			if (type.floodTypeName) return type.floodTypeName;
+
+			var funcNameRegex = /function (.{1,})\(/;
+			var results = (funcNameRegex).exec(type.toString());
+			return (results && results.length > 1) ? results[1] : "";
+		};
+
 		this.name = name;
 		this.type = type;
+		this.typeName = constructPortTypeName( type );
 		this.parentNode = parentNode;
 		this.parentIndex = parentIndex != undefined ? parentIndex : 0;
 		this.oppNode = oppNode;
@@ -412,7 +423,7 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodePort );
 
-	FLOOD.internalNodeTypes.CustomNode = function(functionName, functionId, lambda) {
+	FLOOD.internalNodeTypes.CustomNode = function(functionName, functionId, guid, lambda) {
 
 		var typeData = {
 			typeName: "CustomNode"
@@ -420,6 +431,7 @@ define('FLOOD', function() {
 
 		this.functionName = functionName;
 		this.functionId = functionId;
+		this.guid = guid;
 		this.lambda = lambda;
 
 		if (scheme) var S = new scheme.Interpreter();
@@ -451,6 +463,10 @@ define('FLOOD', function() {
 
 			if (args.functionId && typeof args.functionId === "string"){
 				this.functionId = args.functionId;
+			}
+
+			if (args.guid && typeof args.guid === "string"){
+				this.guid = args.guid;
 			}
 
 			if (args.numInputs && typeof args.numInputs === "number" ){
@@ -649,12 +665,12 @@ define('FLOOD', function() {
 	var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	var currentInputChar = 0;
 
-	FLOOD.nodeTypes.Formula = function() {
+	FLOOD.nodeTypes.Script = function() {
 
 		var typeData = {
 			inputs: [ 	new FLOOD.baseTypes.InputPort( "A", [AnyTypeButQuotedArray], 0 ) ],
 			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
-			typeName: "Formula" 
+			typeName: "Script" 
 		};
 
 		FLOOD.baseTypes.NodeType.call(this, typeData);
@@ -663,13 +679,6 @@ define('FLOOD', function() {
 		var Sin = Math.sin, Cos = Math.cos, Abs = Math.abs, Tan = Math.tan, Random = Math.random,
 			Asin = Math.asin, Atan = Math.atan, Acos = Math.acos, Exp = Math.exp, Sqrt = Math.sqrt,
 			Pow = Math.pow, Pi = Math.PI, Eval = eval;
-
-		var Get = function(url){
-			var xhr = new XMLHttpRequest();
-	    xhr.open("GET", url, false);  // synchronous request
-	    xhr.send(null);
-	    return xhr.responseText;
-	  }
 
 		this.eval = function() {
 			var _fa = Array.prototype.slice.call(arguments, 0);
@@ -764,33 +773,21 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
-	FLOOD.nodeTypes.TwoPi = function() {
+	FLOOD.nodeTypes.Show = function() {
 
 		var typeData = {
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [Number] ) ],
-			typeName: "TwoPi" 
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Anything", [AnyType], null ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
+			typeName: "Show" 
 		};
 
-		FLOOD.baseTypes.NodeType.call(this, typeData);
+		FLOOD.baseTypes.NodeType.call(this, typeData );
 
-		this.eval = function(){
-			return 2 * Math.PI;
-		}
+		this.value = 0;
 
-	}.inherits( FLOOD.baseTypes.NodeType );
-
-	FLOOD.nodeTypes.E = function() {
-
-		var typeData = {
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [Number] ) ],
-			typeName: "E" 
+		this.eval = function(a) {
+			return a;
 		};
-
-		FLOOD.baseTypes.NodeType.call(this, typeData);
-
-		this.eval = function(){
-			return Math.E;
-		}
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
@@ -937,22 +934,6 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
-	FLOOD.nodeTypes.Negate = function() {
-
-		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "A", [Number], 1 ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [Number] ) ],
-			typeName: "Negate" 
-		};
-
-		FLOOD.baseTypes.NodeType.call(this, typeData );
-
-		this.eval = function(a) {
-			return -1 * a;
-		};
-
-	}.inherits( FLOOD.baseTypes.NodeType );
-
 	FLOOD.nodeTypes.Multiply = function() {
 
 		var typeData = {
@@ -987,6 +968,39 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
+	FLOOD.nodeTypes.Negate = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "A", [Number], 1 ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [Number] ) ],
+			typeName: "Negate" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.eval = function(a) {
+			return -1 * a;
+		};
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	FLOOD.nodeTypes.Equal = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "A", [AnyTypeButQuotedArray], 0 ),
+									new FLOOD.baseTypes.InputPort( "B", [AnyTypeButQuotedArray], 0 ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [Boolean] ) ],
+			typeName: "Equal" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.eval = function(a, b) {
+			return a === b;
+		};
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
 	FLOOD.nodeTypes.GreaterThan = function() {
 
 		var typeData = {
@@ -1000,100 +1014,6 @@ define('FLOOD', function() {
 
 		this.eval = function(a, b) {
 			return a > b;
-		};
-
-	}.inherits( FLOOD.baseTypes.NodeType );
-
-	FLOOD.nodeTypes.Input = function(name) {
-
-		var typeData = {
-			typeName: "Input",
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyTypeButQuotedArray] ) ],
-		};
-
-		if (name === undefined) name = characters[currentInputChar++];
-
-		this.name = name;
-
-		FLOOD.baseTypes.NodeType.call(this, typeData);
-
-		this.compile = function() {
-			return this.name;
-		}
-
-		this.printExpression = function(){
-			return this.name;
-		}
-
-	}.inherits( FLOOD.baseTypes.NodeType );
-
-	var currentOutputChar = 0;
-
-	FLOOD.nodeTypes.Output = function(name) {
-
-		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "⇒", [AnyType] ) ],
-			typeName: "Output"
-		};
-
-		if (name === undefined) name = characters[currentOutputChar++];
-
-		this.name = name;
-
-		FLOOD.baseTypes.NodeType.call(this, typeData);
-
-		this.compile = function() {
-			return this.inputs[0].compile();
-		}
-
-	}.inherits( FLOOD.baseTypes.NodeType );
-
-	FLOOD.nodeTypes.Eval = function() {
-
-		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "Code", [String] ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
-			typeName: "Eval" 
-		};
-
-		FLOOD.baseTypes.NodeType.call(this, typeData );
-
-		this.eval = function(a) {
-			return eval( a );
-		};
-
-	}.inherits( FLOOD.baseTypes.NodeType );
-
-	FLOOD.nodeTypes.Apply = function() {
-
-		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "Function", [Function] ),
-									new FLOOD.baseTypes.InputPort( "Arguments", [QuotedArray, AnyType] ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
-			typeName: "Apply" 
-		};
-
-		FLOOD.baseTypes.NodeType.call( this, typeData );
-
-		this.eval = function(f, a) {
-			return f.apply(this, a);
-		};
-
-	}.inherits( FLOOD.baseTypes.NodeType );
-
-	FLOOD.nodeTypes.ApplyToLeaves = function() {
-
-		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "Function", [Function] ),
-									new FLOOD.baseTypes.InputPort( "Arguments", [QuotedArray, AnyTypeButQuotedArray] ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
-			typeName: "ApplyToLeaves" 
-		};
-
-		FLOOD.baseTypes.NodeType.call( this, typeData );
-
-		this.eval = function(f, a) {
-			return f.apply(this, a);
 		};
 
 	}.inherits( FLOOD.baseTypes.NodeType );
@@ -1149,73 +1069,46 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
-	FLOOD.nodeTypes.Equal = function() {
+	FLOOD.nodeTypes.Input = function(name) {
 
 		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "A", [AnyType], 0 ),
-									new FLOOD.baseTypes.InputPort( "B", [AnyType], 0 ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [Boolean] ) ],
-			typeName: "Equal" 
+			typeName: "Input",
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyTypeButQuotedArray] ) ],
 		};
 
-		FLOOD.baseTypes.NodeType.call(this, typeData );
+		if (name === undefined) name = characters[currentInputChar++];
 
-		this.eval = function(a, b) {
-			return a === b;
-		};
+		this.name = name;
 
-	}.inherits( FLOOD.baseTypes.NodeType );
-
-	FLOOD.internalNodeTypes.Begin = function() {
-
-		var typeData = {
-			typeName: "begin",
-			isVisibleInLibrary: false
-		};
-
-		FLOOD.baseTypes.NodeType.call(this, typeData );
+		FLOOD.baseTypes.NodeType.call(this, typeData);
 
 		this.compile = function() {
-			return [this.typeName].concat( this.inputs.map(function(input){
-				return input.compile();
-			}));
+			return this.name;
+		}
+
+		this.printExpression = function(){
+			return this.name;
 		}
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
-	FLOOD.nodeTypes.Watch = function() {
+	var currentOutputChar = 0;
+
+	FLOOD.nodeTypes.Output = function(name) {
 
 		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "Anything", [AnyType], null ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
-			typeName: "Watch" 
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "⇒", [AnyType] ) ],
+			typeName: "Output"
 		};
 
-		FLOOD.baseTypes.NodeType.call(this, typeData );
+		if (name === undefined) name = characters[currentOutputChar++];
 
-		this.value = 0;
+		this.name = name;
 
-		this.eval = function(a) {
-			return a;
-		};
-
-	}.inherits( FLOOD.baseTypes.NodeType );
-
-	FLOOD.nodeTypes.If = function() {
-
-		var typeData = {
-			typeName: "if",
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "Test", [AnyType], true ),
-									new FLOOD.baseTypes.InputPort( "Then", [AnyType] ),
-									new FLOOD.baseTypes.InputPort( "Else", [AnyType] ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
-		};
-
-		FLOOD.baseTypes.NodeType.call(this, typeData );
+		FLOOD.baseTypes.NodeType.call(this, typeData);
 
 		this.compile = function() {
-			return [this.typeName, this.inputs[0].compile(), this.inputs[1].compile(), 
-				this.inputs[2].compile() ];
+			return this.inputs[0].compile();
 		}
 
 	}.inherits( FLOOD.baseTypes.NodeType );
@@ -1234,30 +1127,66 @@ define('FLOOD', function() {
 
 		this.eval = function(min, max, steps) {
 
+			if (min > max) throw new Error('Max must be greater than Min!');
+			if (steps <= 0) throw new Error('The Steps must be greater than 0.');
+			if (min === max) throw new Error('Min is equal to Max!');
+
 			var range = new QuotedArray();
 
-			if (min > max || steps <= 0){
-				return range;
+			if (steps > 1){
+				var stepSize = (max - min) / (steps-1);
+				for (var i = 0; i < steps-1; i++){
+					range.push(min + i * stepSize);
+				}
 			}
-			 
-			var stepSize = (max - min) / steps;
-			for (var i = 0; i < steps; i++){
-				range.push(min + i * stepSize);
+
+			range.push(max);
+
+			return range;
+		};
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	FLOOD.nodeTypes.Steps = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Min", [Number], 0.0 ),
+									new FLOOD.baseTypes.InputPort( "Max", [Number], 1.0 ),
+									new FLOOD.baseTypes.InputPort( "StepSize", [Number], 0.1 ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [QuotedArray, Number] ) ],
+			typeName: "Steps" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.eval = function(min, max, stepSize) {
+
+			if (min > max) throw new Error('Max must be greater than Min!');
+			if (stepSize <= 1e-6 ) throw new Error('The StepSize is less than 0.');
+			if (min === max) throw new Error('Min is equal to Max!');
+
+			var range = new QuotedArray();
+
+
+			var step = min;
+
+			while (step <= max){
+				range.push(step);
+				step += stepSize;
 			}
 
 			return range;
-
 		};
 
-	}.inherits( FLOOD.baseTypes.NodeType )
+	}.inherits( FLOOD.baseTypes.NodeType );
 
-	FLOOD.nodeTypes.ListByRepeat = function() {
+	FLOOD.nodeTypes.Repeat = function() {
 
 		var typeData = {
 			inputs: [ 	new FLOOD.baseTypes.InputPort( "Value", [AnyType], 0 ),
 									new FLOOD.baseTypes.InputPort( "Count", [Number], 0 )],
 			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [QuotedArray, AnyType] ) ],
-			typeName: "ListRepeat" 
+			typeName: "Repeat" 
 		};
 
 		FLOOD.baseTypes.NodeType.call( this, typeData );
@@ -1373,6 +1302,22 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
+	FLOOD.nodeTypes.ListReverse = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "List", [QuotedArray, AnyType], new QuotedArray() )],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
+			typeName: "ListReverse" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.eval = function(L) {
+			return L.slice(0).reverse().toQuotedArray();
+		};
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
 	FLOOD.nodeTypes.ListSort = function() {
 
 		var typeData = {
@@ -1441,7 +1386,6 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
-
 	FLOOD.nodeTypes.ListReduce = function() {
 
 		var typeData = {
@@ -1468,7 +1412,7 @@ define('FLOOD', function() {
 			inputs: [ 	new FLOOD.baseTypes.InputPort( "Function", [Function] ),
 									new FLOOD.baseTypes.InputPort( "List", [QuotedArray, AnyType] )],
 			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
-			typeName: "Filter" 
+			typeName: "ListFilter" 
 		};
 
 		FLOOD.baseTypes.NodeType.call(this, typeData );
@@ -1553,6 +1497,92 @@ define('FLOOD', function() {
 			return s.substring(st, l);
 
 		};
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	FLOOD.nodeTypes.Eval = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Code", [String] ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
+			typeName: "Eval" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.eval = function(a) {
+			return eval( a );
+		};
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	FLOOD.nodeTypes.Apply = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Function", [Function] ),
+									new FLOOD.baseTypes.InputPort( "Arguments", [QuotedArray, AnyType] ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
+			typeName: "Apply" 
+		};
+
+		FLOOD.baseTypes.NodeType.call( this, typeData );
+
+		this.eval = function(f, a) {
+			return f.apply(this, a);
+		};
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	FLOOD.nodeTypes.ApplyToLeaves = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Function", [Function] ),
+									new FLOOD.baseTypes.InputPort( "Arguments", [QuotedArray, AnyTypeButQuotedArray] ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
+			typeName: "ApplyToLeaves" 
+		};
+
+		FLOOD.baseTypes.NodeType.call( this, typeData );
+
+		this.eval = function(f, a) {
+			return f.apply(this, a);
+		};
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	FLOOD.internalNodeTypes.Begin = function() {
+
+		var typeData = {
+			typeName: "begin",
+			isVisibleInLibrary: false
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.compile = function() {
+			return [this.typeName].concat( this.inputs.map(function(input){
+				return input.compile();
+			}));
+		}
+
+	}.inherits( FLOOD.baseTypes.NodeType );
+
+	FLOOD.nodeTypes.If = function() {
+
+		var typeData = {
+			typeName: "if",
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Test", [AnyType], true ),
+									new FLOOD.baseTypes.InputPort( "Then", [AnyType] ),
+									new FLOOD.baseTypes.InputPort( "Else", [AnyType] ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [AnyType] ) ],
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.compile = function() {
+			return [this.typeName, this.inputs[0].compile(), this.inputs[1].compile(), 
+				this.inputs[2].compile() ];
+		}
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
@@ -1779,7 +1809,8 @@ define('FLOOD', function() {
 	  var result = this[ replicationType ](this_arg, args, options);
 
 	  if (result.length === 0){
-	  	throw new Error("You supplied the wrong input types. ");
+	  	throw new Error("The type of data you supplied to this node is incorrect! The ports were expecting: " 
+	  			+ this_arg.inputs.map(function(x){ return x.name + ":" + x.typeName; }).join(", ") );
 	  }
 
 	  return result;

@@ -11,8 +11,12 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
 
     events: {
       'mousedown .node-port-output': 'beginPortConnection',
-      'mouseup .node-port-input': 'endPortConnection',
       'mousedown .node-port-input': 'beginPortDisconnection',
+      'mouseup .node-port-input': 'endPortConnection',
+
+      'touchstart .node-port-output': 'beginTouchConnection',
+      'touchstart .node-port-input': 'beginTouchDisconnection',
+
       'click':  'selectThis',
       'change .use-default-checkbox': 'useDefaultClick',
       'click .toggle-vis': 'toggleGeomVis',
@@ -25,7 +29,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
       this.workspaceView = args.workspaceView;
 
       this.listenTo(this.model, 'requestRender', this.render );
-      this.listenTo(this.model, 'requestRender', this.renderKick );
       this.listenTo(this.model, 'change:position', this.move );
       this.listenTo(this.model, 'change:lastValue', this.renderLastValue );
       this.listenTo(this.model, 'change:failureMessage', this.renderLastValue );
@@ -43,10 +46,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
       this.$workspace_canvas = $('#workspace_canvas');
       this.position = this.model.get('position');
 
-    },
-
-    renderKick: function(){
-      console.log(this.model);
     },
 
     onEvalFailed: function(exception){
@@ -136,7 +135,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
     },
 
     beginPortDisconnection: function(e){
-
       var index = parseInt( $(e.currentTarget).attr('data-index') );
 
       if ( !this.model.isPortConnected(index, false) )
@@ -152,6 +150,12 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
       e.stopPropagation();
     },
 
+    beginPortConnection: function(e){
+      var index = parseInt( $(e.currentTarget).attr('data-index') );
+      this.workspace.startProxyConnection(this.model.get('_id'), index, this.getPortPosition(index, true));
+      e.stopPropagation();
+    },
+
     endPortConnection: function(e){
 
       if ( !this.workspace.draggingProxy )
@@ -163,10 +167,49 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
 
     },
 
-    beginPortConnection: function(e){
+    // touch-specific handlers
+
+    // simply kill the connection
+    beginTouchDisconnection: function(e){
+      
       var index = parseInt( $(e.currentTarget).attr('data-index') );
-      this.workspace.startProxyConnection(this.model.get('_id'), index, this.getPortPosition(index, true));
+
+      if ( !this.model.isPortConnected(index, false) )
+        return;
+
+      var inputConnections = this.model.get('inputConnections')
+        , connection = inputConnections[index][0]
+        , oppos = connection.getOpposite( this.model );
+
+      this.workspace.removeConnection( connection.toJSON() );
+
       e.stopPropagation();
+      e.preventDefault();
+    },
+
+    // special handling of touch events
+    beginTouchConnection: function(e){
+      
+      $('body').one('touchend', function(e){
+
+        var changedTouches = e.originalEvent.changedTouches[0];
+        var elem = $( document.elementFromPoint(changedTouches.pageX, changedTouches.pageY) );
+
+        if (!elem.hasClass("node-port-input")){
+          elem = elem.parent('.node-port-input')
+        }
+
+        if (!elem.attr('data-index')) return;
+
+        this.workspace.draggingProxy = true;
+
+        var e = $.Event( "mouseup" );
+        elem.trigger(e);
+
+        this.workspace.draggingProxy = false;
+
+      }.bind( this ));
+
     },
 
     select: function() {
@@ -214,9 +257,9 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
         this.$el.find('.node-data-container').html( this.getCustomContents() );
       }
 
-            this.$el.find('.node-port-output').tooltip({title: "Click & drag to create a connection", placement: "right", delay:  { show: 400 }});
+      this.$el.find('.node-port-output').tooltip({title: "Click & drag to create a connection", placement: "right", delay:  { show: 400 }});
 
-            return this;
+      return this;
 
     },
 
@@ -246,10 +289,10 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
 
     formatPreview: function( value ){
 
-            var that = this;
-            return JSON.stringify(this.truncatePreview(value), function (k, v) {
-                return that.prettyPrint.call(that, k, v);
-            });
+      var that = this;
+      return JSON.stringify(this.truncatePreview(value), function (k, v) {
+        return that.prettyPrint.call(that, k, v);
+      });
 
     },
 
@@ -384,6 +427,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
       if (pos[0] < 0) pos[0] = 0;
       if (pos[1] < 0) pos[1] = 0;
 
+
+
       this.position = pos;
 
       this.$el.css("left", this.position[0] );
@@ -446,8 +491,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap'], function(Backbone, jquery
           that.inputPorts.push(nodeCircle);
           inIndex++;
         } else {
-          if(ex.portIndexes)
-            portIndex = outIndex > 0 ? ex.portIndexes[outIndex] - ex.portIndexes[outIndex - 1] - 1 : ex.portIndexes[outIndex];
+          if(ex.lineIndices)
+            portIndex = outIndex > 0 ? ex.lineIndices[outIndex] - ex.lineIndices[outIndex - 1] - 1 : ex.lineIndices[outIndex];
           nodeCircle.setAttribute('cx', that.$el.width() + 2.5 );
           // that.portHeight is equal to 29, but actual height of port is 25
           nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * ($(ele).position().top + portIndex * 25) );

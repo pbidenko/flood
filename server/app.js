@@ -19,11 +19,15 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var expressValidator = require('express-validator');
 var connectAssets = require('connect-assets');
+var https = require('https');
+var http = require('http');
+var fs = require('fs');
 
 /**
  * Load controllers.
  */
 
+var feedbackController = require('./controllers/feedback');
 var floodController = require('./controllers/flood');
 var homeController = require('./controllers/home');
 var userController = require('./controllers/user');
@@ -120,7 +124,10 @@ app.get('/', homeController.index);
 
 app.get('/email', userController.getEmail );
 
+app.post('/feedback', feedbackController.postFeedback );
+
 app.get('/login', userController.getLogin);
+app.get('/login2', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
 app.get('/forgot', userController.getForgot);
@@ -131,11 +138,13 @@ app.get('/signup', userController.getSignup);
 app.post('/signup', userController.postSignup);
 app.get('/contact', contactController.getContact);
 app.post('/contact', contactController.postContact);
+app.post('/contact', contactController.postContact);
 app.get('/account', passportConf.isAuthenticated, userController.getAccount);
 app.post('/account/profile', passportConf.isAuthenticated, userController.postUpdateProfile);
 app.post('/account/password', passportConf.isAuthenticated, userController.postUpdatePassword);
 app.post('/account/delete', passportConf.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConf.isAuthenticated, userController.getOauthUnlink);
+
 app.get('/api', apiController.getApi);
 app.get('/api/lastfm', apiController.getLastfm);
 app.get('/api/nyt', apiController.getNewYorkTimes);
@@ -164,7 +173,7 @@ app.get('/api/linkedin', passportConf.isAuthenticated, passportConf.isAuthorized
 
 app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'user_location'] }));
 app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), function(req, res) {
-  res.redirect(req.session.returnTo || '/');
+  res.redirect('/app.html');
 });
 app.get('/auth/github', passport.authenticate('github'));
 app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), function(req, res) {
@@ -172,7 +181,7 @@ app.get('/auth/github/callback', passport.authenticate('github', { failureRedire
 });
 app.get('/auth/google', passport.authenticate('google', { scope: 'profile email' }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), function(req, res) {
-  res.redirect(req.session.returnTo || '/');
+  res.redirect('/app.html');
 });
 app.get('/auth/twitter', passport.authenticate('twitter'));
 app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/login' }), function(req, res) {
@@ -214,7 +223,30 @@ app.use(errorHandler());
  * Start Express server.
  */
 
-app.listen(app.get('port'), function() {
+var keyfn = 'ssl/server.key';
+var crtfn = 'ssl/server.crt';
+var intafn = 'ssl/int_ssl_a.pem';
+var intbfn = 'ssl/int_ssl_b.pem';
+var intcfn = 'ssl/int_ssl_c.pem';
+
+if ( fs.existsSync( keyfn ) && fs.existsSync( crtfn ) 
+  && fs.existsSync( intafn ) && fs.existsSync( intbfn ) && fs.existsSync( intcfn )){
+
+  var key = fs.readFileSync(keyfn, 'utf8');
+  var crt = fs.readFileSync(crtfn, 'utf8');
+  var inta = fs.readFileSync(intafn, 'utf8');
+  var intb = fs.readFileSync(intbfn, 'utf8');
+  var intc = fs.readFileSync(intcfn, 'utf8');
+
+  var cred = { key: key, cert: crt, ca: [ inta, intb, intc ] };
+
+  https.createServer(cred, app).listen(443, function() {
+    console.log("✔ Secure Express server listening on port %d in %s mode", 443, app.get('env'));
+  });
+
+}
+
+app.listen( app.get('port'), function() {
   console.log("✔ Express server listening on port %d in %s mode", app.get('port'), app.get('env'));
 });
 

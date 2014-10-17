@@ -13,9 +13,10 @@ define(['backbone', 'SearchElement', 'FLOOD'], function(Backbone, SearchElement,
 			var match = this.where({ functionId: customNode.functionId });
 			if (match) this.remove( match );
 
-			this.add(new SearchElement({name: customNode.functionName, functionName: customNode.functionName, 
-				isCustomNode: true, functionId: customNode.functionId, app: this.app, numInputs: customNode.inputs.length, 
-				numOutputs: customNode.outputs.length }));
+			this.add(new SearchElement({name: customNode.functionName, functionName: customNode.functionName,
+					creationName: customNode.guid, displayName: customNode.functionName, category: 'Custom nodes',
+					isCustomNode: true, functionId: customNode.functionId, app: this.app, numInputs: customNode.inputs.length,
+					numOutputs: customNode.outputs.length }));
 		},
 
 		fetch: function() {

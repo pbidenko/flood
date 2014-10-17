@@ -1,19 +1,77 @@
 define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'], function (Backbone, SearchElement, SearchElementView, SearchCategoryView) {
 
+    var regExp, filterString;
+
+    function matchSimpleCondition(tag){
+        return tag.indexOf(filterString) > -1;
+    }
+
+    function matchFuzzyCondition(tag){
+        return regExp.test(tag);
+    }
+
+    function fillElementList(list, matchCondition){
+        var weight, searchElementName, i, tag, names, index;
+        for (i = 0; i < this.tagList.length; i++) {
+            tag = this.tagList[i].tag;
+            if (matchCondition(tag)) {
+                // weight is kinda how much it matches
+                weight = filterString.length / tag.length;
+                names = this.tagList[i].names;
+                for (var j = 0; j < names.length; j++) {
+                    index = list.map(function (e) {
+                        return e.name;
+                    }).indexOf(names[j]);
+
+                    if (index == -1) {
+                        list.push({name: names[j], weight: weight});
+                    }
+                    else if (list[index].weight < weight) {
+                        list[index].weight = weight;
+                    }
+                }
+            }
+        }
+    }
+
+    function containsSpecialCharacters() {
+        return filterString.indexOf("*") > -1 ||
+            filterString.indexOf(".") > -1 ||
+            filterString.indexOf(" ") > -1 ||
+            filterString.indexOf("\\") > -1;
+    }
+
+    function makePattern() {
+        var separator = "(.*)";
+        return separator + filterString.trim()
+            .replace(/\\/g, "\\\\")
+            .replace(/\./g, '\\.')
+            .replace(/\*/g, "\\*")
+            .replace(/ /g, separator)
+            + separator;
+    }
+
     var SearchView = Backbone.View.extend({
 
         tagName: 'ul',
         className: 'list search-list',
 
+        tagList: [],
+
+        maxNumberResults: 10,
+        minResultsForTolerantSearch: 0,
+        topResult: null,
+
         initialize: function (attrs, options) {
             this.app = options.app;
-            this.searchView = options.searchView;            
+            this.searchView = options.searchView;
             this.searchElements = [];
-        },        
+        },
 
         template: _.template(''),
 
         render: function () {
+            this.setSearchTags();
             var result = getNamespaces(this.app.SearchElements.models);
             var categories = result.descendants;
             if($.isEmptyObject(categories))
@@ -23,7 +81,6 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                         model: element
                     },
                     {
-                        //parent: this,
                         searchElements: this.searchElements,
                         searchView: this.searchView
                     });
@@ -44,64 +101,77 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                         searchView: this.searchView
                     }).render().$el);
                 }
+
+                _.each(result.elements, function (element) {
+                    var view = new SearchElementView({
+                        model: element
+                    },
+                    {
+                        searchElements: this.searchElements,
+                        searchView: this.searchView
+                    });
+
+                    this.searchElements.push(view);
+
+                    this.$el.append(view.render().$el);
+                }.bind(this));
             }
             
             return this;     
         },
 
-        findElementsByName: function (name) {
+        findElementsBySearchTags: function (name) {
+            if (!name)
+                return;
+
             var result = [],
                 i = 0,
+                creationName,
+                index,
                 len = this.searchElements.length;
 
-            name = name.toLowerCase();
+            var names = this.getFilteredSearchElementNames(name);
             for( ; i < len; i++ ) {
-                if( this.searchElements[i].model.get('name').toLowerCase().indexOf(name) > -1){
+                creationName = this.searchElements[i].model.get('creationName');
+                index = names.indexOf(creationName);
+                if (index > -1) {
+                    // if it's the first result make it top one
+                    if (index == 0)
+                        this.topResult = this.searchElements[i];
                     result.push(this.searchElements[i]);
                 }
+
+                // if we've found all results
+                if (result.length == names.length)
+                    break;
             }
 
             return result;
         },
 
-        findElementByCreatingName: function(name){
-            var result = null,
-                i = 0,
-                len = this.searchElements.length;
-
-            name = name.toLowerCase();
-            for( ; i < len; i++ ) {
-                if( this.searchElements[i].model.get('creatingName').toLowerCase().indexOf(name) > -1 ){
-                    result = this.searchElements[i];
-                    break;
-                }
-            }
-
-            return result;  
-        },
-
-        expandElements: function(name){
+        expandElements: function(name) {
             var elementsToShow,
                 i = 0,
                 len = 0;
 
             this.detach();
+            this.topResult = null;
 
             //If name is empty, show all categories collapsed
-            if(!name){
+            if (!name) {
                 len = this.searchElements.length;
-                for( ; i < len; i++ ){
-                    this.searchElements[i].showWithAncestors();                    
+                for (; i < len; i++) {
+                    this.searchElements[i].showWithAncestors();
                     this.searchElements[i].toggle(false);
                 }
             }
             else {
-                elementsToShow = this.findElementsByName(name),                
+                elementsToShow = this.findElementsBySearchTags(name);
                 len = elementsToShow.length;
                 //First hide all visible elements
                 this.hideElements();
-                
-                for( ; i < len; i++){
+
+                for (; i < len; i++) {
                     elementsToShow[i].showWithAncestors();
                 }
             }
@@ -111,7 +181,68 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
             return this;
         },
 
-        hideElements: function() {            
+        setSearchTags: function() {
+            this.tagList = [];
+            var i, j, searchElementName, tags, tag, index;
+            var models = this.app.SearchElements.models;
+            // generate tagList as array of {tag, creationNames}
+            for (i = 0; i < models.length; i++) {
+                searchElementName = models[i].get('creationName');
+                if (!searchElementName)
+                    searchElementName = models[i].get('name');
+
+                tags = models[i].get('searchTags');
+                if (!tags || !tags.length)
+                    tags = [searchElementName];
+
+                for (j = 0; j < tags.length; j++) {
+                    tag = tags[j];
+
+                    index = this.tagList.map(function (e) {
+                        return e.tag;
+                    }).indexOf(tag);
+
+                    if (index > -1) {
+                        this.tagList[index].names.push(searchElementName);
+                    }
+                    else {
+                        this.tagList.push({tag: tag, names: [searchElementName]});
+                    }
+                }
+            }
+        },
+
+        getFilteredSearchElementNames: function (filter) {
+            filterString = filter.toLowerCase();
+            // array of pair {name, weight}
+            var weightedElements = [];
+
+            fillElementList.call(this, weightedElements, matchSimpleCondition);
+
+            // if we don't have enough results and the filterString
+            // contains special characters, do fuzzy search
+            if (weightedElements.length <= this.minResultsForTolerantSearch
+                && containsSpecialCharacters()) {
+                regExp = new RegExp(makePattern());
+                fillElementList.call(this, weightedElements, matchFuzzyCondition);
+            }
+
+            // sort by weight desc
+            weightedElements.sort(function (a, b) {
+                return b.weight - a.weight;
+            });
+
+            var result = [];
+            for (var i = 0; i < weightedElements.length; i++) {
+                result.push(weightedElements[i].name);
+                if (result.length >= this.maxNumberResults)
+                    break;
+            }
+
+            return result;
+        },
+
+        hideElements: function() {
             var i = 0,
                 len = this.searchElements.length;
             for( ; i < len; i++){
@@ -161,8 +292,8 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                         if (parent.descendants.hasOwnProperty(category)) {
                             parent = parent.descendants[category];
                         } else {
-                            parent = parent.descendants[category] = {        
-                                name: category,                    
+                            parent = parent.descendants[category] = {
+                                name: category,
                                 descendants: {},
                                 elements: []
                             }
@@ -182,7 +313,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
         var category = categories.shift(),
             parentCategory;
 
-        parentCategory = destination.descendants[category] = {         
+        parentCategory = destination.descendants[category] = {
             name: category,   
             descendants: {},
             elements: []
@@ -190,8 +321,8 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
 
         while (categories.length) {
             category = categories.shift();
-            parentCategory = parentCategory.descendants[category] = {      
-                name: category,             
+            parentCategory = parentCategory.descendants[category] = {
+                name: category,
                 descendants: {},
                 elements: []
             }

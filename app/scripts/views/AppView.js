@@ -12,9 +12,12 @@ define([  'backbone',
           'HelpView',
           'Help',
           'LoginView',
-          'Login'],
-          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, WorkspaceTabView, 
-            Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, Help, LoginView, Login) {
+          'Login',
+          'FeedbackView',
+          'Feedback' ], 
+          function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
+            WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
+            Help, LoginView, Login, FeedbackView, Feedback ) {
 
   return Backbone.View.extend({
 
@@ -33,9 +36,11 @@ define([  'backbone',
       this.model.on('change:showingHelp', this.viewHelp, this);
       this.model.on('change:showingBrowser', this.viewBrowser, this);
       this.model.on('hide-search', this.hideSearch, this);
+      this.model.on('show-progress', this.showProgress, this);
+      this.model.on('hide-progress', this.hideProgress, this);
 
       this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
-      this.model.login.on('change:showing', this.showHelpOnFirstExperience, this );
+      this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
 
@@ -47,10 +52,15 @@ define([  'backbone',
     events: {
       'click #save-button' : 'saveClick',
       'click .workspaces_curtain' : 'endSearch',
-      'click #help-button': 'showHelp',
+      'click #help-button': 'toggleHelp',
       'click #settings-button': 'showSettings',
       'click #workspace_hide' : 'toggleViewer',
       'click #workspace-browser-button': 'toggleBrowser',
+      'click #feedback-button': 'toggleFeedback',
+
+      'click #zoomin-button': 'zoominClick',
+      'click #zoomout-button': 'zoomoutClick',
+      'click #zoomreset-button': 'zoomresetClick',
 
       'click #add-project-workspace' : 'newWorkspace',
       'click #add-node-workspace' : 'newNodeWorkspace',
@@ -65,14 +75,13 @@ define([  'backbone',
 
       var that = this;
 
-      if (that.model.login.get('isLoggedIn')  && that.model.get('isFirstExperience')){
-        setTimeout(function(){
+      setTimeout(function(){
+        if (that.model.login.get('isLoggedIn') && that.model.get('isFirstExperience')){
           that.model.set( 'showingHelp', true);
-          that.model.set( 'isFirstExperience', false );
-         }, 800);
-      } else {
-        that.model.set( 'showingHelp', false);
-      }
+        } else {
+          that.model.set( 'showingHelp', false);
+        }
+      }, 800);
 
     },
 
@@ -103,6 +112,10 @@ define([  'backbone',
       // do not capture from input
       if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "INPUT") return;
       if (e.target.nodeName === "INPUT") return;
+
+      // do not capture from textarea
+      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "TEXTAREA" ) return;
+      if (e.target.nodeName === "TEXTAREA") return;
 
       // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
       switch (e.keyCode) {
@@ -136,12 +149,12 @@ define([  'backbone',
 
     hideSearch: function(){
       this.model.set('showingSearch', false);
-      this.workspaceControlsView && this.workspaceControlsView.hideSearch();      
+      this.workspaceControlsView && this.workspaceControlsView.hideSearch();
     },
 
     viewBrowser: function(){
       if (!this.browserView){
-        this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser() }, { app: this.model });
+        this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser({ app: this.model }) }, { app: this.model });
         this.browserView.render();
       }
 
@@ -158,7 +171,6 @@ define([  'backbone',
       }
       
       if (this.model.get('showingHelp') === true){
-        // the workspace must be focused before showing help
         this.focusWorkspace();
         this.helpView.render();
         this.helpView.$el.fadeIn();  
@@ -180,12 +192,20 @@ define([  'backbone',
       }
     },
 
+    toggleHelp: function(){
+      this.model.set('showingHelp', !this.model.get('showingHelp'));
+    },
+
+    toggleFeedback: function(){
+      this.model.set('showingFeedback', !this.model.get('showingFeedback'));
+    },
+
     showHelp: function(){
       this.model.set('showingHelp', true);
     },
 
     hideHelp: function(){
-      this.model.set('showingHelp', true);
+      this.model.set('showingHelp', false);
     },
 
     showFeedback: function(){
@@ -193,7 +213,7 @@ define([  'backbone',
     },
 
     hideFeedback: function(){
-      this.model.set('showingFeedback', true);
+      this.model.set('showingFeedback', false);
     },
 
     showLogin: function(){
@@ -235,6 +255,30 @@ define([  'backbone',
 
       }
 
+    },
+
+    zoomresetClick: function(){
+      if ( this.lookingAtViewer ){
+        zoomToFit();
+      } else {
+        this.currentWorkspaceView.zoomAll();
+      }
+    },
+
+    zoominClick: function(){
+      if ( this.lookingAtViewer ){
+        controls.dollyOut();
+      } else {
+        this.getCurrentWorkspace().zoomIn();
+      }
+    },
+
+    zoomoutClick: function(){
+      if ( this.lookingAtViewer ){
+        controls.dollyIn();
+      } else {
+        this.getCurrentWorkspace().zoomOut();
+      }
     },
 
     showingHelp: false,
@@ -285,6 +329,18 @@ define([  'backbone',
 
       this.workspaceTabViews[workspace.get('_id')].$el.remove();
       delete this.workspaceTabViews[workspace.get('_id')];
+
+    },
+
+    getCurrentWorkspaceCenter: function(){
+
+      var w = this.currentWorkspaceView.$el.width()
+        , h = this.currentWorkspaceView.$el.height()
+        , ho = this.currentWorkspaceView.$el.scrollTop()
+        , wo = this.currentWorkspaceView.$el.scrollLeft()
+        , zoom = 1 / this.model.getCurrentWorkspace().get('zoom');
+
+      return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
 
     },
 
@@ -439,6 +495,14 @@ define([  'backbone',
         this.focusWorkspace();
       }
 
+    },
+
+    showProgress: function(){
+      this.$el.find('.busy-indicator').show();
+    },
+
+    hideProgress: function(){
+      this.$el.find('.busy-indicator').hide();
     }
 
   });

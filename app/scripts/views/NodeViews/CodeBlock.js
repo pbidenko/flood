@@ -14,7 +14,6 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
         getCustomContents: function () {
 
             var json = this.model.toJSON();
-            if (!json.extra.code) json.extra.code = this.model.get('type').code;
 
             return this.innerTemplate(json);
 
@@ -22,6 +21,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
         onChangedExtra: function () {
             this.render();
+            this.$el.addClass('node-evaluating');
             this.model.trigger('updateRunner');
             this.model.workspace.run();
         },
@@ -43,6 +43,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             }
 
             this.render();
+            this.$el.removeClass('node-evaluating');
         },
 
         removeConnections: function (ex) {
@@ -177,7 +178,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
                 if (!that.input.val()) {
                     that.selectable = true;
-                    that.model.workspace.removeNodeByID(that.model.get('_id'));
+                    that.model.workspace.removeNodeById(that.model.get('_id'));
                     return;
                 }
 
@@ -202,8 +203,8 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                         delay: del
                     });
 
-                    if(ex.portIndexes) {
-                      index = i > 0 ? ex.portIndexes[i] - ex.portIndexes[i - 1] - 1 : ex.portIndexes[i];
+                    if(ex.lineIndices) {
+                      index = i > 0 ? ex.lineIndices[i] - ex.lineIndices[i - 1] - 1 : ex.lineIndices[i];
                       this.$el.find('.node-port-output[data-index=\' ' + i + ' \']').css("margin-top", index * 25);
                     }
                 }

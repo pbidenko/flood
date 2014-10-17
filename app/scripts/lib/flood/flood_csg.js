@@ -13,6 +13,12 @@ if (typeof require != 'function' && typeof window != "object") {
 
 define('FLOODCSG', ['FLOOD'], function(FLOOD) {
 
+	// type name overrides
+	CSG.floodTypeName = "Solid";
+	CSG.Polygon.floodTypeName = "Polygon";
+	CSG.Vector.floodTypeName = "Vector";
+	CSG.Plane.floodTypeName = "Plane";
+
 	CSG.prototype.render = function() {
 
 		var obj = { vertices : [], faces: [] };
@@ -87,6 +93,7 @@ define('FLOODCSG', ['FLOOD'], function(FLOOD) {
 		return{ "linestrip": linestrip };
 
 	};
+
 
 
 	FLOOD.nodeTypes.Vector = function() {
@@ -242,14 +249,14 @@ define('FLOODCSG', ['FLOOD'], function(FLOOD) {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
-	FLOOD.nodeTypes.VectorInterp = function() {
+	FLOOD.nodeTypes.VectorLerp = function() {
 
 		var typeData = {
 			inputs: [ 	new FLOOD.baseTypes.InputPort( "A", [ CSG.Vector ], new CSG.Vector([0,0,0]) ),
 									new FLOOD.baseTypes.InputPort( "B", [ CSG.Vector ], new CSG.Vector([1,0,0]) ),
 									new FLOOD.baseTypes.InputPort( "Interp", [ Number ], 0.5 )],
 			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG.Vector ] ) ],
-			typeName: "VectorInterp" 
+			typeName: "VectorLerp" 
 		};
 
 		FLOOD.baseTypes.NodeType.call(this, typeData );
@@ -342,6 +349,220 @@ define('FLOODCSG', ['FLOOD'], function(FLOOD) {
 
 	FLOOD.baseTypes.NodeType.prototype.postProcess = csgPostProcess;
 
+	FLOOD.nodeTypes.Plane = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Origin", [ CSG.Vector ], new CSG.Vector(0,0,0) ),
+			 						new FLOOD.baseTypes.InputPort( "XAxis", [ CSG.Vector ], new CSG.Vector(1,0,0) ),
+			 						new FLOOD.baseTypes.InputPort( "YAxis", [ CSG.Vector ], new CSG.Vector(0,1,0) ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG.Plane ] ) ],
+			typeName: "Plane" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData);
+
+		this.eval = function(o, x, y) {
+
+			if (x.length() < 1e-6) throw new Error("The X Axis must be longer than 0.");
+			if (y.length() < 1e-6) throw new Error("The Y Axis must be longer than 0.");
+			if (x.cross(y).length() < 1e-6) throw new Error("The X and Y Axis must form a plane");
+
+			var n = x.cross(y).unit();
+			var w = n.dot(o);
+
+			var pl = new CSG.Plane(n,w);
+			pl.origin = o;
+			pl.xaxis = x.unit();
+			pl.yaxis = n.cross(x).unit();
+			
+			return pl;
+
+		};
+
+	}.inherits( FLOOD.baseTypes.CSG );
+
+	FLOOD.nodeTypes.PlaneComponents = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Plane", [ CSG.Plane ], initPlane() )],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "Origin", [ CSG.Vector ] ), 
+									new FLOOD.baseTypes.OutputPort( "XAxis", [ CSG.Vector ] ), 
+									new FLOOD.baseTypes.OutputPort( "YAxis", [ CSG.Vector ] ),
+									new FLOOD.baseTypes.OutputPort( "Normal", [ CSG.Vector ] )],
+			typeName: "PlaneComponents" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.eval = function(plane) {
+			return new FLOOD.MultiOutResult({"0" : plane.origin, "1" : plane.xaxis, "2" : plane.yaxis, "3" : plane.xaxis.cross(plane.yaxis) });
+		};
+
+	}.inherits( FLOOD.baseTypes.NodeType);
+
+	var initPlane = function(){
+
+		var n = new CSG.Vector(0,0,1);
+		var w = 0;
+
+		var pl = new CSG.Plane(n,w);
+		
+		pl.origin = new CSG.Vector(0,0,0);
+		pl.xaxis = new CSG.Vector(1,0,0);
+		pl.yaxis = new CSG.Vector(0,1,0);
+
+		return pl;
+
+	};
+
+	var ptOnPlane = function(pl, x, y){
+		return pl.origin.plus( pl.xaxis.times( x ).plus( pl.yaxis.times( y ) ) );
+	};
+
+	FLOOD.nodeTypes.RegularPolygon = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Sides", [ Number ], 3 ),
+			 						new FLOOD.baseTypes.InputPort( "Radius", [ Number ], 10 ),
+			 						new FLOOD.baseTypes.InputPort( "Plane", [ CSG.Plane ], initPlane() )],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG.Polygon ] ) ],
+			typeName: "RegularPolygon" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData);
+
+		this.eval = function(numSides, radius, pl) {
+
+			numSides = Math.floor(numSides);
+
+			if (numSides < 3) throw new Error("Sides must be >= 3");
+
+			var inc = 2 * Math.PI / numSides;
+
+			var pts = [];
+			var ang = 0;
+
+			for (var i = 0; i < numSides; i++) {
+				ang += inc;
+				pts.push( ptOnPlane(pl, radius * Math.cos(ang), radius * Math.sin(ang) ) );
+			}
+
+			return CSG.Polygon.createFromPoints( pts, false );
+
+		};
+
+	}.inherits( FLOOD.baseTypes.CSG );
+
+	FLOOD.nodeTypes.Rectangle = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Width", [ Number ], 5 ),
+			 						new FLOOD.baseTypes.InputPort( "Height", [ Number ], 10 ),
+			 						new FLOOD.baseTypes.InputPort( "Plane", [ CSG.Plane ], initPlane() )],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG.Polygon ] ) ],
+			typeName: "Rectangle" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData);
+
+		this.eval = function(width, height, pl) {
+
+			var pts = [
+				ptOnPlane(pl, width/2, height/2),
+				ptOnPlane(pl, -width/2, height/2),
+				ptOnPlane(pl, -width/2, -height/2),
+				ptOnPlane(pl, width/2, -height/2)
+			];
+
+			return CSG.Polygon.createFromPoints( pts, false );
+
+		};
+
+	}.inherits( FLOOD.baseTypes.CSG );
+	
+	FLOOD.nodeTypes.Polygon = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Corners", [ FLOOD.QuotedArray, CSG.Vector ] )],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG.Polygon ] ) ],
+			typeName: "Polygon" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData);
+
+		this.eval = function(pts) {
+
+			if (pts.length < 3) throw new Exception("You need more than 3 points to make a polygon");
+
+			return CSG.Polygon.createFromPoints( pts, false );
+
+		};
+
+	}.inherits( FLOOD.baseTypes.CSG );
+
+	FLOOD.nodeTypes.SolidCuboid = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "MinCorner", [ CSG.Vector ], new CSG.Vector([0,0,0]) ),
+						new FLOOD.baseTypes.InputPort( "MaxCorner", [ CSG.Vector ], new CSG.Vector([5, 5, 5]) ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG ] ) ],
+			typeName: "SolidCuboid" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.eval = function(minPoint, maxPoint) {
+
+			if (minPoint.z > maxPoint.z ){
+				var t = minPoint;
+				minPoint = maxPoint;
+				maxPoint = t;
+			}
+
+			var x = new CSG.Vector([1,0,0]);
+			var y = new CSG.Vector([0,1,0]);
+			var w = maxPoint.x - minPoint.x;
+			var h = maxPoint.y - minPoint.y;
+			var d = maxPoint.z - minPoint.z;
+
+			var pts = [
+				minPoint, 
+				minPoint.plus( x.times(w) ),
+				minPoint.plus( x.times(w)).plus( y.times(h) ),
+				minPoint.plus( y.times(h) )
+			];
+
+			var poly = CSG.Polygon.createFromPoints( pts, false );
+
+			return extrude( poly, new CSG.Vector( [0,0,d] ));
+
+		};
+
+	}.inherits( FLOOD.baseTypes.CSG );
+
+	FLOOD.nodeTypes.SolidCube = function() {
+
+		var typeData = {
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Center", [ CSG.Vector ], new CSG.Vector([0,0,0]) ),
+						new FLOOD.baseTypes.InputPort( "Radius", [ Number ], 10 ) ],
+			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG ] ) ],
+			typeName: "SolidCube" 
+		};
+
+		FLOOD.baseTypes.NodeType.call(this, typeData );
+
+		this.eval = function(center, radius) {
+
+			return CSG.cube({
+					  center: center,
+					  radius: radius
+					});
+		};
+
+	}.inherits( FLOOD.baseTypes.CSG );
+
+	// FLOOD.nodeTypes.ScaleUneven ( Solid, Plane, XFactor, YFactor, ZFactor )
+
 	FLOOD.nodeTypes.SolidSphere = function() {
 
 		var typeData = {
@@ -389,24 +610,96 @@ define('FLOODCSG', ['FLOOD'], function(FLOOD) {
 
 	}.inherits( FLOOD.baseTypes.CSG );
 
-	FLOOD.nodeTypes.SolidCube = function() {
+	CSG.Matrix4x4.prototype.inverse = function(){
+
+		// based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
+		var te = new Array(16);
+		var me = this.elements;
+
+		var n11 = me[0], n12 = me[4], n13 = me[8], n14 = me[12];
+		var n21 = me[1], n22 = me[5], n23 = me[9], n24 = me[13];
+		var n31 = me[2], n32 = me[6], n33 = me[10], n34 = me[14];
+		var n41 = me[3], n42 = me[7], n43 = me[11], n44 = me[15];
+
+		te[0] = n23*n34*n42 - n24*n33*n42 + n24*n32*n43 - n22*n34*n43 - n23*n32*n44 + n22*n33*n44;
+		te[4] = n14*n33*n42 - n13*n34*n42 - n14*n32*n43 + n12*n34*n43 + n13*n32*n44 - n12*n33*n44;
+		te[8] = n13*n24*n42 - n14*n23*n42 + n14*n22*n43 - n12*n24*n43 - n13*n22*n44 + n12*n23*n44;
+		te[12] = n14*n23*n32 - n13*n24*n32 - n14*n22*n33 + n12*n24*n33 + n13*n22*n34 - n12*n23*n34;
+		te[1] = n24*n33*n41 - n23*n34*n41 - n24*n31*n43 + n21*n34*n43 + n23*n31*n44 - n21*n33*n44;
+		te[5] = n13*n34*n41 - n14*n33*n41 + n14*n31*n43 - n11*n34*n43 - n13*n31*n44 + n11*n33*n44;
+		te[9] = n14*n23*n41 - n13*n24*n41 - n14*n21*n43 + n11*n24*n43 + n13*n21*n44 - n11*n23*n44;
+		te[13] = n13*n24*n31 - n14*n23*n31 + n14*n21*n33 - n11*n24*n33 - n13*n21*n34 + n11*n23*n34;
+		te[2] = n22*n34*n41 - n24*n32*n41 + n24*n31*n42 - n21*n34*n42 - n22*n31*n44 + n21*n32*n44;
+		te[6] = n14*n32*n41 - n12*n34*n41 - n14*n31*n42 + n11*n34*n42 + n12*n31*n44 - n11*n32*n44;
+		te[10] = n12*n24*n41 - n14*n22*n41 + n14*n21*n42 - n11*n24*n42 - n12*n21*n44 + n11*n22*n44;
+		te[14] = n14*n22*n31 - n12*n24*n31 - n14*n21*n32 + n11*n24*n32 + n12*n21*n34 - n11*n22*n34;
+		te[3] = n23*n32*n41 - n22*n33*n41 - n23*n31*n42 + n21*n33*n42 + n22*n31*n43 - n21*n32*n43;
+		te[7] = n12*n33*n41 - n13*n32*n41 + n13*n31*n42 - n11*n33*n42 - n12*n31*n43 + n11*n32*n43;
+		te[11] = n13*n22*n41 - n12*n23*n41 - n13*n21*n42 + n11*n23*n42 + n12*n21*n43 - n11*n22*n43;
+		te[15] = n12*n23*n31 - n13*n22*n31 + n13*n21*n32 - n11*n23*n32 - n12*n21*n33 + n11*n22*n33;
+
+		var det = n11 * te[ 0 ] + n21 * te[ 4 ] + n31 * te[ 8 ] + n41 * te[ 12 ];
+
+		if ( det == 0 ) {
+			var msg = "Matrix4.getInverse(): can't invert matrix, determinant is 0";
+			throw new Error( msg ); 
+		}
+
+		var detInv = 1 / det;
+
+		te = te.map(function(x){ return x * detInv });
+
+		return new CSG.Matrix4x4( te );
+	}
+
+	var extrude = function(polygon, offset) {
+
+		// get CS from profile plane
+		var plane = polygon.plane;
+		var z = plane.normal;
+		var o = polygon.vertices[0].pos;
+
+		var helperVec = z.minus(new CSG.Vector(1,0,0)).length() > 1e-5 ? new CSG.Vector(1,0,0) : new CSG.Vector(0,1,0);
+
+		var x = z.cross( helperVec ).unit();
+		var y = z.cross( x );
+
+		var trf = new CSG.Matrix4x4( [ 	x.x, x.y, x.z, 0, 
+																		y.x, y.y, y.z, 0, 
+																		z.x, z.y, z.z, 0,
+																		0,   0,   0,   1    ]);
+
+		var trfinv = trf.inverse();
+
+		var cc = [];
+
+		for (var i = 0; i < polygon.vertices.length; i++){
+			var cp = polygon.vertices[i].pos.minus( o );
+			var cpp = trf.rightMultiply1x3Vector( cp );
+			cc.push( new CSG.Vector2D( cpp.x, cpp.y ) );
+		}
+
+		// extrude to create polygon
+		var profile2D = new CSG.Polygon2D( cc, false );
+		var offsetTrf = trf.rightMultiply1x3Vector( offset );
+		var ext = profile2D.extrude({ offset: offsetTrf });
+
+		// transform solid back to original cs
+		return ext.transform( CSG.Matrix4x4.translation( o ).multiply( trfinv ) );
+	};
+
+	FLOOD.nodeTypes.SolidExtrusion = function() {
 
 		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "Center", [ CSG.Vector ], new CSG.Vector([0,0,0]) ),
-						new FLOOD.baseTypes.InputPort( "Radius", [ Number ], 10 ) ],
+			inputs: [ 	new FLOOD.baseTypes.InputPort( "Profile", [ CSG.Polygon ] ),
+									new FLOOD.baseTypes.InputPort( "Vector", [ CSG.Vector ], new CSG.Vector(0, 0, 1) ) ],
 			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG ] ) ],
-			typeName: "SolidCube" 
+			typeName: "SolidExtrusion" 
 		};
 
 		FLOOD.baseTypes.NodeType.call(this, typeData );
 
-		this.eval = function(center, radius) {
-
-			return CSG.cube({
-					  center: center,
-					  radius: radius
-					});
-		};
+		this.eval = extrude;
 
 	}.inherits( FLOOD.baseTypes.CSG );
 
@@ -527,7 +820,7 @@ define('FLOODCSG', ['FLOOD'], function(FLOOD) {
 		var typeData = {
 			inputs: [ 	new FLOOD.baseTypes.InputPort( "Geom", [ FLOOD.AnyTypeButQuotedArray ] ),
 									new FLOOD.baseTypes.InputPort( "Axis", [ CSG.Vector ], new CSG.Vector([0,0,1]) ),
-									new FLOOD.baseTypes.InputPort( "Angle", [ Number ], Math.PI/2 )],
+									new FLOOD.baseTypes.InputPort( "Degrees", [ Number ], 30 )],
 			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG ] ) ],
 			typeName: "Rotate" 
 		};
@@ -572,151 +865,6 @@ define('FLOODCSG', ['FLOOD'], function(FLOOD) {
 		};
 
 	}.inherits( FLOOD.baseTypes.CSG );
-
-	FLOOD.nodeTypes.Plane = function() {
-
-		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "Origin", [ CSG.Vector ], new CSG.Vector(0,0,0) ),
-			 						new FLOOD.baseTypes.InputPort( "XAxis", [ CSG.Vector ], new CSG.Vector(1,0,0) ),
-			 						new FLOOD.baseTypes.InputPort( "YAxis", [ CSG.Vector ], new CSG.Vector(0,1,0) ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG.Plane ] ) ],
-			typeName: "Plane" 
-		};
-
-		FLOOD.baseTypes.NodeType.call(this, typeData);
-
-		this.eval = function(o, x, y) {
-
-			var n = x.cross(y).unit();
-			var w = n.dot(o);
-
-			var pl = new CSG.Plane(n,w);
-			pl.origin = o;
-			pl.xaxis = x.unit();
-			pl.yaxis = n.cross(pl.xaxis);
-			
-			return pl;
-
-		};
-
-	}.inherits( FLOOD.baseTypes.CSG );
-
-	FLOOD.nodeTypes.RegularPolygon = function() {
-
-		var initPlane = function(){
-
-			var n = new CSG.Vector(0,0,1);
-			var w = 0;
-
-			var pl = new CSG.Plane(n,w);
-			
-			pl.origin = new CSG.Vector(0,0,0);
-			pl.xaxis = new CSG.Vector(1,0,0);
-			pl.yaxis = new CSG.Vector(0,1,0);
-
-			return pl;
-
-		};
-
-		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "Sides", [ Number ], 3 ),
-			 						new FLOOD.baseTypes.InputPort( "Radius", [ Number ], 10 ),
-			 						new FLOOD.baseTypes.InputPort( "Plane", [ CSG.Plane ], initPlane() )],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG.Polygon ] ) ],
-			typeName: "RegularPolygon" 
-		};
-
-		FLOOD.baseTypes.NodeType.call(this, typeData);
-
-		this.eval = function(numSides, radius, pl) {
-
-			numSides = Math.floor(numSides);
-
-			if (numSides < 3) throw new Error("Sides must be >= 3");
-
-			var inc = 2 * Math.PI / numSides;
-
-			var pts = [];
-			var ang = 0;
-
-			for (var i = 0; i < numSides; i++) {
-
-				ang += inc;
-				var px = pl.xaxis.times( radius * Math.cos(ang) ).plus( pl.yaxis.times( radius * Math.sin(ang) ));
-				pts.push( pl.origin.plus( px ) );
-
-			}
-
-			return CSG.Polygon.createFromPoints( pts, false );
-
-		};
-
-	}.inherits( FLOOD.baseTypes.CSG );
-
-	FLOOD.nodeTypes.SolidExtrusion = function() {
-
-		var typeData = {
-			inputs: [ 	new FLOOD.baseTypes.InputPort( "Profile", [ CSG.Polygon ] ),
-									new FLOOD.baseTypes.InputPort( "Vector", [ CSG.Vector ], new CSG.Vector(0, 0, 1) ) ],
-			outputs: [ 	new FLOOD.baseTypes.OutputPort( "⇒", [ CSG ] ) ],
-			typeName: "SolidExtrusion" 
-		};
-
-		FLOOD.baseTypes.NodeType.call(this, typeData );
-
-		this.eval = function(polygon, offset) {
-
-			// get CS from profile plane
-			var plane = polygon.plane;
-			var z = plane.normal;
-			var o = z.times( plane.w );
-
-			var helperVec = z.minus(new CSG.Vector(1,0,0)).length() < 1e-5 ? new CSG.Vector(1,0,0) : new CSG.Vector(0,1,0);
-
-			var x = z.cross( helperVec ).unit();
-			var y = z.cross( x );
-
-			var trf = new CSG.Matrix4x4( [ 	x.x, x.y, x.z, o.x, 
-																			y.x, y.y, y.z, o.y, 
-																			z.x, z.y, z.z, o.z,
-																			0,   0,   0,   1    ]);
-
-			var trfinv = new CSG.Matrix4x4( [ 	x.x, y.x, z.x, -o.x, 
-																					x.y, y.y, z.y, -o.y, 
-																					x.z, y.z, z.z, -o.z,
-																					0,   0,   0,   1    ]);
-
-			var cc = [];
-
-			for (var i = 0; i < polygon.vertices.length; i++){
-
-				var cp = polygon.vertices[i].pos;
-
-				// align polygon with 2d CS
-				var cpp = cp.multiply4x4( trfinv );
-
-				cc.push( new CSG.Vector2D( cpp.x, cpp.y ) );
-
-			}
-
-			// extrude to create polygon
-			var profile2D = new CSG.Polygon2D( cc, false );
-
-			// transform the extrusion vector
-			var offsetTrf = trf.rightMultiply1x3Vector( offset );
-			var ext = profile2D.extrude({ offset: offsetTrf });
-
-			// transform back to original CS
-			return ext.transform( trf );
-
-		};
-
-	}.inherits( FLOOD.baseTypes.CSG );
-
-	// Rectangle
-	// FLOOD.nodeTypes.ScaleUneven ( Solid, Plane, XFactor, YFactor, ZFactor )
-	// FLOOD.nodeTypes.Cuboid 
-	// FLOOD.nodeTypes.Polygon(Points)
 
 });
 

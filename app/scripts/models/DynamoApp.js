@@ -1,4 +1,5 @@
-define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'Storage'], function(Backbone, App, SocketConnection, SearchElement, Storage) {
+define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
+    function(Backbone, App, SocketConnection, SearchElement) {
 
     return App.extend({
 
@@ -17,7 +18,7 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'Storage'
               this.SearchElements.fetchFromProto();
             }
 
-            Storage.fetchWorkspaces().done(function(workspaces) {
+            this.context.fetchWorkspaces().done(function(workspaces) {
                var result = App.prototype.parse.call(this, workspaces);
                this.set(result, options);
             }.bind(this)).fail(function(workspaces) {
@@ -29,8 +30,8 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'Storage'
 
         mapLibraryItems: function(param) {
           this.SearchElements.models = param.libraryItems.map(function(item){
-            return new SearchElement({name: item.name, creatingName: item.creatingName,
-              displayedName: item.displayedName, category: item.category,
+            return new SearchElement({name: item.name, creationName: item.creationName,
+              displayName: item.displayName, category: item.category, searchTags: item.keywords,
               description: item.description, inPort: item.parameters,
               outPort: item.returnKeys, app: this});
           });

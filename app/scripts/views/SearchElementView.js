@@ -15,9 +15,9 @@ define(['backbone'], function(Backbone) {
       this.searchView = options.searchView;      
       this.parent = options.parent;
 
-      if (!this.model.get('creatingName')){
-            this.model.set('creatingName', this.model.get('name'));
-            this.model.set('displayedName', this.model.get('name'));
+      if (!this.model.get('creationName')){
+            this.model.set('creationName', this.model.get('name'));
+            this.model.set('displayName', this.model.get('name'));
         }
     },
 

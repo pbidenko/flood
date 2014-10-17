@@ -34,9 +34,6 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
       'click #redo-button': 'redoClick',
       'click #copy-button': 'copyClick',
       'click #paste-button': 'pasteClick',
-      'click #zoomin-button': 'zoominClick',
-      'click #zoomout-button': 'zoomoutClick',
-      'click #zoomreset-button': 'zoomresetClick',
       'click #export-button': 'exportClick'
     },
 
@@ -50,7 +47,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
       this.$input = this.$('.library-search-input');
 
       this.modelsListView = new ModelsListView({}, {
-                app: this.app,                
+                app: this.app,
                 searchView: this
       });
 
@@ -58,17 +55,24 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       
       // build button tooltips
-      this.$el.find('#undo-button').tooltip({title: "Ctrl/Cmd Z", delay: del});
-      this.$el.find('#redo-button').tooltip({title: "Ctrl/Cmd Y", delay: del});
+      this.$el.find('#undo-button').tooltip({title: "Undo"});
+      this.$el.find('#redo-button').tooltip({title: "Redo"});
 
-      this.$el.find('#copy-button').tooltip({title: "Ctrl/Cmd C", delay: del});
-      this.$el.find('#paste-button').tooltip({title: "Ctrl/Cmd V", delay: del});
+      this.$el.find('#copy-button').tooltip({title: "Copy"});
+      this.$el.find('#paste-button').tooltip({title: "Paste"});
 
-      this.$el.find('#delete-button').tooltip({title: "Backspace/Delete", delay: del});
+      this.$el.find('#delete-button').tooltip({title: "Delete"});
 
-      this.$el.find('#zoomin-button').tooltip({title: "Ctrl/Cmd +", delay: del});
-      this.$el.find('#zoomout-button').tooltip({title: "Ctrl/Cmd -", delay: del});
-      this.$el.find('#zoomreset-button').tooltip({title: "Ctrl/Cmd 0", delay: del});
+      $('#zoomin-button').tooltip({title: "Zoom in", placement: "left"});
+      $('#zoomout-button').tooltip({title: "Zoom out", placement: "left"});
+      $('#zoomreset-button').tooltip({title: "Zoom reset", placement: "left"});
+
+      this.$el.find('#export-button').tooltip({title: "Export as STL"});
+
+      $('#workspace_hide').tooltip({title: "Switch between 3D view and nodes"});
+
+      $('#help-button').tooltip({title: "Help", placement: "left"});
+      $('#feedback-button').tooltip({title: "Feedback", placement: "left"});
 
     },
 
@@ -77,56 +81,29 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
       this.$('.library-search-input').select();
     },
 
-    currentWorkspace: function(){
-      return this.app.get('workspaces').get( this.app.get('currentWorkspace') );
-    },
-
     deleteClick: function(){
-      this.currentWorkspace().removeSelected();
+      this.app.getCurrentWorkspace().removeSelected();
     },
 
     copyClick: function(){
-      this.currentWorkspace().copy();
+      this.app.getCurrentWorkspace().copy();
     },
 
     pasteClick: function(){
-      this.currentWorkspace().paste();
+      this.app.getCurrentWorkspace().paste();
     },
 
     undoClick: function(){
-      this.currentWorkspace().undo();
+      this.app.getCurrentWorkspace().undo();
     },
 
     redoClick: function(){
-      this.currentWorkspace().redo();
-    },
-
-    zoomresetClick: function(){
-      this.currentWorkspace().set('zoom', 1.0);
-    },
-
-    zoominClick: function(){
-      this.currentWorkspace().zoomIn();
-    },
-
-    zoomoutClick: function(){
-      this.currentWorkspace().zoomOut();
-    },
-
-    getWorkspaceCenter: function(){
-
-      var w = this.appView.currentWorkspaceView.$el.width()
-        , h = this.appView.currentWorkspaceView.$el.height()
-        , ho = this.appView.currentWorkspaceView.$el.scrollTop()
-        , wo = this.appView.currentWorkspaceView.$el.scrollLeft()
-        , zoom = 1 / this.currentWorkspace().get('zoom');
-
-      return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
+      this.app.getCurrentWorkspace().redo();
     },
 
     addNode: function(nodeModel){
 
-      this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creatingName'), this.getWorkspaceCenter());
+      this.app.getCurrentWorkspace().addNodeByNameAndPosition(nodeModel.get('creationName'), this.appView.getCurrentWorkspaceCenter());
       this.hideSearch();
     },
 
@@ -216,7 +193,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       var res = this.getFileFromSelected( this.stlConverter );
 
-      var wsName = this.currentWorkspace().get('name');
+      var wsName = this.app.getCurrentWorkspace().get('name');
 
       this.download(wsName + ".stl", res);
 
@@ -224,7 +201,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
     getFileFromSelected: function(converterFunc){
 
-      var ws = this.currentWorkspace();
+      var ws = this.app.getCurrentWorkspace();
 
       var text = "";
       var vertexOffset = 0;
@@ -250,7 +227,12 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
         var pom = document.createElement('a');
         pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
         pom.setAttribute('download', filename);
+
+        document.body.appendChild( pom );
+
         pom.click();
+
+        document.body.removeChild( pom );
     },
 
     elementClick: function(model){
@@ -272,7 +254,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
         }
 
         if (event.keyCode === 13) { // enter key causes first result to be inserted
-            var elementToAdd = this.modelsListView.findElementByCreatingName(searchText);
+            var elementToAdd = this.modelsListView.topResult;
             elementToAdd && this.elementClick(elementToAdd.model);                
 
         } 

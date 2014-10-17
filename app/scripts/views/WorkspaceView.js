@@ -1,9 +1,21 @@
-define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes'], function(Backbone, Workspace, ConnectionView, MarqueeView, NodeViewTypes){
+define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes', 'Hammer'], function(Backbone, Workspace, ConnectionView, MarqueeView, NodeViewTypes, Hammer){
 
   return Backbone.View.extend({
 
     tagName: 'div',
     className: 'workspace_container row',
+
+    events: {
+      'mousedown .workspace_back':  'deselectAll',
+      'touchstart .workspace_back':  'deselectAll',
+      'mousedown .workspace_back':  'startWorkspaceDrag',
+      'dblclick .workspace_back':  'showNodeSearch',
+
+      // mousewheel
+      'mousewheel':  'mousewheelMove',
+      'DOMMouseScroll':  'mousewheelMove',
+      'MozMousePixelScroll':  'mousewheelMove',
+    },
 
     initialize: function(atts) { 
 
@@ -29,7 +41,6 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
 
       this.model.on('change:zoom', this.updateZoom, this );
       this.model.on('change:offset', this.updateOffset, this );
-
       this.model.on('change:isRunning', this.renderRunnerStatus, this);
 
       this.listenTo(this.model, 'change:nodes', function() {
@@ -45,13 +56,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       this.renderMarquee();
 
       this.renderRunnerStatus();
-      
-    },
 
-    events: {
-      'mousedown .workspace_back':  'deselectAll',
-      'mousedown .workspace_back':  'startMarqueeDrag',
-      'dblclick .workspace_back':  'showNodeSearch'
     },
 
     render: function() {
@@ -63,18 +68,185 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
               .renderNodes()
               .renderRunnerStatus()
               .updateZoom()
-              .updateOffset();
+              .updateOffset()
+              .setupHammer();
     },
 
-    startMarqueeDrag: function(event){
+    hammerSetupDone: false,
 
+    inWorkspaceCoordinates: function(x, y){
+      var offset = this.$workspace.offset()
+        , zoom = this.model.get('zoom');
+
+      return [ (1 / zoom) * (x - offset.left), (1 / zoom) * ( y - offset.top) ];
+    },
+
+    setupHammer: function(){
+
+      if (this.hammerSetupDone) return this;
+      this.hammerSetupDone = true;
+
+      function isTouchDevice() {  
+        try {  
+          document.createEvent("TouchEvent");  
+          return true;  
+        } catch (e) {  
+          return false;  
+        }  
+      }
+
+      if (!isTouchDevice()) return;
+
+      this.$workspace_back.on('touchmove', function(e){
+        e.preventDefault();
+      })
+
+      // marquee - single finger on .workspace_back
+
+      var mcm = new Hammer.Manager(this.$workspace_back.get(0));
+      mcm.add( new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, pointers: 1 }) );
+
+      // start marquee
+      mcm.on('panstart', function(event){
+
+        this.model.marquee.setStartCorner( this.inWorkspaceCoordinates(event.center.x, event.center.y) );
+
+      }.bind(this));
+
+      // marquee
+      mcm.on('pan', function(event) {
+
+        this.model.marquee.set('hidden', false);
+        this.model.marquee.setEndCorner( this.inWorkspaceCoordinates(event.center.x, event.center.y) );
+        this.doMarqueeSelect();
+
+      }.bind(this));
+
+      // end marquee
+      mcm.on('panend', function(){
+
+        this.model.marquee.set('hidden', true);
+
+      }.bind(this));
+
+
+      var mc = new Hammer.Manager(this.el);
+      mc.add( new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, pointers: 3 }) );
+
+      // start pan
+      mc.on('panstart', function(){
+        this.scrollStart = [ this.$el.scrollLeft(), this.$el.scrollTop() ];
+      }.bind(this));
+
+      // pan
+      mc.on('pan', function(ev) {
+        this.model.set('offset', [ this.scrollStart[0] - ev.deltaX, this.scrollStart[1] - ev.deltaY ] );
+      }.bind(this));
+
+      // end pan
+      mc.on('panend', function(){
+        this.zoomDisabled = true;
+        setTimeout(function(){ this.zoomDisabled = false; }.bind(this), 200)
+      }.bind(this));
+
+      // pinching
+      mc.add( new Hammer.Pinch({ threshold: 0.1 }) );
+
+      mc.on('pinchstart', function(ev) {
+        this.zoomStart = this.model.get('zoom');
+      }.bind( this ));
+
+      mc.on('pinch', function(ev) {
+
+        if (this.zoomDisabled) return;
+
+        var val = this.zoomStart * ev.scale;
+
+        if (val < 0.25) val = 0.25;
+        if (val > 1) val = 1;
+
+        this.model.set('zoom', val );
+      }.bind( this ));
+
+
+      // tap
+      mc.add( new Hammer.Tap({ taps: 2 }) );
+
+      mc.on('tap', function(e) {
+        this.showNodeSearch({ clientX: e.center.x, clientY: e.center.y });
+      }.bind( this ));
+
+      return this;
+
+    },
+
+    mousewheelMove: function(e){
+
+      this.isMouseWheel = true;
+      this.clientX = e.clientX;
+      this.clientY = e.clientY;
+
+      var delta = 0;
+
+      if ( e.originalEvent.wheelDelta !== undefined ) { // WebKit / Opera / Explorer 9
+        delta = e.originalEvent.wheelDelta;
+      } else if ( e.originalEvent.detail !== undefined ) { // Firefox
+        delta = -e.originalEvent.detail;
+      }
+
+      if( delta > 0 ) {
+          if (this.model.get('zoom') < 1) 
+            this.model.set('zoom', Math.min(1, this.model.get('zoom') + delta * 0.0005 ));
+      } else {
+          if (this.model.get('zoom') > 0.25) 
+            this.model.set('zoom', Math.max( 0.25, this.model.get('zoom') + delta * 0.0005 ));
+      }
+
+      this.isMouseWheel = false;
+
+      return false;
+
+    },
+
+    startWorkspaceDrag: function(event){
       this.deselectAll();
 
-      var offset = this.$workspace.offset()
-        , zoom = this.model.get('zoom')
-        , posInWorkspace = [ (1 / zoom) * (event.pageX - offset.left), (1 / zoom) * ( event.pageY - offset.top) ];
+      if (event.ctrlKey || event.which === 2){
+        this.startWorkspacePan(event);
+      } else {
+        this.startMarqueeDrag(event);
+      }
+    },
 
-      this.model.marquee.setStartCorner( posInWorkspace );
+    // workspace panning
+
+    panStart: [0,0],
+
+    startWorkspacePan: function(event){
+      event.preventDefault();
+
+      this.panStart = [ event.pageX,  event.pageY ];
+      this.scrollStart = [ this.$el.scrollLeft(), this.$el.scrollTop() ];
+      
+      this.$workspace.bind('mousemove', $.proxy( this.workspacePan, this) );
+      this.$workspace.bind('mouseup', $.proxy( this.endWorkspacePan, this) );
+    },
+
+    endWorkspacePan: function(event){
+      this.model.set('offset', [this.$el.scrollLeft(), this.$el.scrollTop()])
+      this.$workspace.unbind('mousemove', this.workspacePan);
+      this.$workspace.unbind('mouseup', this.endWorkspacePan);
+    },
+
+    workspacePan: function(event){
+      this.$el.scrollLeft( this.scrollStart[0] + this.panStart[0] - event.pageX );
+      this.$el.scrollTop( this.scrollStart[1] + this.panStart[1] - event.pageY );
+    },
+
+    // marquee drag
+
+    startMarqueeDrag: function(event){
+      this.model.marquee.setStartCorner( this.inWorkspaceCoordinates(event.pageX, event.pageY) );
       
       this.$workspace.bind('mousemove', $.proxy( this.marqueeDrag, this) );
       this.$workspace.bind('mouseup', $.proxy( this.endMarqueeDrag, this) );
@@ -89,12 +261,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
     marqueeDrag: function(event){
 
       this.model.marquee.set('hidden', false);
-
-      var offset = this.$workspace.offset()
-        , zoom = this.model.get('zoom')
-        , posInWorkspace = [ (1 / zoom) * (event.pageX - offset.left), (1 / zoom) * ( event.pageY - offset.top) ];
-
-      this.model.marquee.setEndCorner( posInWorkspace );
+      this.model.marquee.setEndCorner( this.inWorkspaceCoordinates(event.pageX, event.pageY) );
       this.doMarqueeSelect();
 
     },
@@ -147,29 +314,128 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
         , wo = this.$el.scrollLeft()
         , zoom = 1 / this.model.get('zoom');
 
-      return [wo + w / 2, ho + h / 2];
+      return [zoom * (wo + w / 2), zoom * (ho + h / 2)];
 
     },
 
     updateZoom: function(){
 
-      var center = this.getCenter();
+      if (this.model.get('zoom') < 0) {
+        this.model.set('zoom', 0.25); 
+        return this;
+      }
+
+      if (this.cachedZoom === this.model.get('zoom')) {
+        return this;
+      }
+
+      this.zoomFactor = this.model.get('zoom') / (this.cachedZoom ? this.cachedZoom : this.model.get('zoom') );
+      this.cachedZoom = this.model.get('zoom');
 
       this.$workspace.css('transform', 'scale(' + this.model.get('zoom') + ')' );
       this.$workspace.css('transform-origin', "0 0" );
 
-      // force redraw in chrome, otherwise the nodes look blurry
-      this.$workspace.css('display', 'none').height();
-      this.$workspace.css('display', 'block');
+      // get scroll here, because it gets removed by the following lines
+      if (this.isMouseWheel){
+        var s = this.getNewScroll( this.clientX, this.clientY );
+      } else {
+        var s = this.getNewScroll();
+      }
+
+      this.model.set('offset', s);
 
       return this;
 
     },
 
+    getNewScroll: function(x, y){
+
+      var z = this.zoomFactor;
+      var ox = this.model.get('offset')[0];
+      var oy = this.model.get('offset')[1];
+
+      if (!x || !y){
+        var w = this.$el.width();
+        var h = this.$el.height();
+
+        // this is the offset from the center in document coordinates
+        var centerOffset = [w / 2, h / 2]; 
+      } else {
+        var centerOffset = [x,y];
+      }
+
+      var sx = z * ( ox + centerOffset[0] ) - centerOffset[0];
+      var sy = z * ( oy + centerOffset[1] ) - centerOffset[1];
+
+      if (sx < 0) sx = 0;
+      if (sy < 0) sy = 0;
+
+      return [sx,sy];
+    },
+
+    boundingBox: function(){
+
+      // build list of nodeViews in ws
+      var nvs = [];
+      for (var nv in this.nodeViews){ 
+        nvs.push( this.nodeViews[nv] ); 
+      }
+
+      return nvs.reduce(function(a, x){
+
+        var p = x.model.get('position');
+        var nw = x.$el.width();
+        var nh = x.$el.height();
+
+        return [  Math.min(p[0], a[0]), 
+                  Math.max(p[0] + nw, a[1]),
+                  Math.min(p[1], a[2]),
+                  Math.max(p[1] + nh, a[3]) ];
+
+      }, [ Number.MAX_VALUE, 0, Number.MAX_VALUE, 0 ] ); // minx, maxx, miny, maxy
+
+    },
+
+    zoomAll: function(){
+
+      var bb = this.boundingBox();
+
+      // this is the min offset we expect from the bounding box in document space
+      var o = 20 * (1 / this.model.get('zoom') );
+      bb = [bb[0] - o, bb[1] + o, bb[2] - o, bb[3] + o ];
+
+      // calculate zoom
+
+      // we do this by first determining the width and height of the ws
+      var wsw = this.$el.width();
+      var wsh = this.$el.height();
+
+      // now we determine the width of the node collection
+      var ntw = bb[1] - bb[0];
+      var nth = bb[3] - bb[2];
+
+      // we calculate the zoom from the ratio between the node bbox and workspace size
+      var zx = wsw / ntw;
+      var zy = wsh / nth;
+      var nz = Math.min( zx, zy ); // the new zoom is the lesser of these two - TODO account for zoom min
+
+      nz = Math.min(1, nz);
+
+      // set the zoom
+      this.model.set('zoom', nz );
+
+      // set the offset, taking into account the new zoom
+      var offset = [ nz * bb[0], nz * bb[2] ];
+      this.model.set('offset', offset);
+
+    },
+
     updateOffset: function(){
 
-      // this.$el.scrollLeft( this.model.get('offset')[0] );
-      // this.$el.scrollTop( this.model.get('offset')[1] );
+      var s = this.model.get('offset');
+
+      this.$el.scrollLeft( s[0] );
+      this.$el.scrollTop( s[1] );
 
       return this;
 
@@ -187,30 +453,38 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
     showNodeSearch: function(e){
       this.app.set('showingSearch', true);
 
-      var z = this.model.get('zoom');
-      var offX  = z * (e.offsetX || e.clientX - $(e.target).offset().left);
-      var offY  = z * (e.offsetY || e.clientY - $(e.target).offset().top);
+      // the position of the click in workspace coordinates
+      var z = 1 / this.model.get('zoom');
+      var offX  = z * (e.clientX + this.$el.scrollLeft());
+      var offY  = z * (e.clientY + this.$el.scrollTop());
 
       this.app.newNodePosition = [offX, offY];
     },
 
     startProxyDrag: function(event){
+      this.$workspace.bind('touchmove', $.proxy( this.proxyTouchDrag, this) );
       this.$workspace.bind('mousemove', $.proxy( this.proxyDrag, this) );
+      this.$workspace.bind('touchend', $.proxy( this.endProxyDrag, this) );
       this.$workspace.bind('mouseup', $.proxy( this.endProxyDrag, this) );
     },
 
     endProxyDrag: function(event){
+      this.$workspace.unbind('touchmove', this.proxyTouchDrag );
       this.$workspace.unbind('mousemove', this.proxyDrag);
+      this.$workspace.unbind('touchend', this.endProxyDrag);
       this.$workspace.unbind('mouseup', this.endProxyDrag);
+      
       this.model.endProxyConnection();
     },
 
-    proxyDrag: function(event){
-      var offset = this.$workspace.offset()
-        , zoom = this.model.get('zoom')
-        , posInWorkspace = [ (1 / zoom) * (event.pageX - offset.left), (1 / zoom) * ( event.pageY - offset.top) ];
+    proxyTouchDrag: function(event){
+      this.model.proxyConnection.set('endProxyPosition', 
+        this.inWorkspaceCoordinates(event.originalEvent.touches[0].pageX, event.originalEvent.touches[0].pageY));
+      event.preventDefault(); // prevents mousemove
+    },
 
-      this.model.proxyConnection.set('endProxyPosition', posInWorkspace);
+    proxyDrag: function(event){
+      this.model.proxyConnection.set('endProxyPosition', this.inWorkspaceCoordinates(event.pageX, event.pageY));
     },
 
     renderProxyConnection: function() {
@@ -257,7 +531,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
         if ( nodeView === undefined){
 
           var NodeView = NodeViewTypes.Base;
-          if ( NodeViewTypes[nodeModel.get('typeName')] )
+          if ( NodeViewTypes[ nodeModel.get('typeName') ] != undefined)
           {
             NodeView = NodeViewTypes[ nodeModel.get('typeName') ];
           }

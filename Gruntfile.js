@@ -18,7 +18,7 @@ module.exports = function (grunt) {
     // configurable paths
     var yeomanConfig = {
         app: 'app',
-        dist: 'dist/app'
+        dist: 'dist'
     };
 
     grunt.initConfig({
@@ -88,6 +88,24 @@ module.exports = function (grunt) {
                 }
             }
         },
+        replace: {
+            mongo2base: {
+                src: ['app/scripts/config.js'],
+                overwrite: true,
+                replacements: [{
+                  from: "Storage: 'helpers/MongoStorage'",
+                  to: "Storage: 'helpers/BaseStorage'"
+                }]
+            },
+            base2mongo: {
+                src: ['app/scripts/config.js'],
+                overwrite: true,
+                replacements: [{
+                  from: "Storage: 'helpers/BaseStorage'",
+                  to: "Storage: 'helpers/MongoStorage'"
+                }]
+            }
+        },
         // This task uses James Burke's excellent r.js AMD builder to take all
         // modules and concatenate them into a single file.
         requirejs: {
@@ -101,7 +119,7 @@ module.exports = function (grunt) {
               include: ["main"],
               insertRequire: ["main"],
 
-              out: "dist/app/source.min.js",
+              out: "dist/source.min.js",
               optimize: "uglify",
               // optimize: "none",
 
@@ -131,24 +149,33 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= yeoman.app %>/images',
-                    src: '{,*/}*.{png,jpg,jpeg}',
+                    src: '{,*/}*.{png,jpg,jpeg,gif}',
                     dest: '<%= yeoman.dist %>/images'
+                }]
+            },
+            jqueryui: {
+                files: [{
+                    expand: true,
+                    flatten: true,
+                    cwd: '<%= yeoman.app %>',
+                    src: 'bower_components/jquery.ui/themes/base/images/*.png',
+                    dest: '<%= yeoman.dist %>/styles/images'
                 }]
             }
         },
         cssmin: {
             dist: {
                 files: {
-                    '<%= yeoman.dist %>/style.min.css': [
-                        '.tmp/styles/{,*/}*.css',
+                    '<%= yeoman.dist %>/styles/style.min.css': [                        '.tmp/styles/{,*/}*.css',
                         '<%= yeoman.app %>/bower_components/jquery.ui/themes/base/*.css',
+                        '<%= yeoman.app %>/bower_components/components-font-awesome/css/font-awesome.min.css',
                         '<%= yeoman.app %>/styles/{,*/}*.css',
                     ]
                 }
             }
         },
         copy: {
-            distApp: {
+            dist: {
                 files: [{
                     expand: true,
                     dot: true,
@@ -158,40 +185,24 @@ module.exports = function (grunt) {
                         '*.{ico,txt}',
                         '.htaccess',
                         '*.html',
-                        'images/{,*/}*.{webp,gif}',
-                        'styles/bootstrap.css',
-                        'bower_components/jquery.ui/themes/base/*.css',
-                        'bower_components/jquery.ui/themes/base/images/*.png',
-                        'bower_components/pace/pace.min.js'
+                        '*.json',
+                        'images/{,*/}*.{webp,gif,png}',
+                        'bower_components/jquery/jquery.min.js',
+                        'bower_components/components-font-awesome/css/font-awesome.min.css',
+                        'bower_components/components-font-awesome/fonts/*.{ttf,eot,svg,woff,otf}',
+                        'scripts/lib/flood/*.js'
                     ]
                 }]
             },
-            distServer: {
+            fonts: {
                 files: [{
                     expand: true,
                     dot: true,
-                    cwd: 'server',
-                    dest: 'dist/server',
+                    flatten: true,
+                    cwd: '<%= yeoman.app %>',
+                    dest: '<%= yeoman.dist %>/fonts',
                     src: [
-                        'start.html',
-                        'app.js',
-                        'config/**/*',
-                        'controllers/**/*',
-                        'models/**/*',
-                        'node_modules/**/*',
-                        'public/**/*',
-                        'views/**/*'
-                    ]
-                }]
-            },
-            distJson: {
-                files: [{
-                    expand: true,
-                    dot: true,
-                    cwd: '.',
-                    dest: 'dist',
-                    src: [
-                        'package.json'
+                        'bower_components/components-font-awesome/fonts/*.{ttf,eot,svg,woff,otf}'
                     ]
                 }]
             }
@@ -204,7 +215,7 @@ module.exports = function (grunt) {
         processhtml: {
           release: {
             files: {
-              "dist/app/index.html": ["app/index.html"]
+              "dist/app.html": ["app/app.html"]
             }
           }
         },
@@ -245,20 +256,24 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:dist',
-        'requirejs',
-        'imagemin',
-        'cssmin',
-        'copy',
-        'processhtml'
-    ]);
-
-    grunt.registerTask('desktop', [
-        'clean:dist',
+        'replace:mongo2base',
         'requirejs',
         'imagemin',
         'cssmin',
         'copy',
         'processhtml',
+        'replace:base2mongo'
+    ]);
+
+    grunt.registerTask('desktop', [
+        'clean:dist',
+        'replace:mongo2base',
+        'requirejs',
+        'imagemin',
+        'cssmin',
+        'copy',
+        'processhtml',
+        'replace:base2mongo',
         'nodewebkit'
     ]);
 
