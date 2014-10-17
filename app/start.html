@@ -1,40 +1,38 @@
 <html>
-	<head>
-		<script>
-			function bodyOnLoad(){
-				var execFile = require('child_process').execFile,
-					child;
-					
-				require('nw.gui').Window.get().showDevTools();
+<head>
+    <title>Start</title>
+    <script>
+        var execFile = require('child_process').execFile,
+            child;
 
-				child = execFile('DynamoWebServer.exe' , ['headless'], { cwd: 'dynamo' } , function(error,stdout,stderr) { 
-					if (error) {
-						console.log(error.stack); 
-						console.log('Error code: '+ error.code); 
-						console.log('Signal received: '+ error.signal);
-					} 
-					console.log('Child Process stdout: '+ stdout);
-					console.log('Child Process stderr: '+ stderr);
-				});
+        require('nw.gui').Window.get().showDevTools();
 
-				interval = setInterval(function(){
-				
-					socket = new WebSocket("ws://127.0.0.1:2100");
+        child = execFile('DynamoWebServer.exe', ['headless'], { cwd: 'dynamo' }, function (error, stdout, stderr) {
+            if (error) {
+                console.log(error.stack);
+                console.log('Error code: ' + error.code);
+                console.log('Signal received: ' + error.signal);
+            }
+            console.log('Child Process stdout: ' + stdout);
+            console.log('Child Process stderr: ' + stderr);
+        });
 
-					socket.onopen = function () {
-						clearInterval(interval);
-						socket.close();
-						window.location.href = 'app.html';
-					};
-					
-				}, 2000);
+        interval = setInterval(function () {
 
-			}	
-		</script>
-	</head>
-	<body onload="bodyOnLoad()">
-		<h1>
-			Wait for redirect...
-		</h1>	
-	</body>
+            socket = new WebSocket(require('./scripts/helpers/Settings.js').socketUrl);
+
+            socket.onopen = function () {
+                clearInterval(interval);
+                socket.close();
+                window.location.href = 'app.html';
+            };
+
+        }, 2000);
+    </script>
+</head>
+<body>
+    <h1>
+        Wait for redirect...
+    </h1>
+</body>
 </html>
