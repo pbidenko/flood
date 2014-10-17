@@ -102,14 +102,15 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     newWorkspace: function( callback ){
 
-      var that = this;
+        $.get("/nws", function (data) {
 
-      $.get("/nws", function(data){
+            var ws = new Workspace(data, {app: this });
+            this.get('workspaces').add(ws);
+            this.set('currentWorkspace', ws.get('_id'));
+            if (callback) {
+                callback(ws);
+            }
 
-        var ws = new Workspace(data, {app: that });
-        that.get('workspaces').add( ws );
-        that.set('currentWorkspace', ws.get('_id') );
-        if (callback) callback( ws );
 
       }).fail(function(){
 
@@ -121,7 +122,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     newNodeWorkspace: function( callback ){
 
-      var that = this;
+        $.get("/nws", function (data) {
 
       $.get("/nws", function(data){
 
@@ -130,9 +131,11 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
         var ws = new Workspace(data, { app: that });
 
-        that.get('workspaces').add( ws );
-        that.set('currentWorkspace', ws.get('_id') );
-        if (callback) callback( ws );
+            this.get('workspaces').add(ws);
+            this.set('currentWorkspace', ws.get('_id'));
+            if (callback) {
+                callback(ws);
+            }
 
       }).fail(function(){
 
@@ -147,9 +150,16 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       var ws = this.get('workspaces').get(id);
       if(ws) return;
 
-      var that = this;
+        $.get("/ws/" + id, function (data) {
 
-      $.get("/ws/" + id, function(data){
+            var ws = this.get('workspaces').get(id);
+            if (ws) return;
+
+            var ws = new Workspace(data, {app: this});
+            this.get('workspaces').add(ws);
+            if (callback) {
+                callback(ws);
+            }
 
         var ws = that.get('workspaces').get(id);
         if(ws) return;

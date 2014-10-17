@@ -42,7 +42,11 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 updated = true;
             }
 
-            if (!this.get('extra').inputs || !this.get('extra').inputs.equals(codeBlock.InPorts)) {
+            if (!this.get('extra').inputs) {
+                this.get('extra').inputs = [];
+            }
+
+            if (!this.get('extra').inputs.equals(codeBlock.InPorts)) {
                 this.get('extra').inputs = codeBlock.InPorts;
                 updated = true;
             }
