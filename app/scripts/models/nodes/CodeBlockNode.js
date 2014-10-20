@@ -52,34 +52,27 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
             }
 
             if(!extraCopy.inputs) {
-                extraCopy.oldInputs = [];
                 extraCopy.inputs = [];
             }
 
+            extraCopy.oldInputs = extraCopy.inputs;
             if (!extraCopy.inputs.equals(codeBlock.InPorts)) {
-                extraCopy.oldInputs = extraCopy.inputs;
                 extraCopy.inputs = codeBlock.InPorts;
                 updated = true;
             }
 
             if (!extraCopy.outputs) {
-                extraCopy.oldOutputs = [];
                 extraCopy.outputs = [];
             }
 
+            extraCopy.oldOutputs = extraCopy.outputs;
             if (!extraCopy.outputs.equals(codeBlock.OutPorts)) {
-                extraCopy.oldOutputs = extraCopy.outputs;
                 extraCopy.outputs = codeBlock.OutPorts;
                 updated = true;
             }
 
-            if (values.state === 'Error' || values.state === 'Warning') {
-                this.trigger('evalFailed', values.stateMessage);
-            }
-            else {
-                this.set('failureMessage', '');
-                this.trigger('evalBegin');
-            }
+            values.data = codeBlock.Data;
+            Node.prototype.updateValue.call(this, values);
 
             if (updated) {
                 this.set('extra', extraCopy);
