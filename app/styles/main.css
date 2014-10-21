@@ -826,7 +826,7 @@ input[type="button"].btn-block {
     max-height: 500px;
     margin-top: -150px;
     margin-left: -100px;
-    width: 130px;
+    width: 300px;
     background: none;
 }
 
@@ -880,7 +880,7 @@ input[type="button"].btn-block {
 .library-search-input {
     color: whitesmoke;
     padding: 10px;
-    width: 200px;
+    width: 300px;
     background: #222;
     border: none;
     font-size: 15px;
