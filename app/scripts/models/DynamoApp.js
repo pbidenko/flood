@@ -21,6 +21,7 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
             },
 
             mapLibraryItems: function (param) {
+                //Add elements to collection not via add method to avoid multiple 'add' events trigger
                 this.SearchElements.models = param.libraryItems.map(function (item) {
                     return new SearchElement({
                         name: item.name, creationName: item.creationName,
@@ -28,7 +29,10 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
                         description: item.description, inPort: item.parameters,
                         outPort: item.returnKeys, app: this
                     });
-                });
+                    //Concatenate with already existing SearchElements
+                }).concat(this.SearchElements.models);
+                //Trigger 'add' event after all elements are added
+                this.SearchElements.trigger('add');
             }
 
         });
