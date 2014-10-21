@@ -61,6 +61,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
         maxNumberResults: 10,
         minResultsForTolerantSearch: 0,
         topResult: null,
+        topCategory: null,
 
         initialize: function (attrs, options) {
             this.app = options.app;
@@ -74,6 +75,19 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
             this.setSearchTags();
             var result = getNamespaces(this.app.SearchElements.models);
             var categories = result.descendants;
+            this.topCategory = new SearchCategoryView({
+                    model: {
+                        name: 'Top result',
+                        descendants: {},
+                        elements: []
+                    }
+                },
+                {
+                    searchElements: this.searchElements,
+                    searchView: this.searchView
+                });
+            this.$el.append(this.topCategory.render().$el);
+
             if($.isEmptyObject(categories))
             {
                 _.each(result.elements, function (element) {
@@ -116,8 +130,9 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                     this.$el.append(view.render().$el);
                 }.bind(this));
             }
-            
-            return this;     
+
+            this.renderTopResult();
+            return this;
         },
 
         findElementsBySearchTags: function (name) {
@@ -176,9 +191,20 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                 }
             }
 
+            this.renderTopResult();
             this.attach();
 
             return this;
+        },
+
+        renderTopResult: function() {
+            if (this.topResult) {
+                this.topCategory.$el.show();
+                this.topCategory.model.elements = [this.topResult.model];
+                this.topCategory.render().toggle(null, true);
+            }
+            else
+                this.topCategory.$el.hide();
         },
 
         setSearchTags: function() {
