@@ -1,4 +1,4 @@
-define(['backbone', 'helpers/BaseStorage', 'settings'], function (Backbone, BaseStorage, settings) {
+define(['backbone', 'helpers/BaseStorage'], function (Backbone, BaseStorage) {
 
     var createUrl = function (url) {
         return this.baseUrl + url;

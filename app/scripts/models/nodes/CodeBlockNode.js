@@ -17,6 +17,7 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
             }
             if (attrs.extra && attrs.extra.inputs) {
                 len = attrs.extra.inputs.length;
+                attrs.extra.oldInputs = attrs.extra.inputs;
             }
 
             for (; i < len; i++) {
@@ -25,6 +26,7 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
 
             if (attrs.extra && attrs.extra.outputs) {
                 len = attrs.extra.outputs.length;
+                attrs.extra.oldOutputs = attrs.extra.outputs;
             } else {
                 len = 0;
             }
@@ -66,27 +68,24 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 extraCopy.inputs = [];
             }
 
+            extraCopy.oldInputs = extraCopy.inputs;
             if (!extraCopy.inputs.equals(codeBlock.InPorts)) {
                 extraCopy.inputs = codeBlock.InPorts;
                 updated = true;
             }
 
-            if(!extraCopy.outputs) {
+            if (!extraCopy.outputs) {
                 extraCopy.outputs = [];
             }
 
+            extraCopy.oldOutputs = extraCopy.outputs;
             if (!extraCopy.outputs.equals(codeBlock.OutPorts)) {
                 extraCopy.outputs = codeBlock.OutPorts;
                 updated = true;
             }
 
-            if (values.state === 'Error' || values.state === 'Warning') {
-                this.trigger('evalFailed', values.stateMessage);
-            }
-            else {
-                this.set('failureMessage', '');
-                this.trigger('evalBegin');
-            }
+            values.data = codeBlock.Data;
+            Node.prototype.updateValue.call(this, values);
 
             if (updated) {
                 this.set('extra', extraCopy);

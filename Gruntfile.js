@@ -190,7 +190,8 @@ module.exports = function (grunt) {
                         'bower_components/jquery/jquery.min.js',
                         'bower_components/components-font-awesome/css/font-awesome.min.css',
                         'bower_components/components-font-awesome/fonts/*.{ttf,eot,svg,woff,otf}',
-                        'scripts/lib/flood/*.js'
+                        'scripts/lib/flood/*.js',
+						'scripts/helpers/Settings.js'
                     ]
                 }]
             },

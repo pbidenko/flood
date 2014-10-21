@@ -1,7 +1,7 @@
 ﻿define(['backbone', 'ComputationResponse', 'ContentResponse', 'LibraryItemsListResponse',
-        'SavedFileResponse', 'NodeCreationDataResponse', 'GeometryDataResponse', 'UpdateProxyNodesResponse' ],
+        'SavedFileResponse', 'NodeCreationDataResponse', 'GeometryDataResponse', 'UpdateProxyNodesResponse', 'settings' ],
     function (Backbone, ComputationResponse, ContentResponse, LibraryItemsListResponse,
-              SavedFileResponse, NodeCreationDataResponse, GeometryDataResponse, UpdateProxyNodesResponse ) {
+              SavedFileResponse, NodeCreationDataResponse, GeometryDataResponse, UpdateProxyNodesResponse, globalSettings ) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -10,7 +10,7 @@
         settings = {
             maxMessageStack: 100,
             pingTimeout: 1000,
-            url: 'ws://127.0.0.1:2100'
+            url: globalSettings.socketUrl
         },
         messageStack = [],
         responseMap = {
@@ -56,7 +56,7 @@
 
                 socket.onmessage = function (event) {
                     //console.log('Socket success: ' + event.data);
-                    var response = JSON.parse(event.data)
+                    var response = JSON.parse(event.data);
                     if (responseMap.hasOwnProperty(response.$type)) {
                         var resp = new responseMap[response.$type](response);
 
