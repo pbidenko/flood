@@ -23,14 +23,12 @@ define([  'backbone',
 
     el: '#app',
 
-    initialize: function() { 
-      
-      this.listenTo(this.model, 'change', this.render);
+    initialize: function() {        
+      this.listenTo(this.model, 'change', this.render, this);
       this.$workspace_tabs = this.$('#workspace-tabs');
 
       this.model.get('workspaces').on('add', this.addWorkspaceTab, this);
       this.model.get('workspaces').on('remove', this.removeWorkspaceTab, this);
-
       this.model.on('change:showingSettings', this.viewSettings, this);
       this.model.on('change:showingFeedback', this.viewFeedback, this);
       this.model.on('change:showingHelp', this.viewHelp, this);
@@ -45,8 +43,12 @@ define([  'backbone',
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
 
       // deactivate the context menu
-      $(document).bind("contextmenu",function(e){ return false; });
+      $(document).bind("contextmenu", function (e) { return false; });
 
+        //Render application inside init method, because if App model doesn't use http service as storage,
+        //we will never get to the render event, because model is already initialized and therefore it
+        //won't generate 'change' event
+      this.render();
     },
 
     events: {
@@ -304,8 +306,7 @@ define([  'backbone',
       this.workspaceTabViews[workspace.get('_id')] = view;
 
       view.render();
-      this.$workspace_tabs.append( view.$el );
-
+      this.$workspace_tabs.append( view.$el );      
     },
 
     removeWorkspaceTab: function(workspace){
@@ -326,7 +327,7 @@ define([  'backbone',
           this.newWorkspace();
         }
       }
-
+      
       this.workspaceTabViews[workspace.get('_id')].$el.remove();
       delete this.workspaceTabViews[workspace.get('_id')];
 
@@ -389,7 +390,7 @@ define([  'backbone',
 
     },
 
-    render: function(arg) {
+    render: function() {
 
       var model = this.model;
       var workspaces = this.model.get('workspaces')

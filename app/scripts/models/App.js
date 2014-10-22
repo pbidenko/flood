@@ -3,7 +3,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
   return Backbone.Model.extend({
 
-    idAttribute: "_id",
+    idAttribute: '_id',
 
     url: function() {
       return '/mys';
@@ -39,8 +39,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     workspaceIdsAwaitingParse : [],
 
-    parse : function(resp) {
-
+    parse : function(resp) {        
       var old = this.get('workspaces').slice();
       this.workspaceIdsAwaitingParse = _.pluck( resp.workspaces, '_id');
 
@@ -50,7 +49,6 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.workspaceIdsAwaitingParse = [];
       resp.workspaces = this.get('workspaces');
       return resp;
-
     },
 
     fetch : function(options){
