@@ -10,24 +10,34 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
         return regExp.test(tag);
     }
 
-    function fillElementList(list, matchCondition){
-        var weight, searchElementName, i, tag, names, index;
-        for (i = 0; i < this.tagList.length; i++) {
+    function fillElementList(list, matchCondition) {
+        var weight, i, tag, namesIndexes, index,
+            namesList = [],
+            len = this.tagList.length;
+
+        // tagList is ordered by tag length (asc) =>
+        // weight will decrease with increasing i.
+        // so stop cycle if we have enough results
+        for (i = 0; i < len && list.length < this.maxNumberResults; i++) {
             tag = this.tagList[i].tag;
             if (matchCondition(tag)) {
                 // weight is kinda how much it matches
                 weight = filterString.length / tag.length;
-                names = this.tagList[i].names;
-                for (var j = 0; j < names.length; j++) {
-                    index = list.map(function (e) {
-                        return e.name;
-                    }).indexOf(names[j]);
+                namesIndexes = this.tagList[i].namesIndexes;
+
+                for (var j = 0; j < namesIndexes.length; j++) {
+                    index = namesList.indexOf(namesIndexes[j].name);
 
                     if (index == -1) {
-                        list.push({name: names[j], weight: weight});
-                    }
-                    else if (list[index].weight < weight) {
-                        list[index].weight = weight;
+                        list.push({
+                            name: namesIndexes[j].name,
+                            index: namesIndexes[j].index,
+                            weight: weight
+                        });
+                        namesList.push(namesIndexes[j].name);
+
+                        if (list.length >= this.maxNumberResults)
+                            break;
                     }
                 }
             }
@@ -57,6 +67,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
         className: 'list search-list',
 
         tagList: [],
+        rootElements: [],
 
         maxNumberResults: 10,
         minResultsForTolerantSearch: 0,
@@ -72,9 +83,9 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
         template: _.template(''),
 
         render: function () {
-            this.setSearchTags();
             var result = getNamespaces(this.app.SearchElements.models);
-            var categories = result.descendants;
+            var categories = result.descendants, view;
+            this.rootElements = [];
             this.topCategory = new SearchCategoryView({
                     model: {
                         name: 'Top result',
@@ -91,7 +102,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
             if($.isEmptyObject(categories))
             {
                 _.each(result.elements, function (element) {
-                    var view = new SearchElementView({
+                    view = new SearchElementView({
                         model: element
                     },
                     {
@@ -100,6 +111,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                     });
 
                     this.searchElements.push(view);
+                    this.rootElements.push(view);
 
                     this.$el.append(view.render().$el);
                 }.bind(this));
@@ -107,17 +119,21 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
             else
             {
                 for(var prop in categories){
-                    this.$el.append(new SearchCategoryView({
-                        model: categories[prop]
-                    }, 
-                    {
-                        searchElements: this.searchElements,
-                        searchView: this.searchView
-                    }).render().$el);
+                    view = new SearchCategoryView({
+                            model: categories[prop]
+                        },
+                        {
+                            searchElements: this.searchElements,
+                            searchView: this.searchView
+                        });
+
+                    this.rootElements.push(view);
+                    this.$el.append(view.render().$el);
+
                 }
 
                 _.each(result.elements, function (element) {
-                    var view = new SearchElementView({
+                    view = new SearchElementView({
                         model: element
                     },
                     {
@@ -126,11 +142,13 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                     });
 
                     this.searchElements.push(view);
+                    this.rootElements.push(view);
 
                     this.$el.append(view.render().$el);
                 }.bind(this));
             }
 
+            this.setSearchTags();
             this.renderTopResult();
             return this;
         },
@@ -140,25 +158,13 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                 return;
 
             var result = [],
-                i = 0,
-                creationName,
-                index,
-                len = this.searchElements.length;
+                indexes = this.getFilteredSearchElementIndexes(name),
+                len = indexes.length;
 
-            var names = this.getFilteredSearchElementNames(name);
-            for( ; i < len; i++ ) {
-                creationName = this.searchElements[i].model.get('creationName');
-                index = names.indexOf(creationName);
-                if (index > -1) {
-                    // if it's the first result make it top one
-                    if (index == 0)
-                        this.topResult = this.searchElements[i];
-                    result.push(this.searchElements[i]);
-                }
-
-                // if we've found all results
-                if (result.length == names.length)
-                    break;
+            for( var i = 0 ; i < len; i++ ) {
+                if (i == 0)
+                    this.topResult = this.searchElements[indexes[i]];
+                result.push(this.searchElements[indexes[i]]);
             }
 
             return result;
@@ -167,18 +173,14 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
         expandElements: function(name) {
             var elementsToShow,
                 i = 0,
-                len = 0;
+                len;
 
             this.detach();
             this.topResult = null;
 
             //If name is empty, show all categories collapsed
             if (!name) {
-                len = this.searchElements.length;
-                for (; i < len; i++) {
-                    this.searchElements[i].showWithAncestors();
-                    this.searchElements[i].toggle(false);
-                }
+                this.showAndCollapseElements();
             }
             else {
                 elementsToShow = this.findElementsBySearchTags(name);
@@ -209,15 +211,18 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
 
         setSearchTags: function() {
             this.tagList = [];
-            var i, j, searchElementName, tags, tag, index;
-            var models = this.app.SearchElements.models;
-            // generate tagList as array of {tag, creationNames}
-            for (i = 0; i < models.length; i++) {
-                searchElementName = models[i].get('creationName');
+            var i, j, searchElementName, tags, tag, index, pair, model;
+            var len = this.searchElements.length;
+            // generate tagList as array of {tag, pairs {creationName, index}}
+            // index is in tagList to not find search results 
+	    // in searchElements list for long time
+            for (i = 0; i < len; i++) {
+                model = this.searchElements[i].model;
+                searchElementName = model.get('creationName');
                 if (!searchElementName)
-                    searchElementName = models[i].get('name');
+                    searchElementName = model.get('name');
 
-                tags = models[i].get('searchTags');
+                tags = model.get('searchTags');
                 if (!tags || !tags.length)
                     tags = [searchElementName];
 
@@ -228,19 +233,29 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                         return e.tag;
                     }).indexOf(tag);
 
+                    pair = {
+                        name: searchElementName,
+                        index: i
+                    };
+
                     if (index > -1) {
-                        this.tagList[index].names.push(searchElementName);
+                        this.tagList[index].namesIndexes.push(pair);
                     }
                     else {
-                        this.tagList.push({tag: tag, names: [searchElementName]});
+                        this.tagList.push({tag: tag, namesIndexes: [pair]});
                     }
                 }
             }
+
+            // sort by tag length asc
+            this.tagList.sort(function (a, b) {
+                return a.tag.length - b.tag.length;
+            });
         },
 
-        getFilteredSearchElementNames: function (filter) {
+        getFilteredSearchElementIndexes: function (filter) {
             filterString = filter.toLowerCase();
-            // array of pair {name, weight}
+            // array of trio {name, index, weight}
             var weightedElements = [];
 
             fillElementList.call(this, weightedElements, matchSimpleCondition);
@@ -253,14 +268,9 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
                 fillElementList.call(this, weightedElements, matchFuzzyCondition);
             }
 
-            // sort by weight desc
-            weightedElements.sort(function (a, b) {
-                return b.weight - a.weight;
-            });
-
             var result = [];
             for (var i = 0; i < weightedElements.length; i++) {
-                result.push(weightedElements[i].name);
+                result.push(weightedElements[i].index);
                 if (result.length >= this.maxNumberResults)
                     break;
             }
@@ -269,10 +279,23 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'SearchCategoryView'],
         },
 
         hideElements: function() {
+            var i = 0, len = this.rootElements.length;
+
+            for (; i < len; i++) {
+                this.rootElements[i].hide();
+            }
+        },
+
+        showAndCollapseElements: function() {
             var i = 0,
-                len = this.searchElements.length;
-            for( ; i < len; i++){
-                this.searchElements[i].hide();
+                len = this.rootElements.length,
+                elem;
+            for ( ; i < len; i++ ) {
+                elem = this.rootElements[i];
+                elem.show(true);
+                if (elem.children) {
+                    elem.toggle(null, false, true);
+                }
             }
         },
 

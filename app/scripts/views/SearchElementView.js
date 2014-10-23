@@ -36,26 +36,20 @@ define(['backbone'], function(Backbone) {
       return false;
     },
 
-    toggle: function(isVisible){
-      iterateAncestors.call(this, this.parent, function(ancestor) {
-          ancestor.toggle(null, isVisible);
-      });      
+    hide: function() {
+        this.$el.hide();
     },
 
-    hide: function(){
-      iterateAncestors.call(this, this.parent, function(ancestor) {
-          ancestor.$el.hide();
-      });      
-
-      this.$el.hide();
+    show: function() {
+        this.$el.show();
     },
 
-    showWithAncestors: function(){        
-      iterateAncestors.call(this, this.parent, function(ancestor) {
-          ancestor.show();
-      });
+    showWithAncestors: function() {
+        iterateAncestors.call(this, this.parent, function (ancestor) {
+            ancestor.show();
+        });
 
-      this.$el.show();
+        this.$el.show();
     }
   }),
 
