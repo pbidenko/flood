@@ -164,13 +164,16 @@
             <div id="add-workspace-select-element">
                 <div id="add-workspace-select-container">
                     <ul>
+                        <!-- build:remove -->
                         <li id="add-project-workspace">Project</li>
+                        <!-- /build -->
                         <li id="add-node-workspace">Custom node</li>
                     </ul>
                 </div>
             </div>
 
             <div id="more-menu">
+                <!-- build:remove -->
                 <div id="login-button" class="menu-element">
                     <i class="fa fa-sign-out fa-fw"></i>
                     Logout
@@ -178,6 +181,7 @@
                 <div id="workspace-browser-button" class="menu-element">
                     <i class="fa fa-list-ul fa-fw"></i>Workspaces
                 </div>
+                <!-- /build -->
                 <div class="busy-indicator" style="display: none"></div>
             </div>
 
@@ -737,7 +741,7 @@
 <!-- build:[src] source.min.js -->
 <script data-main="/scripts/main" src="/bower_components/requirejs/require.js"></script>
 <!-- /build -->
-
+<!-- build:remove -->
 <script>
 
     (function (i, s, o, g, r, a, m) {
@@ -751,5 +755,6 @@
     ga('send', 'pageview');
 
 </script>
+<!-- /build -->
 </body>
 </html>
