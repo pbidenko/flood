@@ -14,9 +14,8 @@ define(['backbone'], function(Backbone) {
 	  	this.app = vals.app;
 	  },
 
-	  fetch : function(){
-
-	  	this.app.context.fetchLogin().done(function(e){
+	  fetch : function(){	      
+	      this.app.context.fetchLogin().done(function (e) {	          
 	  		if (e.email) {
 	  			this.set('email', e.email);
 	  			this.set('isLoggedIn', true);
