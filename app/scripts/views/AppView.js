@@ -14,17 +14,22 @@ define([  'backbone',
           'LoginView',
           'Login',
           'FeedbackView',
-          'Feedback' ], 
+          'Feedback', 
+          'fastclick' ], 
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback ) {
+            Help, LoginView, Login, FeedbackView, Feedback, fastclick ) {
 
   return Backbone.View.extend({
 
     el: '#app',
 
-    initialize: function() {        
+    initialize: function() { 
+      
+      var f = new fastclick(document.body);
+
       this.listenTo(this.model, 'change', this.render, this);
+
       this.$workspace_tabs = this.$('#workspace-tabs');
 
       this.model.get('workspaces').on('add', this.addWorkspaceTab, this);
@@ -71,6 +76,16 @@ define([  'backbone',
       'mouseout #add-workspace-button': 'hideAddWorkspaceSelect',
       'mouseover #add-workspace-select-element': 'showAddWorkspaceSelect',
       'mouseout #add-workspace-select-element': 'hideAddWorkspaceSelect',
+
+      // touch
+      'touchstart #add-workspace-button': 'toggleAddWorkspaceSelect'
+
+    },
+
+    toggleAddWorkspaceSelect: function(){
+
+      $('#add-workspace-select-element').toggle();
+
     },
 
     showHelpOnFirstExperience: function(){
