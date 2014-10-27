@@ -18,6 +18,7 @@ define(['backbone', 'SearchElementView'], function (Backbone, SearchElementView)
 
         render: function () {
             var $childContainer;
+            this.children = [];
 
             this.$el.html(this.template(this.model));
             $childContainer = this.$el.find('ul').eq(0);
@@ -35,6 +36,7 @@ define(['backbone', 'SearchElementView'], function (Backbone, SearchElementView)
                     searchView: this.searchView
                 });
 
+                this.children.push(view);
                 $childContainer.append(view.render().$el);
             }.bind(this));
 
@@ -50,13 +52,14 @@ define(['backbone', 'SearchElementView'], function (Backbone, SearchElementView)
 
                 this.searchElements.push(view);
 
+                this.children.push(view);
                 $childContainer.append(view.render().$el);
             }.bind(this));
 
             return this;
         },
 
-        toggle: function (event, open) {
+        toggle: function (event, open, withChildren) {
             if( typeof open === 'boolean' ){
                 this.expanded = open;  
             }
@@ -75,16 +78,48 @@ define(['backbone', 'SearchElementView'], function (Backbone, SearchElementView)
 
             //Stop event propagation so the parent elements won't get it
             event && event.preventDefault();
+
+            var child, len;
+            if (withChildren) {
+                len = this.children.length;
+                for (var i = 0; i < len; i++) {
+                    child = this.children[i];
+                    // if it's SearchCategoryView
+                    if (child.children)
+                        child.toggle(event, open, true);
+                }
+            }
             return false;
         },
 
-        show: function(){
+        show: function(withChildren) {
             this.$el.show();
             this.$el.addClass('expanded');
             this.$el.find('ul').eq(0).show();
             this.expanded = true;
+
+            if (withChildren) {
+                var len = this.children.length;
+                for (var i = 0; i < len; i++) {
+                    this.children[i].show(true);
+                }
+            }
+        },
+
+        hide: function() {
+            hideWithChildren(this);
         }
-    });
+    }),
+
+    hideWithChildren = function (parent) {
+        parent.$el.hide();
+        if (parent.children) {
+            var len = parent.children.length;
+            for (var i = 0; i < len; i++) {
+                hideWithChildren(parent.children[i]);
+            }
+        }
+    };
 
     return SearchCategoryView;
 });
