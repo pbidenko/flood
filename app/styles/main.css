@@ -1271,6 +1271,11 @@ input[type="button"].btn-block {
     border-left: none;
 }
 
+li.need-bottom {
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    height: 25px;
+}
+
 body {
     margin: 0;
     padding: 0;

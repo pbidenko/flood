@@ -48,6 +48,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             }
 
             this.render();
+            this.model.trigger('change:position');
             this.finishEvaluating();
         },
 
@@ -194,7 +195,9 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 ex,
                 i = 0,
                 len,
-                index = 0;
+                index = 0,
+                margintop,
+                port;
 
             BaseNodeView.prototype.renderNode.apply(this, arguments);
 
@@ -233,15 +236,24 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 len = ex.outputs.length;
 
                 for (; i < len; i++) {
-                    this.$el.find('.node-port-output[data-index=\' ' + i + ' \']').tooltip({
+                    port = this.$el.find('.node-port-output[data-index=\' ' + i + ' \']');
+                    port.tooltip({
                         title: ex.outputs[i],
                         placement: "right",
                         delay: del
                     });
 
                     if(ex.lineIndices) {
-                      index = i > 0 ? ex.lineIndices[i] - ex.lineIndices[i - 1] - 1 : ex.lineIndices[i];
-                      this.$el.find('.node-port-output[data-index=\' ' + i + ' \']').css("margin-top", index * 25);
+                        index = i > 0 ? ex.lineIndices[i] - ex.lineIndices[i - 1] - 1 : ex.lineIndices[i];
+                        margintop = index * 25;
+                        port.css("margin-top", margintop);
+                        if (i > 0) {
+                            port = this.$el.find(".node-port-output[data-index=' " + (i - 1) + " ']");
+                            if (margintop)
+                                port.addClass('need-bottom');
+                            else
+                                port.removeClass('need-bottom');
+                        }
                     }
                 }
             }
