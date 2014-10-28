@@ -16,7 +16,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
       'touchstart .node-port-output': 'beginTouchConnection',
       'touchstart .node-port-input': 'beginTouchDisconnection',
-      
+
       'touchstart': 'touchstart',
       'click':  'selectThis',
 

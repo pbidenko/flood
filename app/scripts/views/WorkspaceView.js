@@ -38,7 +38,9 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       this.listenTo(this.model, 'change:connections', function() {
         that.cleanup().renderConnections();
       });
-
+      this.listenTo(this.model, 'update-connections', function () {
+          that.cleanup().updateConnections();
+      });
       this.model.on('change:zoom', this.updateZoom, this );
       this.model.on('change:offset', this.updateOffset, this );
       this.model.on('change:isRunning', this.renderRunnerStatus, this);
@@ -625,6 +627,12 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
 
       return this;
 
+    },
+
+    updateConnections: function () {        
+        this.model.get('connections').forEach(function (cntn) {
+            this.connectionViews[cntn.get('_id')].render();
+        }.bind(this));
     },
 
     clearDeadNodes: function() {

@@ -14,7 +14,8 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
                 
                 this.context.fetchWorkspaces()
                     .done(function (response) {
-                        this.parse(response);
+                        var result = this.parse(response);
+                        this.set(result, options);
                     }.bind(this))
                     .fail(function (response) {
                         options.error(response);
