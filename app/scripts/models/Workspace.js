@@ -1,5 +1,5 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node', 'Marquee', 'WorkspaceResolver', 'NodeFactory', 'GeometryMessage'], 
-    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node, Marquee, WorkspaceResolver, nodeFactory, GeometryMessage) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node', 'Marquee', 'WorkspaceResolver', 'NodeFactory', 'GeometryMessage', 'GeometryExport'], 
+    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node, Marquee, WorkspaceResolver, nodeFactory, GeometryMessage, GeometryExport) {
 
   return Backbone.Model.extend({
 
@@ -97,7 +97,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.app.trigger('workspaceLoaded', this);
 
     },
-    
+
+    exportSTL: function(){
+
+      GeometryExport.toSTL(scene, this.get('name') + ".stl" );
+
+    },
+
     createNodes: function(data){
 
       this.set('nodes', new Nodes());

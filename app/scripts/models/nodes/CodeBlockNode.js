@@ -30,6 +30,7 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
 
             this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort));
             this.set('creationName', 'Code Block');
+            this.set('displayName', 'Code Block');
             this.set('lastValue', '');
 
             this.initAttrs(attrs, vals);
@@ -71,8 +72,10 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 updated = true;
             }
 
-            values.data = codeBlock.Data;
-            Node.prototype.updateValue.call(this, values);
+            if (codeBlock.Code) {
+                values.data = codeBlock.Code;
+                Node.prototype.updateValue.call(this, values);
+            }
 
             if (updated) {
                 this.set('extra', extraCopy);

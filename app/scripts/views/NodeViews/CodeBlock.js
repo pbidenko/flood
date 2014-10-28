@@ -58,6 +58,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             }
 
             this.render();
+            this.model.trigger('change:position');
             this.finishEvaluating();
         },
 
@@ -200,11 +201,12 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
         renderNode: function () {
 
             var del = { show: 400 },
-                that = this,
                 ex,
                 i = 0,
                 len,
-                index = 0;
+                index = 0,
+                margintop,
+                port;
 
             BaseNodeView.prototype.renderNode.apply(this, arguments);
 
@@ -213,29 +215,29 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             this.input.height(this.input[0].scrollHeight);
 
             this.input.focus(function (e) {
-                that.selectable = false;
-                that.model.set('selected', false);
+                this.selectable = false;
+                this.model.set('selected', false);
                 e.stopPropagation();
-            });
+            }.bind(this));
 
             this.input.blur(function () {
 
-                var ex = JSON.parse(JSON.stringify(that.model.get('extra')));
+                this.selectable = true;
 
-                if (!that.input.val()) {
-                    that.selectable = true;
-                    that.model.workspace.removeNodeById(that.model.get('_id'));
+                var ex = JSON.parse(JSON.stringify(this.model.get('extra')));
+
+                if (!this.input.val()) {
+                    this.model.workspace.removeNodeById(this.model.get('_id'));
                     return;
                 }
 
-                if (ex.code === that.input.val())
+                if (ex.code === this.input.val())
                     return;
 
-                ex.code = that.input.val();
+                ex.code = this.input.val();
 
-                that.model.workspace.setNodeProperty({ property: 'extra', _id: that.model.get('_id'), newValue: ex });
-                that.selectable = true;
-            });
+                this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
+            }.bind(this));
 
             ex = this.model.get('extra') || {};
             if (ex.outputs) {
@@ -243,22 +245,39 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 len = ex.outputs.length;
 
                 for (; i < len; i++) {
-                    this.$el.find('.node-port-output[data-index=\' ' + i + ' \']').tooltip({
+                    port = this.$el.find('.node-port-output[data-index=\' ' + i + ' \']');
+                    port.tooltip({
                         title: ex.outputs[i],
                         placement: "right",
                         delay: del
                     });
 
-                    if (ex.lineIndices) {
+                    if(ex.lineIndices) {
                         index = i > 0 ? ex.lineIndices[i] - ex.lineIndices[i - 1] - 1 : ex.lineIndices[i];
-                        this.$el.find('.node-port-output[data-index=\' ' + i + ' \']').css("margin-top", index * 25);
+                        margintop = index * 25;
+                        port.css("margin-top", margintop);
+                        if (i > 0) {
+                            port = this.$el.find(".node-port-output[data-index=' " + (i - 1) + " ']");
+                            if (margintop)
+                                port.addClass('need-bottom');
+                            else
+                                port.removeClass('need-bottom');
+                        }
                     }
                 }
             }
 
-            this.input.focus();
-
             this.trigger('after-render');
+
+            return this;
+        },
+
+        moveNode: function() {
+            BaseNodeView.prototype.moveNode.apply(this, arguments);
+
+            if(!this.input[0].value){
+                this.input.focus();
+            }
 
             return this;
         },
