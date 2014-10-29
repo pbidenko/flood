@@ -38,7 +38,9 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       this.listenTo(this.model, 'change:connections', function() {
         that.cleanup().renderConnections();
       });
-
+      this.listenTo(this.model, 'update-connections', function () {
+          that.cleanup().updateConnections();
+      });
       this.model.on('change:zoom', this.updateZoom, this );
       this.model.on('change:offset', this.updateOffset, this );
       this.model.on('change:isRunning', this.renderRunnerStatus, this);
@@ -87,12 +89,8 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       this.hammerSetupDone = true;
 
       function isTouchDevice() {  
-        try {  
-          document.createEvent("TouchEvent");  
-          return true;  
-        } catch (e) {  
-          return false;  
-        }  
+        return 'ontouchstart' in window // works on most browsers 
+          || 'onmsgesturechange' in window; // works on ie10
       }
 
       if (!isTouchDevice()) return;
@@ -157,13 +155,12 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       }.bind( this ));
 
       mc.on('pinch', function(ev) {
-
         if (this.zoomDisabled) return;
 
         var val = this.zoomStart * ev.scale;
 
         if (val < 0.25) val = 0.25;
-        if (val > 1) val = 1;
+        if (val > 1.2) val = 1.2;
 
         this.model.set('zoom', val );
       }.bind( this ));
@@ -630,6 +627,12 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
 
       return this;
 
+    },
+
+    updateConnections: function () {        
+        this.model.get('connections').forEach(function (cntn) {
+            this.connectionViews[cntn.get('_id')].render();
+        }.bind(this));
     },
 
     clearDeadNodes: function() {

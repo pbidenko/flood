@@ -11,13 +11,15 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
 
             fetch: function (options) {
                 this.login.fetch();
-
-                this.context.fetchWorkspaces().done(function (workspaces) {
-                    var result = App.prototype.parse.call(this, workspaces);
-                    this.set(result, options);
-                }.bind(this)).fail(function (workspaces) {
-                    options.error(workspaces);
-                });
+                
+                this.context.fetchWorkspaces()
+                    .done(function (response) {
+                        var result = this.parse(response);
+                        this.set(result, options);
+                    }.bind(this))
+                    .fail(function (response) {
+                        options.error(response);
+                    });
             },
 
             mapLibraryItems: function (param) {

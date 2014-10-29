@@ -1,6 +1,6 @@
 define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
-    return BaseNodeView.extend({
+    var CodeBlock = BaseNodeView.extend({
 
         innerTemplate: _.template($('#code-block-template').html()),
 
@@ -10,6 +10,16 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             this.model.on('change:extra', this.onChangedExtra, this);
             this.model.on('connections-update', this.onConnectionsUpdate, this);
             this.model.on('cbn-up-to-date', this.finishEvaluating, this);
+
+            //Get original element's size right after rendering of template
+            this.once('after-render', function () {
+                var $textEl = this.$el.find('textarea');
+                $textEl.data('x', $textEl.outerWidth());
+                $textEl.data('y', $textEl.outerHeight());
+            }.bind(this));
+
+            this.$el.on('mouseup', adjustElements.bind(this));
+            this.$el.on('mousemove', adjustElements.bind(this));
         },
 
         getCustomContents: function () {
@@ -20,7 +30,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
         },
 
-        finishEvaluating: function() {
+        finishEvaluating: function () {
             this.$el.removeClass('node-evaluating');
         },
 
@@ -48,6 +58,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             }
 
             this.render();
+            this.model.trigger('change:position');
             this.finishEvaluating();
         },
 
@@ -174,7 +185,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             var exCopy = JSON.parse(JSON.stringify(ex));
 
             exCopy.inputs = inputs;
-            this.model.workspace.setNodeProperty({property: 'extra', _id: this.model.get('_id'), newValue: exCopy, oldValue: ex });
+            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: exCopy, oldValue: ex });
         },
 
         setOutputsProperty: function (outputs) {
@@ -184,48 +195,49 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             var exCopy = JSON.parse(JSON.stringify(ex));
 
             exCopy.outputs = outputs;
-            this.model.workspace.setNodeProperty({property: 'extra', _id: this.model.get('_id'), newValue: exCopy, oldValue: ex });
+            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: exCopy, oldValue: ex });
         },
 
         renderNode: function () {
 
             var del = { show: 400 },
-                that = this,
                 ex,
                 i = 0,
                 len,
-                index = 0;
+                index = 0,
+                margintop,
+                port;
 
             BaseNodeView.prototype.renderNode.apply(this, arguments);
 
             this.input = this.$el.find('.code-block-input');
 
-            this.input.height( this.input[0].scrollHeight );
+            this.input.height(this.input[0].scrollHeight);
 
             this.input.focus(function (e) {
-                that.selectable = false;
-                that.model.set('selected', false);
+                this.selectable = false;
+                this.model.set('selected', false);
                 e.stopPropagation();
-            });
+            }.bind(this));
 
             this.input.blur(function () {
 
-                var ex = JSON.parse(JSON.stringify(that.model.get('extra')));
+                this.selectable = true;
 
-                if (!that.input.val()) {
-                    that.selectable = true;
-                    that.model.workspace.removeNodeById(that.model.get('_id'));
+                var ex = JSON.parse(JSON.stringify(this.model.get('extra')));
+
+                if (!this.input.val()) {
+                    this.model.workspace.removeNodeById(this.model.get('_id'));
                     return;
                 }
 
-                if (ex.code === that.input.val())
+                if (ex.code === this.input.val())
                     return;
 
-                ex.code = that.input.val();
+                ex.code = this.input.val();
 
-                that.model.workspace.setNodeProperty({property: 'extra', _id: that.model.get('_id'), newValue: ex });
-                that.selectable = true;
-            });
+                this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
+            }.bind(this));
 
             ex = this.model.get('extra') || {};
             if (ex.outputs) {
@@ -233,21 +245,41 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 len = ex.outputs.length;
 
                 for (; i < len; i++) {
-                    this.$el.find('.node-port-output[data-index=\' ' + i + ' \']').tooltip({
+                    port = this.$el.find('.node-port-output[data-index=\' ' + i + ' \']');
+                    port.tooltip({
                         title: ex.outputs[i],
                         placement: "right",
                         delay: del
                     });
 
                     if(ex.lineIndices) {
-                      index = i > 0 ? ex.lineIndices[i] - ex.lineIndices[i - 1] - 1 : ex.lineIndices[i];
-                      this.$el.find('.node-port-output[data-index=\' ' + i + ' \']').css("margin-top", index * 25);
+                        index = i > 0 ? ex.lineIndices[i] - ex.lineIndices[i - 1] - 1 : ex.lineIndices[i];
+                        margintop = index * 25;
+                        port.css("margin-top", margintop);
+                        if (i > 0) {
+                            port = this.$el.find(".node-port-output[data-index=' " + (i - 1) + " ']");
+                            if (margintop)
+                                port.addClass('need-bottom');
+                            else
+                                port.removeClass('need-bottom');
+                        }
                     }
                 }
             }
 
             if (!this.model.get('duringUploading'))
                 this.input.focus();
+            this.trigger('after-render');
+
+            return this;
+        },
+
+        moveNode: function() {
+            BaseNodeView.prototype.moveNode.apply(this, arguments);
+
+            if(!this.input[0].value){
+                this.input.focus();
+            }
 
             return this;
         },
@@ -259,7 +291,20 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
             return this;
 
         }
-
     });
+
+    //Private methods
+    var adjustElements = function () {
+        var $textEl = this.$el.find('textarea');
+        if ($textEl.outerWidth() !== $textEl.data('x') || $textEl.outerHeight() !== $textEl.data('y')) {
+            this.renderPorts();
+            this.model.workspace.trigger('update-connections');
+            // store new height/width
+            $textEl.data('x', $textEl.outerWidth());
+            $textEl.data('y', $textEl.outerHeight());
+        }
+    };
+
+    return CodeBlock;
 
 });
