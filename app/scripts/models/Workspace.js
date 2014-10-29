@@ -110,10 +110,19 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     createNodes: function(data, browserViewWorkspaces){
 
+      var i;
+      var oldNodes = this.get('nodes');
+      if (oldNodes && oldNodes.models && oldNodes.models.length) {
+            oldNodes = oldNodes.models;
+            for(i = 0; i < oldNodes.length; i++) {
+                  oldNodes[i].clearGeometry();
+            }
+      }
+
       this.set('nodes', new Nodes());
       var guid, workspaces, id, node, index;
       var allWorkspaces = this.app.get('workspaces');
-      for(var i = 0; i < data.nodes.length; i++) {
+      for(i = 0; i < data.nodes.length; i++) {
           node = data.nodes[i];
           node.duringUploading = true;
           // besides creating nodes we should set all dependencies
@@ -939,27 +948,26 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
                 node.updateValue(param.result[i]);
                 if (resultNode.containsGeometryData) {
                     this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeId)));
+                    if(this.pendingRequestsCount === 0){
+                        this.app.trigger('show-progress');
+                    }
+                    this.pendingRequestsCount++;
                 }
                 else {
                     node.clearGeometry();
                 }
-                if(this.pendingRequestsCount === 0){
-                    this.app.trigger('show-progress');
-                }
-                this.pendingRequestsCount++;
             }
         }
     },
 
     updateNodeGeometry: function(param) {
-        var node = this.app.getCurrentWorkspace().get('nodes').get(param.geometryData.nodeId);
+        var node = this.get('nodes').get(param.geometryData.nodeId);
         if (node && param.geometryData.graphicPrimitivesData) {
             node.updateNodeGeometry(param);
-        }
-
-        this.pendingRequestsCount--;
-        if(this.pendingRequestsCount === 0) {
-            this.app.trigger('hide-progress');
+            this.pendingRequestsCount--;
+            if(this.pendingRequestsCount === 0) {
+                this.app.trigger('hide-progress');
+            }
         }
     },
 

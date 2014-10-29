@@ -85,10 +85,8 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 updated = true;
             }
 
-            if (codeBlock.Code) {
-                values.data = codeBlock.Code;
-                Node.prototype.updateValue.call(this, values);
-            }
+            values.data = codeBlock.Data;
+            Node.prototype.updateValue.call(this, values);
 
             if (updated) {
                 this.set('extra', extraCopy);
