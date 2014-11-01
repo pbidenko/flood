@@ -13,13 +13,13 @@ define([  'backbone',
           'Help',
           'LoginView',
           'Login',
-          'SaveFileMessage',
           'FeedbackView',
           'Feedback', 
-          'fastclick' ], 
+          'fastclick',
+          'SaveUploader' ],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, SaveFileMessage, FeedbackView, Feedback, fastclick ) {
+            Help, LoginView, Login, FeedbackView, Feedback, fastclick, SaveUploader ) {
 
   return Backbone.View.extend({
 
@@ -49,7 +49,7 @@ define([  'backbone',
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
-      this.model.on('creation-data-received:event', this.createWorkspaceWithData, this);
+      this.saveUploader = new SaveUploader({ appView : this });
       // deactivate the context menu
       $(document).bind("contextmenu", function (e) { return false; });
 
@@ -66,8 +66,6 @@ define([  'backbone',
       'click #settings-button': 'showSettings',
       'click #workspace_hide' : 'toggleViewer',
       'click #workspace-browser-button': 'toggleBrowser',
-      'click #save-file-button': 'saveFile',
-      'change #file': 'loadSelectedFile',
       'click #feedback-button': 'toggleFeedback',
 
       'click #zoomin-button': 'zoominClick',
@@ -80,88 +78,12 @@ define([  'backbone',
       'mouseover #add-workspace-button': 'showAddWorkspaceSelect',
       'mouseout #add-workspace-button': 'hideAddWorkspaceSelect',
       'mouseover #add-workspace-select-element': 'showAddWorkspaceSelect',
-      'mouseout #add-workspace-select-element': 'hideAddWorkspaceSelect'
+      'mouseout #add-workspace-select-element': 'hideAddWorkspaceSelect',
 
       // touch
       'touchstart #add-workspace-button': 'toggleAddWorkspaceSelect'
 
     },
-    
-    createWorkspaceWithData: (function() {
-        var data = null;
-        function mapWorkspaceFromBrowserView(ws){
-            return {
-                guid: ws.get('guid'),
-                id: ws.get('_id')
-            };
-        }
-
-        function prepareWorkspace (ws) {
-            if (data.workspaceId) {
-                ws.set('guid', data.workspaceId);
-            }
-
-            var browserViewWorkspaces = this.browserView.model.get('workspaces')
-                .map(mapWorkspaceFromBrowserView);
-            ws.createNodes(data, browserViewWorkspaces);
-            this.model.changed.currentWorkspace = ws.get('_id');
-            this.render(true);
-            ws.createConnections(data);
-
-            ws.subscribeOnNodesConnectionsChanges();
-            ws.runner.subscribeOnNodesConnectionsChanges();
-
-            this.model.trigger('computation-completed:event', data);
-            ws.trigger('runCommand');
-
-            if (data.workspaceId) {
-                this.model.setAvailableCustomNodeDefinitions(data.workspaceId);
-            }
-
-            this.zoomresetClick();
-        }
-
-        return function (params) {
-            var i;
-            data = params;
-            for (i = 0; i < params.nodes.length; i++) {
-                var node = params.nodes[i];
-                node.typeName = node.creationName;
-            }
-
-            for (i = 0; i < params.connections.length; i++) {
-                params.connections[i]._id = this.model.makeId();
-            }
-
-            var workspaces;
-            var allWorkspaces = this.model.get('workspaces');
-            if (params.workspaceId) {
-                workspaces = allWorkspaces.where({ guid: params.workspaceId });
-            }
-            else {
-                workspaces = allWorkspaces.where({ isCustomNode: false });
-            }
-
-            if (workspaces.length > 0) {
-                var currentWorkspace = workspaces[0];
-                this.model.set('currentWorkspace', currentWorkspace.get('_id'));
-
-                prepareWorkspace.call(this, currentWorkspace);
-            }
-            else if (params.workspaceId) {
-                workspaces = this.browserView.model.get('workspaces').where({ guid: params.workspaceId });
-                if (workspaces.length > 0) {
-                    this.model.loadWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true, true);
-                }
-                else {
-                    this.model.newNodeWorkspace(prepareWorkspace.bind(this), true);
-                }
-            }
-            else {
-                this.model.newWorkspace(prepareWorkspace.bind(this));
-            }
-        };
-    })(),
 
     toggleAddWorkspaceSelect: function(){
 
@@ -223,19 +145,6 @@ define([  'backbone',
       }
 
       this.currentWorkspaceView.keydownHandler(e);
-    },
-    
-    loadSelectedFile: function( e ) {
-        var files = e.target.files;
-        if (files && files.length == 1) {
-            this.model.socket.send( files[0] );
-
-            e.target.value = null;
-        }
-    },
-
-    saveFile: function(e){
-        this.model.socket.send(JSON.stringify(new SaveFileMessage()));
     },
 
     saveClick: function(e){

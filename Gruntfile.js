@@ -104,6 +104,22 @@ module.exports = function (grunt) {
                   from: "Storage: 'helpers/BaseStorage'",
                   to: "Storage: 'helpers/MongoStorage'"
                 }]
+            },
+            nwksaveuploader2base: {
+                src: ['app/scripts/config.js'],
+                overwrite: true,
+                replacements: [{
+                  from: "SaveUploader: 'views/NWKSaveUploader'",
+                  to: "SaveUploader: 'views/BaseSaveUploader'"
+                }]
+            },
+            basesaveuploader2nwk: {
+                src: ['app/scripts/config.js'],
+                overwrite: true,
+                replacements: [{
+                  from: "SaveUploader: 'views/BaseSaveUploader'",
+                  to: "SaveUploader: 'views/NWKSaveUploader'"
+                }]
             }
         },
         // This task uses James Burke's excellent r.js AMD builder to take all
@@ -258,23 +274,27 @@ module.exports = function (grunt) {
     grunt.registerTask('build', [
         'clean:dist',
         'replace:mongo2base',
-        'requirejs',
-        'imagemin',
-        'cssmin',
-        'copy',
-        'processhtml',
-        'replace:base2mongo'
-    ]);
-
-    grunt.registerTask('desktop', [
-        'clean:dist',
-        'replace:mongo2base',
+        'replace:basesaveuploader2nwk',
         'requirejs',
         'imagemin',
         'cssmin',
         'copy',
         'processhtml',
         'replace:base2mongo',
+        'replace:nwksaveuploader2base'
+    ]);
+
+    grunt.registerTask('desktop', [
+        'clean:dist',
+        'replace:mongo2base',
+        'replace:basesaveuploader2nwk',
+        'requirejs',
+        'imagemin',
+        'cssmin',
+        'copy',
+        'processhtml',
+        'replace:base2mongo',
+        'replace:nwksaveuploader2base',
         'nodewebkit'
     ]);
 

@@ -149,6 +149,7 @@ require.config({
         LibraryItemsListMessage: 'models/messages/LibraryItemsListMessage',
         SaveFileMessage: 'models/messages/SaveFileMessage',
         GeometryMessage: 'models/messages/GeometryMessage',
+        UploadFileMessage: 'models/messages/UploadFileMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
@@ -158,6 +159,7 @@ require.config({
         NodeCreationDataResponse: 'models/responses/NodeCreationDataResponse',
         UpdateProxyNodesResponse: 'models/responses/UpdateProxyNodesResponse',
         GeometryDataResponse: 'models/responses/GeometryDataResponse',
+        WorkspacePathResponse: 'models/responses/WorkspacePathResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',
@@ -165,7 +167,7 @@ require.config({
         staticHelpers: 'helpers/StaticHelpers',
         augment: 'helpers/augment',
         // Use BaseStorage if no actual data storage is required
-        Storage: 'helpers/MongoStorage',//'helpers/MongoStorage'
+        Storage: 'helpers/MongoStorage', //'helpers/BaseStorage',
         settings: 'helpers/Settings',
 
         // backbone views
@@ -184,7 +186,8 @@ require.config({
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
         ModelsListView: 'views/ModelsListView',
         SearchCategoryView: 'views/SearchCategoryView',
-        
+        SaveUploader: 'views/BaseSaveUploader', //'views/NWKSaveUploader',
+
         // node backbone views
         NodeViewTypes: 'views/NodeViews/NodeViews',
         BaseNodeView: 'views/NodeViews/Base',

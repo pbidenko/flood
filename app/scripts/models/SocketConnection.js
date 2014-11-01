@@ -1,7 +1,7 @@
 ﻿define(['backbone', 'ComputationResponse', 'ContentResponse', 'LibraryItemsListResponse',
-        'SavedFileResponse', 'NodeCreationDataResponse', 'GeometryDataResponse', 'UpdateProxyNodesResponse', 'settings' ],
+        'SavedFileResponse', 'NodeCreationDataResponse', 'GeometryDataResponse', 'UpdateProxyNodesResponse', 'WorkspacePathResponse', 'settings' ],
     function (Backbone, ComputationResponse, ContentResponse, LibraryItemsListResponse,
-              SavedFileResponse, NodeCreationDataResponse, GeometryDataResponse, UpdateProxyNodesResponse, globalSettings ) {
+              SavedFileResponse, NodeCreationDataResponse, GeometryDataResponse, UpdateProxyNodesResponse, WorkspacePathResponse, globalSettings ) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -20,7 +20,8 @@
             'DynamoWebServer.Responses.SavedFileResponse, DynamoWebServer': SavedFileResponse,
             'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : NodeCreationDataResponse,
             'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : GeometryDataResponse,
-            'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : UpdateProxyNodesResponse
+            'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : UpdateProxyNodesResponse,
+            'DynamoWebServer.Responses.WorkspacePathResponse, DynamoWebServer' : WorkspacePathResponse
         },
         responseEventMap = {
             'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': 'computation-completed:event',
@@ -28,7 +29,8 @@
             'DynamoWebServer.Responses.SavedFileResponse, DynamoWebServer': 'saved-file-received:event',
             'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : 'creation-data-received:event',
             'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : 'geometry-data-received:event',
-            'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : 'proxy-nodes-data-received:event'
+            'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : 'proxy-nodes-data-received:event',
+            'DynamoWebServer.Responses.WorkspacePathResponse, DynamoWebServer' : 'ws-path-received:event'
         },
         app;
 
