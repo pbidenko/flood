@@ -218,6 +218,11 @@ module.exports = function (grunt) {
             files: {
               "dist/app.html": ["app/app.html"]
             }
+          },
+          selenium: {
+            files: {
+              "dist/start.html": ["app/start.html"]
+            }
           }
         },
         nodewebkit: {
@@ -262,7 +267,7 @@ module.exports = function (grunt) {
         'imagemin',
         'cssmin',
         'copy',
-        'processhtml',
+        'processhtml:release',
         'replace:base2mongo'
     ]);
 
@@ -273,9 +278,13 @@ module.exports = function (grunt) {
         'imagemin',
         'cssmin',
         'copy',
-        'processhtml',
+        'processhtml:release',
         'replace:base2mongo',
         'nodewebkit'
+    ]);
+
+    grunt.registerTask('desktop_selenium', [
+        'processhtml:selenium',
     ]);
 
     grunt.registerTask('desktop_dynamo', [
