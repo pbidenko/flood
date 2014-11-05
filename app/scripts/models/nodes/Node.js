@@ -390,10 +390,13 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         // if we have single points
         if (graphicData.pointVertices && graphicData.pointVertices.length) {
             var points = {vertices: []}, onePoint;
-            // while there are at least 3 coordinates
-            while (graphicData.pointVertices.length >= graphicData.numberOfCoordinates) {
+            for(var i = 0; i< graphicData.pointVertices.length / graphicData.numberOfCoordinates; i++){
                 // add [x, y, z]
-                onePoint = graphicData.pointVertices.splice(0, graphicData.numberOfCoordinates);
+                onePoint = [
+                  graphicData.pointVertices[i * graphicData.numberOfCoordinates], 
+                  graphicData.pointVertices[i * graphicData.numberOfCoordinates + 1],
+                  graphicData.pointVertices[i * graphicData.numberOfCoordinates + 2]
+                ];
                 points.vertices.push(onePoint);
             }
 
@@ -405,17 +408,26 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         // if we have line strips
         if (graphicData.lineStripVertices && graphicData.lineStripVertices.length
             && graphicData.lineStripCounts && graphicData.lineStripCounts.length) {
-            var curve, count, oneVertex;
+            var curve, count, oneVertex, pos = 0;
+
             for (var k = 0; k < graphicData.lineStripCounts.length; k++) {
                 curve = { linestrip: []};
                 count = graphicData.lineStripCounts[k];
 
-                while (count > 0 && graphicData.lineStripVertices.length >= graphicData.numberOfCoordinates) {
-                    oneVertex = graphicData.lineStripVertices.splice(0, graphicData.numberOfCoordinates);
-                    curve.linestrip.push(oneVertex);
-                    count--;
+                if(!count){
+                    continue;
                 }
 
+                for(var i = pos; i < pos + count; i++){
+                    oneVertex = [
+                      graphicData.lineStripVertices[i * graphicData.numberOfCoordinates],
+                      graphicData.lineStripVertices[i * graphicData.numberOfCoordinates + 1],
+                      graphicData.lineStripVertices[i * graphicData.numberOfCoordinates + 2]
+                    ];
+                    curve.linestrip.push(oneVertex);
+                }
+
+                pos += count;
                 geometries.push(curve);
             }
         }
@@ -427,24 +439,34 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
             && graphicData.triangleNormals && graphicData.triangleNormals.length) {
             var triangles = {vertices: [], faces:[]};
             var index = 0, oneVertex, vertexCount = 3;
-            // while there are at least 9 coordinates of triangle's vertices
-            // and at least 3 coordinates of normal vector
-            while (graphicData.triangleVertices.length >= (vertexCount * graphicData.numberOfCoordinates)
-                && graphicData.triangleNormals.length >= graphicData.numberOfCoordinates) {
-                for (var i = 0; i < vertexCount; i++)
-                {
+
+            for(var i = 0; i <= graphicData.triangleVertices.length / vertexCount * 3; i++) {
+                for (var j = 0; j < vertexCount; j++) {
                     // Add vertex - [x, y, z]
-                    oneVertex = graphicData.triangleVertices.splice(0, graphicData.numberOfCoordinates);
+                    oneVertex = [graphicData.triangleVertices[i * 9 + j * 3], graphicData.triangleVertices[i * 9 + j * 3 + 1], graphicData.triangleVertices[i * 9 + j * 3 + 2]];
                     triangles.vertices.push(oneVertex);
                 }
-                // add [indexA, indexB, indexC, normal_vector: [x, y, z]]
-                triangles.faces.push([index++, index++, index++,
-                    graphicData.triangleNormals.splice(0, graphicData.numberOfCoordinates * 3)]);
+                // add [indexA, indexB, indexC, normal_vector: [x1, y1, z1, x2, y2, z2, x3, y3, z3]]
+                triangles.faces.push([index++, index++, index++, [
+                    // x1, y1, z1
+                    graphicData.triangleNormals[i * 9],
+                    graphicData.triangleNormals[i * 9 + 1],
+                    graphicData.triangleNormals[i * 9 + 2],
+                    // x2, y2, z2
+                    graphicData.triangleNormals[i * 9 + 3],
+                    graphicData.triangleNormals[i * 9 + 4],
+                    graphicData.triangleNormals[i * 9 + 5],
+                    // x3, y3, z3
+                    graphicData.triangleNormals[i * 9 + 6],
+                    graphicData.triangleNormals[i * 9 + 7],
+                    graphicData.triangleNormals[i * 9 + 8]]
+                ]);
             }
 
             geometries.push(triangles);
         }
     }
+
   });
 });
 

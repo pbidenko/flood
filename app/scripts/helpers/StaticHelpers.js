@@ -42,12 +42,12 @@ define(function(){
 
         getIntArray: function (base64){
             var buffer = this.getArrayFromBase64string(base64).buffer;
-            return Array.apply([], new Int32Array(buffer));
+            return new Int32Array(buffer);
         },
 
         getFloatArray: function (base64){
             var buffer = this.getArrayFromBase64string(base64).buffer;
-            return Array.apply([], new Float32Array(buffer));
+            return new Float32Array(buffer);
         },
 
         capitalizeFirstLetter: function(string) {
