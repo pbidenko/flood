@@ -15,10 +15,11 @@ define([  'backbone',
           'Login',
           'FeedbackView',
           'Feedback', 
-          'fastclick' ], 
+          'fastclick',
+          'SaveUploader' ],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback, fastclick ) {
+            Help, LoginView, Login, FeedbackView, Feedback, fastclick, SaveUploader ) {
 
   return Backbone.View.extend({
 
@@ -42,11 +43,13 @@ define([  'backbone',
       this.model.on('show-progress', this.showProgress, this);
       this.model.on('hide-progress', this.hideProgress, this);
 
+      this.viewBrowser();
+
       this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
-
+      this.saveUploader = new SaveUploader({ appView : this });
       // deactivate the context menu
       $(document).bind("contextmenu", function (e) { return false; });
 

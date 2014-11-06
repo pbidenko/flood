@@ -239,7 +239,7 @@ exports.getWorkspaces = function(req, res) {
 	if (!user) return res.status(403).send("Must be logged in to list your workspaces")
 
 	User.findById( user._id )
-		.populate('workspaces', 'name lastSaved isPublic maintainers isModified isCustomNode')
+		.populate('workspaces', 'name lastSaved isPublic maintainers isModified isCustomNode guid')
 		.exec(function(e, u) {
 			var filtered = u.workspaces.filter(function(x, i){ return x.isModified === true || i === 0; }).sort(dateSort);
 			return res.send( filtered );

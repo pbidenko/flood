@@ -182,6 +182,23 @@
                     <i class="fa fa-list-ul fa-fw"></i>Workspaces
                 </div>
                 <!-- /build -->
+                <div id="save-upload">
+                  <div id="saveas-file-button" class="menu-element">
+                      <input id="savefile" type="file" class="hidden-file-input" nwsaveas accept=".dyn,.dyf" />
+                      <div>
+                            <i class="fa fa-floppy-o"></i>Save As
+                      </div>
+                  </div>
+                  <div id="save-file-button" class="menu-element">
+                      <i class="fa fa-floppy-o"></i>Save
+                  </div>
+                  <div id="open-file-button" class="menu-element">
+                    <input id="openfile" type="file" class="hidden-file-input" accept=".dyn,.dyf" />
+                    <div class="over-hidden-file-input">
+                        <i class="fa fa-folder-open"></i>Open
+                    </div>
+                  </div>
+                </div>
                 <div class="busy-indicator" style="display: none"></div>
             </div>
 
@@ -358,9 +375,8 @@
 </script>
 
 <script type="text/template" id="node-custom-template">
-
-    <i class="fa fa-fw fa-bolt"></i>
-    <span class="name searchfield"><%= type.functionName  %></span>
+          <i class="fa fa-fw fa-bolt"></i>
+          <span class="name searchfield"><%= type.functionName  %></span>
 
 </script>
 

@@ -1,5 +1,5 @@
-define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
-    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
+define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'CreateProxyNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
+    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, CreateProxyNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
 
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
@@ -41,7 +41,14 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
                 len = data.nodes.length,
                 commands = [];
             for( ; i < len; i++ ){
-                commands.push(new CreateNodeCommand( {}, data.nodes[i] ));
+                // if there is no definition for custom node
+                // the dynamo won't be able to create an instance
+                if (data.nodes[i].extra.isProxy) {
+                    commands.push(new CreateProxyNodeCommand({}, data.nodes[i]));
+                }
+                else {
+                    commands.push(new CreateNodeCommand({}, data.nodes[i]));
+                }
                 Array.prototype.push.apply(commands, new UpdateModelValueCommand( {}, data.nodes[i] ));
             }
 

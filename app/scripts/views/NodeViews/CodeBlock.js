@@ -267,6 +267,8 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 }
             }
 
+            if (!this.model.get('duringUploading'))
+                this.input.focus();
             this.trigger('after-render');
 
             return this;
