@@ -2,37 +2,72 @@
 <head>
     <title>Start</title>
     <script>
-        var execFile = require('child_process').execFile,
-            child;
+        try {
+            var execFile = require('child_process').execFile,
+                child;
 
-        require('nw.gui').Window.get().showDevTools();
+            require('nw.gui').Window.get().showDevTools();
 
-        child = execFile('DynamoWebServer.exe', ['headless'], { cwd: 'dynamo' }, function (error, stdout, stderr) {
-            if (error) {
-                console.log(error.stack);
-                console.log('Error code: ' + error.code);
-                console.log('Signal received: ' + error.signal);
-            }
-            console.log('Child Process stdout: ' + stdout);
-            console.log('Child Process stderr: ' + stderr);
-        });
+            child = execFile('DynamoWebServer.exe', ['headless'], { cwd: 'dynamo' }, function (error, stdout, stderr) {
+                try {
+                    if (error) {
+                        window.location.href = 'error.html';
+                    }
 
-        interval = setInterval(function () {
+                    console.log('Child Process stdout: ' + stdout);
+                    console.log('Child Process stderr: ' + stderr);
+                }
+                catch (exc){
+                    window.location.href = 'error.html';
+                }
+            });
 
-            socket = new WebSocket(require('./scripts/helpers/Settings.js').socketUrl);
+            interval = setInterval(function () {
 
-            socket.onopen = function () {
-                clearInterval(interval);
-                socket.close();
-                window.location.href = 'app.html';
-            };
+                socket = new WebSocket(require('./scripts/helpers/Settings.js').socketUrl);
 
-        }, 2000);
+                socket.onopen = function () {
+                    clearInterval(interval);
+                    socket.close();
+                    window.location.href = 'app.html';
+                };
+
+            }, 2000);
+        }
+        catch (exc){
+            window.location.href = 'error.html';
+        }
     </script>
+
+    <style>
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Helvetica, Arial, "Lucida Grande", sans-serif;
+            text-align: center;
+        }
+
+        #loadingtext {
+            padding-top: 120px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 90px;
+            color: #589cc8;
+            text-shadow: 0 1px white;
+        }
+        
+        #loadingimage {
+            width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+    </style>
 </head>
 <body>
-    <h1>
-        Wait for redirect...
-    </h1>
+    <div id="loadingtext">Please wait...</div>
+    <br />
+    <img id="loadingimage" src="images/loading-bar.gif">
 </body>
 </html>
