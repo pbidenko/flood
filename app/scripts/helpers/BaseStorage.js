@@ -71,6 +71,7 @@ define(['backbone', 'staticHelpers'], function(Backbone, helpers) {
         this.session.workspaces.map(function (ws) {
             arr.push({
                 _id: ws._id,
+                guid: ws.guid,
                 name: ws.name,
                 isCustomNode: ws.isCustomNode,
                 isPublic: false,

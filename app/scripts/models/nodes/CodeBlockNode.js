@@ -2,12 +2,19 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
 
     return Node.extend({
 
+        defaults: {
+            duringUploading: false
+        },
+
         initialize: function (attrs, vals) {
             var inPort = [],
                 outPort = [],
                 i = 0,
                 len = 0;
 
+            if (attrs.duringUploading) {
+                this.set('duringUploading', true);
+            }
             if (attrs.extra && attrs.extra.inputs) {
                 len = attrs.extra.inputs.length;
                 attrs.extra.oldInputs = attrs.extra.inputs;
@@ -32,6 +39,12 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
             this.set('creationName', 'Code Block');
             this.set('displayName', 'Code Block');
             this.set('lastValue', '');
+            if (!this.get('failureMessage'))
+                this.set('failureMessage', '');
+            if (!this.get('extra'))
+                this.set('extra',{});
+            if (!this.get('displayName'))
+                this.set('displayName', '');
 
             this.initAttrs(attrs, vals);
         },
@@ -72,10 +85,8 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 updated = true;
             }
 
-            if (codeBlock.Code) {
-                values.data = codeBlock.Code;
-                Node.prototype.updateValue.call(this, values);
-            }
+            values.data = codeBlock.Data;
+            Node.prototype.updateValue.call(this, values);
 
             if (updated) {
                 this.set('extra', extraCopy);

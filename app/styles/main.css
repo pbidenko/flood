@@ -319,7 +319,7 @@ input[type="button"].btn-block {
 
 .workspace-search-container ul {
     max-height: 500px;
-    overflow-y: scroll;
+    overflow-y: auto;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -612,6 +612,20 @@ input[type="button"].btn-block {
     width: 200px;
     bottom: 0;
     top: 30px;
+}
+
+.hidden-file-input {
+    opacity: 0.0;
+    -moz-opacity: 0.0;
+    filter: alpha(opacity=0);
+    height: 30px;
+    width: 64px;
+    z-index: 2;
+    margin: -7px;
+}
+
+.over-hidden-file-input {
+    margin-top: -23px;
 }
 
 .workspace-browser-header {
@@ -918,6 +932,7 @@ input[type="button"].btn-block {
     padding: 7px;
     display: inline-block;
     border-left: 1px solid #c7bbb1;
+    cursor: default;
 }
 
     .menu-element:hover {

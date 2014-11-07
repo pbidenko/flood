@@ -12,9 +12,12 @@ define(['backbone', 'WorkspaceBrowserElement'], function(Backbone, WorkspaceBrow
 
         this.app.context.fetchWorkspaceBrowserElements().done(function (elements) {
 
+            // remove default element
+            this.models.remove(0,0);
             elements.map(function (element) {
                 var browserElement = new WorkspaceBrowserElement({
                     _id: element._id,
+                    guid: element.guid,
                     name: element.name,
                     isPublic: element.isPublic,
                     lastSaved: element.lastSaved,

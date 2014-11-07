@@ -1,8 +1,9 @@
-define( ['CreateNodeCommand', 'DeleteModelCommand', 'MakeConnectionCommand', 'RunCancelCommand', 'UpdateModelValueCommand', 'CreateCustomNodeCommand'],
-    function ( CreateNodeCommand, DeleteModelCommand, MakeConnectionCommand, RunCancelCommand, UpdateModelValueCommand, CreateCustomNodeCommand ) {
+define( ['CreateNodeCommand', 'CreateProxyNodeCommand', 'DeleteModelCommand', 'MakeConnectionCommand', 'RunCancelCommand', 'UpdateModelValueCommand', 'CreateCustomNodeCommand'],
+    function ( CreateNodeCommand, CreateProxyNodeCommand, DeleteModelCommand, MakeConnectionCommand, RunCancelCommand, UpdateModelValueCommand, CreateCustomNodeCommand ) {
         return {
             //Key should correspond to the name of command inside flood_runner.js
             addNode: CreateNodeCommand,
+            addProxyNode: CreateProxyNodeCommand,
             removeNode: DeleteModelCommand,
             removeConnection: MakeConnectionCommand,
             addConnection: MakeConnectionCommand,

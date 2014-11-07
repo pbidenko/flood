@@ -21,7 +21,6 @@ define(['backbone', 'FLOOD'],
         this.workspace.initializeRunner();
         this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
         this.workspace.listenTo( this.app, 'geometry-data-received:event', this.workspace.updateNodeGeometry);
-        this.workspace.listenTo( this.app, 'saved-file-received:event', this.workspace.downloadFile);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
         return;
@@ -81,7 +80,6 @@ define(['backbone', 'FLOOD'],
         this.workspace.initializeRunner();
         this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
         this.workspace.listenTo( this.app, 'geometry-data-received:event', this.workspace.updateNodeGeometry);
-        this.workspace.listenTo( this.app, 'saved-file-received:event', this.workspace.downloadFile);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
         this.app.get('workspaces').add(this.workspace);
@@ -94,7 +92,8 @@ define(['backbone', 'FLOOD'],
 
       var ws = this.app.getLoadedWorkspace(id);
 
-      if (!ws) throw new Error("You tried to add an unloaded workspace as a dependency!")
+      if (!ws)
+          throw new Error("You tried to add an unloaded workspace as a dependency!");
 
       var depDeps = ws.get('workspaceDependencyIds')
         , currentDeps = this.workspace.get('workspaceDependencyIds')
@@ -102,8 +101,8 @@ define(['backbone', 'FLOOD'],
 
       this.workspace.set( 'workspaceDependencyIds', unionDeps );
 
-      if (watch) this.watchDependency( id );
-
+      if (watch)
+          this.watchDependency( id );
     },
 
     watchDependency: function( id ){
@@ -319,7 +318,7 @@ define(['backbone', 'FLOOD'],
 
       });
 
-    },
+    }
 
 
   });
