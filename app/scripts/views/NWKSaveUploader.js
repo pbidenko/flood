@@ -62,9 +62,7 @@ define(['backbone', 'views/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMess
                 var files = e.target.files;
                 if (files && files.length == 1) {
                     if (files[0].path)
-                        this.appView.model.socket.send(JSON.stringify(
-                            new UploadFileMessage(files[0].path)
-                        ));
+                        this.sendStringMessage(new UploadFileMessage(files[0].path));
 
                     e.target.value = null;
                 }
@@ -87,9 +85,8 @@ define(['backbone', 'views/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMess
                         this.updatePathByGuid(guid, path);
                     }
 
-                    this.appView.model.socket.send(JSON.stringify(
-                        new SaveFileMessage(guid, path)
-                    ));
+                    this.synchronizeNodeCoordinates();
+                    this.sendStringMessage(new SaveFileMessage(guid, path));
                 }
                 // ask for FilePath
                 else {

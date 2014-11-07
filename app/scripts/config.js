@@ -150,6 +150,7 @@ require.config({
         SaveFileMessage: 'models/messages/SaveFileMessage',
         GeometryMessage: 'models/messages/GeometryMessage',
         UploadFileMessage: 'models/messages/UploadFileMessage',
+        UpdateCoordinatesMessage: 'models/messages/UpdateCoordinatesMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
