@@ -1,8 +1,8 @@
 /**
  * Created by Masha on 10/29/2014.
  */
-define(['backbone', 'SaveFileMessage', 'UpdateCoordinatesMessage', 'staticHelpers'],
-    function(Backbone, SaveFileMessage, UpdateCoordinatesMessage, helpers) {
+define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers'],
+    function(Backbone, SaveFileMessage, SetModelPositionMessage, helpers) {
 
     var data = null;
 
@@ -92,13 +92,13 @@ define(['backbone', 'SaveFileMessage', 'UpdateCoordinatesMessage', 'staticHelper
             for (var i = 0; i < nodes.length; i++) {
                 node = nodes[i];
                 nodePositions.push({
-                    nodeId: node.get('_id'),
+                    modelId: node.get('_id'),
                     x: node.get('position')[0],
                     y: node.get('position')[1]
                 });
             }
 
-            this.sendStringMessage(new UpdateCoordinatesMessage(nodePositions, guid, wsName));
+            this.sendStringMessage(new SetModelPositionMessage(nodePositions, guid, wsName));
         },
 
         saveFile: function () {
