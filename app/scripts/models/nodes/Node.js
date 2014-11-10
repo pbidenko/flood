@@ -125,21 +125,23 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
       this.set('inputConnections', new Array( type.inputs.length ));
       this.set('outputConnections', new Array( type.outputs.length ));
 
-        },
+    },
 
-        updateValue: function (values) {
-            if (values.data) {
-                this.set('lastValue', values.data);
-            }
+    updateValue: function (values) {
 
-            if (values.state === 'Error' || values.state === 'Warning') {
-                this.trigger('evalFailed', values.stateMessage);
-            }
-            else {
-                this.set('failureMessage', '');
-                this.trigger('evalBegin');
-            }
-        },
+      if (values.data) {
+        this.set('lastValue', values.data);
+      }
+
+      if (values.state === 'Error' || values.state === 'Warning') {
+        this.trigger('evalFailed', values.stateMessage);
+      }
+      else {
+        this.set('failureMessage', '');
+        this.trigger('evalBegin');
+      }
+
+    },
 
     onRemove: function(){
 
@@ -310,38 +312,39 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
     },
 
-        disconnectPort: function (portIndex, connection, isOutput) {
-            var port,
-                index = -1;
-            if (!this.isValidPort(portIndex, isOutput))
-                return;
+    disconnectPort: function (portIndex, connection, isOutput) {
+    
+      var port,
+          index = -1;
+    
+      if (!this.isValidPort(portIndex, isOutput))
+        return;
 
-            port = this.getPorts(isOutput)[portIndex];
+      port = this.getPorts(isOutput)[portIndex];
 
-            if (!port)
-                return;
+      if (!port)
+        return;
 
-            if (connection) {
-                index = port.indexOf(connection);
+      if (connection) {
+        index = port.indexOf(connection);
+      }
+      else if (!isOutput && port.length > 0) {
+        index = 0;
+        connection = port[0];
+        isOutput = false;
+        this.workspace.get('connections').remove(connection);
+      }
 
-            }
-            else if (!isOutput && port.length > 0) {
-                index = 0;
-                connection = port[0];
-                isOutput = false;
-                this.workspace.get('connections').remove(connection);
-            }
+      if (index === -1)
+        return;
 
-            if (index === -1)
-                return;
+      // remove the requested connection on the port
+      port.remove(index);
 
-            // remove the requested connection on the port
-            port.remove(index);
+      this.trigger('disconnection', portIndex, isOutput, connection);
+      this.trigger('change');
 
-            this.trigger('disconnection', portIndex, isOutput, connection);
-            this.trigger('change');
-
-        },
+    },
 
     onConnectPort: function( portIndex, isOutput, connection){
       
@@ -397,13 +400,19 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
     },
 
     addPoints: function (graphicData, geometries) {
+        var length, pos;
         // if we have single points
         if (graphicData.pointVertices && graphicData.pointVertices.length) {
+            length = graphicData.pointVertices.length / graphicData.numberOfCoordinates
             var points = {vertices: []}, onePoint;
-            // while there are at least 3 coordinates
-            while (graphicData.pointVertices.length >= graphicData.numberOfCoordinates) {
+            for(var i = 0; i < length; i++){
                 // add [x, y, z]
-                onePoint = graphicData.pointVertices.splice(0, graphicData.numberOfCoordinates);
+                pos = i * graphicData.numberOfCoordinates;
+                onePoint = [
+                  graphicData.pointVertices[pos], 
+                  graphicData.pointVertices[pos + 1],
+                  graphicData.pointVertices[pos + 2]
+                ];
                 points.vertices.push(onePoint);
             }
 
@@ -415,17 +424,29 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         // if we have line strips
         if (graphicData.lineStripVertices && graphicData.lineStripVertices.length
             && graphicData.lineStripCounts && graphicData.lineStripCounts.length) {
-            var curve, count, oneVertex;
+            var curve, count, oneVertex, size, index, pos = 0;
+
             for (var k = 0; k < graphicData.lineStripCounts.length; k++) {
                 curve = { linestrip: []};
                 count = graphicData.lineStripCounts[k];
 
-                while (count > 0 && graphicData.lineStripVertices.length >= graphicData.numberOfCoordinates) {
-                    oneVertex = graphicData.lineStripVertices.splice(0, graphicData.numberOfCoordinates);
-                    curve.linestrip.push(oneVertex);
-                    count--;
+                if(!count) {
+                    continue;
                 }
 
+                size = index + count;
+
+                for(var i = index; i < size; i++) {
+                    pos = i * graphicData.numberOfCoordinates;
+                    oneVertex = [
+                      graphicData.lineStripVertices[pos],
+                      graphicData.lineStripVertices[pos + 1],
+                      graphicData.lineStripVertices[pos + 2]
+                    ];
+                    curve.linestrip.push(oneVertex);
+                }
+
+                index += count;
                 geometries.push(curve);
             }
         }
@@ -436,25 +457,44 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         if (graphicData.triangleVertices && graphicData.triangleVertices.length
             && graphicData.triangleNormals && graphicData.triangleNormals.length) {
             var triangles = {vertices: [], faces:[]};
-            var index = 0, oneVertex, vertexCount = 3;
-            // while there are at least 9 coordinates of triangle's vertices
-            // and at least 3 coordinates of normal vector
-            while (graphicData.triangleVertices.length >= (vertexCount * graphicData.numberOfCoordinates)
-                && graphicData.triangleNormals.length >= graphicData.numberOfCoordinates) {
-                for (var i = 0; i < vertexCount; i++)
-                {
+            var index = 0, oneVertex, vertexCount = 3, length, pos;
+
+            length = graphicData.triangleVertices.length / vertexCount * 3;
+
+            for(var i = 0; i <= length; i++) {
+                for (var j = 0; j < vertexCount; j++) {
                     // Add vertex - [x, y, z]
-                    oneVertex = graphicData.triangleVertices.splice(0, graphicData.numberOfCoordinates);
+                    pos = i * 9 + j * 3;
+                    oneVertex = [
+                      graphicData.triangleVertices[pos],
+                      graphicData.triangleVertices[pos + 1],
+                      graphicData.triangleVertices[pos + 2]
+                    ];
                     triangles.vertices.push(oneVertex);
                 }
-                // add [indexA, indexB, indexC, normal_vector: [x, y, z]]
-                triangles.faces.push([index++, index++, index++,
-                    graphicData.triangleNormals.splice(0, graphicData.numberOfCoordinates * 3)]);
+
+                pos = i * 9;
+                // add [indexA, indexB, indexC, normal_vector: [x1, y1, z1, x2, y2, z2, x3, y3, z3]]
+                triangles.faces.push([index++, index++, index++, [
+                    // x1, y1, z1
+                    graphicData.triangleNormals[pos],
+                    graphicData.triangleNormals[pos + 1],
+                    graphicData.triangleNormals[pos + 2],
+                    // x2, y2, z2
+                    graphicData.triangleNormals[pos + 3],
+                    graphicData.triangleNormals[pos + 4],
+                    graphicData.triangleNormals[pos + 5],
+                    // x3, y3, z3
+                    graphicData.triangleNormals[pos + 6],
+                    graphicData.triangleNormals[pos + 7],
+                    graphicData.triangleNormals[pos + 8]]
+                ]);
             }
 
             geometries.push(triangles);
         }
     }
+
   });
 });
 
