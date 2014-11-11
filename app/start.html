@@ -6,7 +6,9 @@
             var execFile = require('child_process').execFile,
                 child;
 
+            <!-- build:remove:selenium -->
             require('nw.gui').Window.get().showDevTools();
+            <!-- /build -->
 
             child = execFile('DynamoWebServer.exe', ['headless'], { cwd: 'dynamo' }, function (error, stdout, stderr) {
                 try {

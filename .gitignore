@@ -6,3 +6,7 @@ app/bower_components
 dist_desktop
 .DS_Store
 dist
+/test/selenium/*.suo
+/test/selenium/NodeWebkitTest/bin
+/test/selenium/NodeWebkitTest/obj
+/test/selenium/Tests.sln.DotSettings.user
