@@ -16,6 +16,9 @@ namespace NodeWebkitTest
             // Add new node.
             // We need to use driver.FindElement each time we want to operate on element to avoid exceptions.
             var search = driver.FindElement(By.Id("bottom-search"));
+            search.Click();
+            Thread.Sleep(2000);
+            search = driver.FindElement(By.Id("bottom-search"));
             search.SendKeys("number");
             Thread.Sleep(1000);
             search = driver.FindElement(By.Id("bottom-search"));
@@ -23,7 +26,7 @@ namespace NodeWebkitTest
             Thread.Sleep(1000);
             search = driver.FindElement(By.Id("bottom-search"));
             search.Clear();
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
         }
 
         [Test]
@@ -34,11 +37,11 @@ namespace NodeWebkitTest
             var file = driver.FindElement(By.Id("add-workspace-button"));
 
             actions.MoveToElement(file, 0, 100).DoubleClick().Build().Perform();
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             actions.SendKeys("point").Build().Perform();
             Thread.Sleep(1000);
             actions.SendKeys(Keys.Return).Build().Perform();
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
         }
 
         [Test]
@@ -51,9 +54,9 @@ namespace NodeWebkitTest
             var inputPort = allPorts.First(el => el.Text == "x");
 
             actions.ClickAndHold(outputPort).Release(inputPort).Build().Perform();
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             driver.FindElements(By.ClassName("connection"));
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
         }
 
         [Test]
@@ -63,7 +66,7 @@ namespace NodeWebkitTest
             var numberInput = driver.FindElement(By.CssSelector("input.currentValue"));
             numberInput.SendKeys("1");
             numberInput.SendKeys(Keys.Return);
-            Thread.Sleep(2000);
+            Thread.Sleep(3000);
 
             // Check node value received from server
             Assert.IsTrue(driver.PageSource.Contains("Point(X = 1.000, Y = 0.000, Z = 0.000)"));

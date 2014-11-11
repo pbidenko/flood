@@ -67,6 +67,7 @@ namespace NodeWebkitTest
 
             textInput = driver.FindElement(By.ClassName("code-block-input"));
             textInput.SendKeys(Keys.Return);
+            Thread.Sleep(1000);
             textInput.SendKeys("C = 1;");
             Thread.Sleep(1000);
             container = driver.FindElement(By.Id("top_container"));
@@ -79,6 +80,7 @@ namespace NodeWebkitTest
             // Type inappropriate code in CBN.
             textInput = driver.FindElement(By.ClassName("code-block-input"));
             textInput.SendKeys(Keys.Return);
+            Thread.Sleep(1000);
             textInput.SendKeys("X=");
             Thread.Sleep(1000);
             container = driver.FindElement(By.Id("top_container"));

@@ -19,13 +19,13 @@ namespace NodeWebkitTest
             // Connect to remote web driver
             driver = new RemoteWebDriver(new Uri("http://127.0.0.1:4444/wd/hub"), DesiredCapabilities.Chrome());
 
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
 
             // Check if loaded
             wait.Until(d => d.Url.Contains("app.html"));
 
             // Wait some time till UI fully loaded
-            Thread.Sleep(3000);
+            Thread.Sleep(5000);
         }
 
         [TestFixtureTearDown]
