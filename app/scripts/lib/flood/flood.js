@@ -829,7 +829,7 @@ define('FLOOD', function() {
         }
         else {
             outPort.forEach(function (x) {
-                outPorts.push(new FLOOD.baseTypes.OutputPort(x, [Number]));
+                outPorts.push(new FLOOD.baseTypes.OutputPort(x || '⇒', [Number]));
             });
         }
 
