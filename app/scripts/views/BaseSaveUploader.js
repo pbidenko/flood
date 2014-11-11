@@ -85,18 +85,18 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers
         },
 
         synchronizeNodeCoordinates: function () {
-            var nodes = this.appView.model.getCurrentWorkspace().get('nodes').models,
+            var nodes = this.appView.model.getCurrentWorkspace().get('nodes'),
                 guid = this.getCurrentWorkspaceGuid(),
                 wsName = this.appView.model.getCurrentWorkspace().get('name'),
-                nodePositions = [], node;
-            for (var i = 0; i < nodes.length; i++) {
-                node = nodes[i];
+                nodePositions = [];
+            
+            nodes.each(function (node) {
                 nodePositions.push({
                     modelId: node.get('_id'),
                     x: node.get('position')[0],
                     y: node.get('position')[1]
                 });
-            }
+            });
 
             this.sendStringMessage(new SetModelPositionMessage(nodePositions, guid, wsName));
         },
