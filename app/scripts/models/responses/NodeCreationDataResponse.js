@@ -1,6 +1,7 @@
 define(['backbone', 'staticHelpers'], function (Backbone, staticHelpers) {
     function NodeCreationDataResponse(data) {
         this.workspaceId = data.workspaceId;
+        this.workspaceName = data.workspaceName;
         this.nodes = data.nodes.map( function(node){
 
             var returnValue = {

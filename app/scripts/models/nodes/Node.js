@@ -424,7 +424,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         // if we have line strips
         if (graphicData.lineStripVertices && graphicData.lineStripVertices.length
             && graphicData.lineStripCounts && graphicData.lineStripCounts.length) {
-            var curve, count, oneVertex, size, index, pos = 0;
+            var curve, count, oneVertex, size, index = 0, pos = 0;
 
             for (var k = 0; k < graphicData.lineStripCounts.length; k++) {
                 curve = { linestrip: []};

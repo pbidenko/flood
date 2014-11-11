@@ -628,6 +628,10 @@ input[type="button"].btn-block {
     margin-top: -23px;
 }
 
+.no-save-button #save-file-button {
+    display: none;
+}
+
 .workspace-browser-header {
     background: #DDD;
     color: #444;

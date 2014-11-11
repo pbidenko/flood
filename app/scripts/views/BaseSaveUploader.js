@@ -1,7 +1,8 @@
 /**
  * Created by Masha on 10/29/2014.
  */
-define(['backbone', 'SaveFileMessage', 'staticHelpers'], function(Backbone, SaveFileMessage, helpers) {
+define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers'],
+    function(Backbone, SaveFileMessage, SetModelPositionMessage, helpers) {
 
     var data = null;
 
@@ -17,6 +18,11 @@ define(['backbone', 'SaveFileMessage', 'staticHelpers'], function(Backbone, Save
 
         if (data.workspaceId) {
             ws.set('guid', data.workspaceId);
+        }
+
+        // if name is not empty
+        if (data.workspaceName && data.workspaceName.trim().length) {
+            ws.set('name', data.workspaceName);
         }
 
         var browserViewWorkspaces = this.appView.browserView.model.get('workspaces')
@@ -78,9 +84,31 @@ define(['backbone', 'SaveFileMessage', 'staticHelpers'], function(Backbone, Save
             return guid;
         },
 
+        synchronizeNodeCoordinates: function () {
+            var nodes = this.appView.model.getCurrentWorkspace().get('nodes'),
+                guid = this.getCurrentWorkspaceGuid(),
+                wsName = this.appView.model.getCurrentWorkspace().get('name'),
+                nodePositions = [];
+            
+            nodes.each(function (node) {
+                nodePositions.push({
+                    modelId: node.get('_id'),
+                    x: node.get('position')[0],
+                    y: node.get('position')[1]
+                });
+            });
+
+            this.sendStringMessage(new SetModelPositionMessage(nodePositions, guid, wsName));
+        },
+
         saveFile: function () {
+            this.synchronizeNodeCoordinates();
             var guid = this.getCurrentWorkspaceGuid();
-            this.appView.model.socket.send(JSON.stringify(new SaveFileMessage(guid)));
+            this.sendStringMessage(new SaveFileMessage(guid));
+        },
+
+        sendStringMessage: function (message) {
+            this.appView.model.socket.send(JSON.stringify(message));
         },
 
         loadSelectedFile: function (e) {
