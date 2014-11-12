@@ -29,7 +29,7 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
                         name: item.name, creationName: item.creationName,
                         displayName: item.displayName, category: item.category, searchTags: item.keywords,
                         description: item.description, inPort: item.parameters,
-                        outPort: item.returnKeys, app: this
+                        outPort: item.returnKeys, defaultValue: item.defaultValues, app: this
                     });
                     //Concatenate with already existing SearchElements
                 }).concat(this.SearchElements.models);

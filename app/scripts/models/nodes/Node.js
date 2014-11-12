@@ -27,6 +27,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         initialize: function (attrs, vals) {
             var inPort,
                 outPort,
+                defaultValue,
                 elems;
             // Need to know the type in order to create the node
             if (attrs.typeName && FLOOD.nodeTypes[attrs.typeName]) {
@@ -46,11 +47,12 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 } else {
                     inPort = elems[0].get('inPort');
                     outPort = elems[0].get('outPort');
+                    defaultValue = elems[0].get('defaultValue');
                     this.set('displayName', elems[0].get('displayName'));
                     this.set('creationName', elems[0].get('creationName'));
                 }
 
-                this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort));
+                this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort, defaultValue));
             }
 
             this.initAttrs(attrs, vals);

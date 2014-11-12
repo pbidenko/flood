@@ -809,19 +809,25 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
-    FLOOD.nodeTypes.ServerNode = function (inPort, outPort) {
+    FLOOD.nodeTypes.ServerNode = function (inPort, outPort, defaultValue) {
 
         var inPorts = [],
             outPorts = [],
             that = this;
 
         if (!inPort) {
-            inPorts.push(new FLOOD.baseTypes.InputPort('A', [Number], 0));
+            inPorts.push(new FLOOD.baseTypes.InputPort('A', [AnyType]));
         }
         else {
-            inPort.forEach(function (x) {
-                inPorts.push(new FLOOD.baseTypes.InputPort(x, [Number], 0));
-            });
+
+            for(var i = 0; i< inPort.length; i++) {
+                if(!defaultValue || defaultValue[i] === null) {
+                    inPorts.push(new FLOOD.baseTypes.InputPort(inPort[i], [AnyType]));
+                }
+                else {
+                    inPorts.push(new FLOOD.baseTypes.InputPort(inPort[i], [AnyType], defaultValue[i]));
+                }
+            };
         }
 
         if (!outPort) {
