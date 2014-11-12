@@ -9,8 +9,11 @@ body {
 }
 
 .row, .col {
-    overflow: hidden;
     position: absolute;
+}
+
+.row:not(.search-container), .col {
+    overflow: hidden;
 }
 
 .row {
@@ -1858,7 +1861,7 @@ li.notmatch {
 
 div.tooltip-inner {
     max-width: 400px;
-    white-space: nowrap;
+    white-space: pre-line;
 }
 
 .code-block-input {
