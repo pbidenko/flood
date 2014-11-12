@@ -173,6 +173,9 @@ define([  'backbone',
     },
 
     viewBrowser: function(){
+      if(!this.model.login.get('showing'))
+        return;
+
       if (!this.browserView){
         this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser({ app: this.model }) }, { app: this.model });
         this.browserView.render();

@@ -10,9 +10,11 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
             },
 
             fetch: function (options) {
-                this.login.fetch();
-                
-                this.context.fetchWorkspaces()
+
+                if(this.login.get('showing')) {
+                    this.login.fetch();
+
+                    this.context.fetchWorkspaces()
                     .done(function (response) {
                         var result = this.parse(response);
                         this.set(result, options);
@@ -20,6 +22,9 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
                     .fail(function (response) {
                         options.error(response);
                     });
+                }
+
+                this.options = options;
             },
 
             mapLibraryItems: function (param) {
@@ -35,6 +40,17 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
                 }).concat(this.SearchElements.models);
                 //Trigger 'add' event after all elements are added
                 this.SearchElements.trigger('add');
+
+                this.login.fetch();
+
+                this.context.fetchWorkspaces()
+                    .done(function (response) {
+                        var result = this.parse(response);
+                        this.set(result, this.options);
+                    }.bind(this))
+                    .fail(function (response) {
+                        options.error(response);
+                    });
             }
 
         });
