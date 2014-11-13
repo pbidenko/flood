@@ -1788,6 +1788,47 @@ define('FLOOD', function() {
 
   }
 
+  Function.prototype.applyShortest = function( this_arg, args, options ){
+
+	  // shortest
+  	var length_array = args.map( function( a ){ 
+
+  		if (a instanceof Array) {
+  			return a.length;
+  		} else {
+  			return -1; // return -1 if arg is not an array
+  		}
+
+  	});
+
+  	// get the shortest list array
+  	var min_length = Math.min.apply( Math, length_array );
+
+  	var result = new QuotedArray();
+  	for (var i = 0; i < min_length; i++){
+
+  		var this_node_args = [];
+  		for (var j = 0; j < args.length; j++){	
+  			
+  			var arg = args[j];
+  			if ( arg instanceof QuotedArray){
+
+  				this_node_args.push( args[j][i] );
+
+  			} else {
+
+  				this_node_args.push( arg );
+
+  			}
+  		}
+
+  		result.push( this.mapApply(this_arg, this_node_args, options) );
+  	}
+
+  	return result;
+
+  }
+
   var prettyPrint = function(key, val){
 
   	if (val instanceof Array){ return val; }

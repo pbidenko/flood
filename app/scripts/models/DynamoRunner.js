@@ -1,5 +1,5 @@
-define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'CreateProxyNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
-    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, CreateProxyNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
+define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'CreateProxyNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand', 'UpdateNodeMessage'],
+    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, CreateProxyNodeCommand, MakeConnectionCommand, UpdateModelValueCommand, UpdateNodeMessage) {
 
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
@@ -16,6 +16,22 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
 
         reset: function () {
             AbstractRunner.prototype.reset.call(this);
+        },
+
+        updateNode: function (node) {
+
+            if(node.changed['replication']) {
+                this.app.socket.send(JSON.stringify(
+                    new UpdateNodeMessage(node.id, 'Replication', node.changed.replication, node.workspace.get('guid')))
+                );
+            }
+            else if(node.changed['ignoreDefaults']) {
+                this.app.socket.send(JSON.stringify(
+                    new UpdateNodeMessage(node.id, 'IgnoreDefaults', node.changed.ignoreDefaults.join(';'), node.workspace.get('guid')))
+                );
+            }
+
+            AbstractRunner.prototype.updateNode.call(this, node);
         }
     });
 

@@ -151,6 +151,7 @@ require.config({
         GeometryMessage: 'models/messages/GeometryMessage',
         UploadFileMessage: 'models/messages/UploadFileMessage',
         SetModelPositionMessage: 'models/messages/SetModelPositionMessage',
+        UpdateNodeMessage: 'models/messages/UpdateNodeMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
