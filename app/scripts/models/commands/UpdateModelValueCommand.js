@@ -45,7 +45,7 @@ define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, help
             }
         }
         if(options.ignoreDefaults) {
-            values.push(getInstance(options._id, helpers.capitalizeFirstLetter('UsingDefault'), options.ignoreDefaults.join(';')));
+            values.push(getInstance(options._id, helpers.capitalizeFirstLetter('UsingDefaultValue'), options.ignoreDefaults.join(';')));
         }
         return values;
     }
