@@ -23,6 +23,8 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers
         // if name is not empty
         if (data.workspaceName && data.workspaceName.trim().length) {
             ws.set('name', data.workspaceName);
+            // if it's NWK tab name will be set to file name later
+            ws.set('tabName', data.workspaceName);
         }
 
         var browserViewWorkspaces = this.appView.browserView.model.get('workspaces')

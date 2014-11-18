@@ -109,18 +109,54 @@ define(['backbone', 'views/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMess
                 return null;
             },
 
-            updatePathByGuid: function(guid, path) {
-                if (!path)
-                    return;
+            updatePathByGuid: function (guid, path) {
+                // set empty string as key for saving Home path
+                if (!guid)
+                    guid = '';
 
                 var index = this.pathsToSave.map(function (pair) {
                     return pair.guid;
                 }).indexOf(guid);
 
-                if (index > -1)
+                if (!path && index == -1)
+                    return;
+
+                if (!path && index > -1) {
+                    this.pathsToSave.remove(index, index);
+                }
+                else if (index > -1)
                     this.pathsToSave[index].path = path;
                 else
                     this.pathsToSave.push({guid: guid, path: path});
+
+                setTimeout(function () {
+                    var fileName, wsName;
+                    var workspace = this.getWorkspaceByGuid(guid);
+                    if (workspace) {
+                        wsName = workspace.get('name');
+                        if (path) {
+                            fileName = this.getFilename(path);
+                            // don't change workspace name
+                            workspace.set('tabName', fileName);
+                            workspace.set('name', wsName);
+                        }
+                        // in case of no path reset tab name
+                        // by setting it to workspace name
+                        else {
+                            workspace.set('tabName', wsName);
+                        }
+                    }
+                }.bind(this), 0);
+            },
+
+            getFilename: function (path) {
+                if (!path)
+                    return null;
+
+                var start = path.lastIndexOf('\\') + 1;
+                // get file name and show on the tab
+                // if no '\' we'll get whole string
+                return path.substring(start);
             }
         });
     });
