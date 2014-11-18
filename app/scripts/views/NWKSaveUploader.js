@@ -133,16 +133,14 @@ define(['backbone', 'views/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMess
                     var fileName, wsName;
                     var workspace = this.getWorkspaceByGuid(guid);
                     if (workspace) {
-                        wsName = workspace.get('name');
                         if (path) {
                             fileName = this.getFilename(path);
-                            // don't change workspace name
                             workspace.set('tabName', fileName);
-                            workspace.set('name', wsName);
                         }
                         // in case of no path reset tab name
                         // by setting it to workspace name
                         else {
+                            wsName = workspace.get('name');
                             workspace.set('tabName', wsName);
                         }
                     }
