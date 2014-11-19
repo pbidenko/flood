@@ -1,5 +1,5 @@
-define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'CreateProxyNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand', 'UpdateNodeMessage'],
-    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, CreateProxyNodeCommand, MakeConnectionCommand, UpdateModelValueCommand, UpdateNodeMessage) {
+define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'CreateProxyNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
+    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, CreateProxyNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
 
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
@@ -21,14 +21,36 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
         updateNode: function (node) {
 
             if(node.changed['replication']) {
-                this.app.socket.send(JSON.stringify(
-                    new UpdateNodeMessage(node.id, 'Replication', node.changed.replication, node.workspace.get('guid')))
-                );
+                //     FLOOD          DANAMO
+                // applyShortest  -  Shortest
+                // applyLongest   -  Longest
+                // applyCartesian -  CrossProduct
+
+                var replication;
+
+                switch(node.changed.replication){
+                    case 'applyShortest':
+                        replication = 'Shortest';
+                        break;
+                    case 'applyLongest':
+                        replication = 'Longest';
+                        break;
+                    case 'applyCartesian':
+                        replication = 'CrossProduct';
+                        break;
+                    default:
+                        replication = 'Shortest';
+                        break;
+                }
+
+                this.app.socket.send(createMessage.call(this,
+                    new UpdateModelValueCommand( {}, {_id: node.id, typeName: 'Replication', extra: {Replication: replication} })
+                ));
             }
             else if(node.changed['ignoreDefaults']) {
-                this.app.socket.send(JSON.stringify(
-                    new UpdateNodeMessage(node.id, 'IgnoreDefaults', node.changed.ignoreDefaults.join(';'), node.workspace.get('guid')))
-                );
+                this.app.socket.send(createMessage.call(this,
+                    new UpdateModelValueCommand( {}, {_id: node.id, typeName: 'IgnoreDefaults', extra: {IgnoreDefaults: node.changed.ignoreDefaults.join(';')} })
+                ));
             }
 
             AbstractRunner.prototype.updateNode.call(this, node);
