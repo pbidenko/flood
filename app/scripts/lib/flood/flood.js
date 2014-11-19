@@ -816,20 +816,20 @@ define('FLOOD', function() {
             that = this;
 
         if (!inPort) {
-            inPorts.push(new FLOOD.baseTypes.InputPort('A', [Number], 0));
+            inPorts.push(new FLOOD.baseTypes.InputPort('A', [AnyType], 0));
         }
         else {
             inPort.forEach(function (x) {
-                inPorts.push(new FLOOD.baseTypes.InputPort(x, [Number], 0));
+                inPorts.push(new FLOOD.baseTypes.InputPort(x.name, [x.type ? {floodTypeName : x.type} : AnyType], x.defaultValue));
             });
         }
 
         if (!outPort) {
-            outPorts.push(new FLOOD.baseTypes.OutputPort('⇒', [Number]));
+            outPorts.push(new FLOOD.baseTypes.OutputPort('⇒', [AnyType]));
         }
         else {
             outPort.forEach(function (x) {
-                outPorts.push(new FLOOD.baseTypes.OutputPort(x || '⇒', [Number]));
+                outPorts.push(new FLOOD.baseTypes.OutputPort(x.name || '⇒', [AnyType]));
             });
         }
 
