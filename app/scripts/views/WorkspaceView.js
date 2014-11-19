@@ -560,9 +560,9 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       // do not capture from input
       if (e.originalEvent.srcElement &&
          (e.originalEvent.srcElement.nodeName === "INPUT" ||
-          e.originalEvent.srcElement.nodeName === "TEXTAREA"))
+          e.originalEvent.srcElement.nodeName === "CODE"))
         return;
-      if (e.target.nodeName === "INPUT" || e.target.nodeName === "TEXTAREA")
+      if (e.target.nodeName === "INPUT" || e.target.nodeName === "CODE")
         return;
 
       // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
