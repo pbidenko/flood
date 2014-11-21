@@ -99,6 +99,9 @@ require.config({
             deps: [
             ],
             exports: 'almond'
+        },
+        prism: {
+            exports: 'Prism'
         }
     },
     paths: {
@@ -207,6 +210,7 @@ require.config({
         FLOOD: 'lib/flood/flood',
         CSG: 'lib/flood/csg',
         scheme: 'lib/flood/scheme',
+        Prism: 'lib/prism',
 
         // bower
         Hammer: '../bower_components/hammerjs/hammer',
