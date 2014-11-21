@@ -134,8 +134,8 @@ define([  'backbone',
       if (e.target.nodeName === "INPUT") return;
 
       // do not capture from textarea
-      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "TEXTAREA" ) return;
-      if (e.target.nodeName === "TEXTAREA") return;
+      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "CODE" ) return;
+      if (e.target.nodeName === "CODE") return;
 
       // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
       switch (e.keyCode) {
