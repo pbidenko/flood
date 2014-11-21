@@ -210,9 +210,9 @@ require.config({
         FLOOD: 'lib/flood/flood',
         CSG: 'lib/flood/csg',
         scheme: 'lib/flood/scheme',
-        Prism: 'lib/prism',
-
+        
         // bower
+        Prism: '../bower_components/prism/prism',
         Hammer: '../bower_components/hammerjs/hammer',
         almond: '../bower_components/almond/almond',
         bootstrap: '../bower_components/bootstrap/dist/js/bootstrap',
