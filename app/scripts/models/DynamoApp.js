@@ -30,36 +30,11 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
             mapLibraryItems: function (param) {
                 //Add elements to collection not via add method to avoid multiple 'add' events trigger
                 this.SearchElements.models = param.libraryItems.map(function (item) {
-                    var parameters = [], 
-                        returnKeys = [],
-                        i = 0,
-                        length = item.parameters.length;
-
-                    for(; i < length; i++)
-                    {
-                        parameters.push({
-                            name: item.parameters[i].name,
-                            type: item.parameters[i].type,
-                            defaultValue: item.parameters[i].defaultValue
-                        });
-                    }
-
-                    length = item.returnKeys.length;
-                    for(i = 0; i < length; i++)
-                    {
-                        returnKeys.push({
-                            name: item.returnKeys[i].name,
-                            type: item.returnKeys[i].type,
-                            defaultValue: item.returnKeys[i].defaultValue
-                        });
-                    }
-
                     return new SearchElement({
                         name: item.name, creationName: item.creationName,
-                        displayName: item.displayName, category: item.category,
-                        searchTags: item.keywords, description: item.description, 
-                        inPort: parameters, outPort: returnKeys,
-                        app: this
+                        displayName: item.displayName, category: item.category, searchTags: item.keywords,
+                        description: item.description, inPort: item.parameters,
+                        outPort: item.returnKeys, app: this
                     });
                     //Concatenate with already existing SearchElements
                 }).concat(this.SearchElements.models);
