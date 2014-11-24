@@ -131,7 +131,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
           that.model.workspace.setNodeProperty( cmd );
 
         }
-      });  
+      });
       this.$el.css('position', 'absolute');
 
     },
@@ -221,7 +221,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
     touchstart: function(event){
       // is the user pressing on an input?
       var shouldIgnore = event.target != null 
-          && ( event.target.tagName.toLowerCase() == "input" || event.target.tagName.toLowerCase() == "textarea" );
+          && ( event.target.tagName.toLowerCase() == "input" || event.target.tagName.toLowerCase() == "code" );
 
       if(shouldIgnore) {
         // need to focus the input - on iOS the input never gets focussed

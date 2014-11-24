@@ -1,4 +1,4 @@
-define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
+define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNodeView) {
 
     var CodeBlock = ThreeCSGNodeView.extend({
 
@@ -13,13 +13,15 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
 
             //Get original element's size right after rendering of template
             this.once('after-render', function () {
-                var $textEl = this.$el.find('textarea');
+                var $textEl = this.$el.find('code');
                 $textEl.data('x', $textEl.outerWidth());
                 $textEl.data('y', $textEl.outerHeight());
             }.bind(this));
 
             this.$el.on('mouseup', adjustElements.bind(this));
             this.$el.on('mousemove', adjustElements.bind(this));
+
+            this.$el.draggable({ cancel: '.code-block-input' }); 
         },
 
         getCustomContents: function () {
@@ -164,8 +166,8 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
                 else {
                     // if this output port has already been
                     // and it could change its index
-                    port = outputsCopy[index];
-                    outputConnections[i] = port || [];
+                    port = outputsCopy[index] || [];
+                    outputConnections[i] = port;
                     if (port && i != index) {
                         for (j = 0; j < port.length; j++) {
                             port[j].set('startPortIndex', i);
@@ -212,7 +214,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
 
             this.input = this.$el.find('.code-block-input');
 
-            this.input.height(this.input[0].scrollHeight);
+            //this.input.height(this.input[0].scrollHeight);
 
             this.input.focus(function (e) {
                 this.selectable = false;
@@ -226,15 +228,15 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
 
                 var ex = JSON.parse(JSON.stringify(this.model.get('extra')));
 
-                if (!this.input.val()) {
+                if (!this.input[0].innerText) {
                     this.model.workspace.removeNodeById(this.model.get('_id'));
                     return;
                 }
 
-                if (ex.code === this.input.val())
+                if (ex.code === this.input[0].innerText)
                     return;
 
-                ex.code = this.input.val();
+                ex.code = this.input[0].innerText;
 
                 this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
             }.bind(this));
@@ -271,6 +273,8 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
                 this.input.focus();
             this.trigger('after-render');
 
+            Prism.highlightAll();
+
             return this;
         },
 
@@ -295,7 +299,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
 
     //Private methods
     var adjustElements = function () {
-        var $textEl = this.$el.find('textarea');
+        var $textEl = this.$el.find('code');
         if ($textEl.outerWidth() !== $textEl.data('x') || $textEl.outerHeight() !== $textEl.data('y')) {
             this.renderPorts();
             this.model.workspace.trigger('update-connections');
