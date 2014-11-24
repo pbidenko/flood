@@ -165,7 +165,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
                     // if this output port has already been
                     // and it could change its index
                     port = outputsCopy[index];
-                    outputConnections[i] = port;
+                    outputConnections[i] = port || [];
                     if (port && i != index) {
                         for (j = 0; j < port.length; j++) {
                             port[j].set('startPortIndex', i);

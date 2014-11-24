@@ -2,9 +2,9 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
 
     return Node.extend({
 
-        defaults: {
+        defaults: _.extend( Node.prototype.defaults, {
             duringUploading: false
-        },
+        }),
 
         initialize: function (attrs, vals) {
             var inPort = [],
