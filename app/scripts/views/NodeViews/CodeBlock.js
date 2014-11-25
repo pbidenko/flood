@@ -1,12 +1,12 @@
-define(['backbone', 'BaseNodeView', 'Prism'], function (Backbone, BaseNodeView) {
+define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNodeView) {
 
-    var CodeBlock = BaseNodeView.extend({
+    var CodeBlock = ThreeCSGNodeView.extend({
 
         innerTemplate: _.template($('#code-block-template').html()),
 
         initialize: function (args) {
 
-            BaseNodeView.prototype.initialize.apply(this, arguments);
+            ThreeCSGNodeView.prototype.initialize.apply(this, arguments);
             this.model.on('change:extra', this.onChangedExtra, this);
             this.model.on('connections-update', this.onConnectionsUpdate, this);
             this.model.on('cbn-up-to-date', this.finishEvaluating, this);
@@ -210,7 +210,7 @@ define(['backbone', 'BaseNodeView', 'Prism'], function (Backbone, BaseNodeView) 
                 margintop,
                 port;
 
-            BaseNodeView.prototype.renderNode.apply(this, arguments);
+            ThreeCSGNodeView.prototype.renderNode.apply(this, arguments);
 
             this.input = this.$el.find('.code-block-input');
 
@@ -279,7 +279,7 @@ define(['backbone', 'BaseNodeView', 'Prism'], function (Backbone, BaseNodeView) 
         },
 
         moveNode: function() {
-            BaseNodeView.prototype.moveNode.apply(this, arguments);
+            ThreeCSGNodeView.prototype.moveNode.apply(this, arguments);
 
             if(!this.input[0].value){
                 this.input.focus();
@@ -290,7 +290,7 @@ define(['backbone', 'BaseNodeView', 'Prism'], function (Backbone, BaseNodeView) 
 
         render: function () {
 
-            BaseNodeView.prototype.render.apply(this, arguments);
+            ThreeCSGNodeView.prototype.render.apply(this, arguments);
 
             return this;
 
