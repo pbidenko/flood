@@ -269,8 +269,6 @@ define(['backbone', 'BaseNodeView', 'Prism'], function (Backbone, BaseNodeView) 
                 }
             }
 
-            if (!this.model.get('duringUploading'))
-                this.input.focus();
             this.trigger('after-render');
 
             Prism.highlightAll();
