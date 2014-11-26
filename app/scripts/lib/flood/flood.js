@@ -820,7 +820,7 @@ define('FLOOD', function() {
         }
         else {
             inPort.forEach(function (x) {
-                inPorts.push(new FLOOD.baseTypes.InputPort(x.name, [x.type ? {floodTypeName : x.type} : AnyType], x.defaultValue));
+                inPorts.push(new FLOOD.baseTypes.InputPort(x.name || x, [x.type ? {floodTypeName : x.type} : AnyType], x.defaultValue));
             });
         }
 
