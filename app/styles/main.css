@@ -9,8 +9,11 @@ body {
 }
 
 .row, .col {
-    overflow: hidden;
     position: absolute;
+}
+
+.row:not(.search-container), .col {
+    overflow: hidden;
 }
 
 .row {
@@ -1862,13 +1865,24 @@ li.notmatch {
 
 div.tooltip-inner {
     max-width: 400px;
-    white-space: nowrap;
+    white-space: pre-line;
 }
 
 .code-block-input {
-    height: auto;
+    -moz-appearance: textfield-multiline;
+    -webkit-appearance: textarea;
     font-size: 14px;
     line-height: 25px;
+    text-align: left;
+    white-space: pre;
+    overflow: auto;
+    color: black;
+    border: 1px solid gray;
+    background: #f5f2f0;
+    width: auto;
+    min-width: 80px;
+    height: auto;
+    min-height: 40px;
 }
 
 .busy-indicator {
@@ -1880,4 +1894,20 @@ div.tooltip-inner {
     background-position: center center;
     float: right;
     display: inline-block;
+}
+
+.token.string {
+    color: #885D3B;
+}
+
+.token.comment {
+    color: #309130;
+}
+
+.token.keyword {
+    color: #8C5EAA;
+}
+
+.token.number {
+    color: #6897BB;
 }

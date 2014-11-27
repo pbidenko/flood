@@ -20,7 +20,8 @@ define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, help
     var typeMap = {
         'Input': {param: 'name', value: 'InputSymbol'},
         'Output': {param: 'name', value: 'Symbol'},
-        'Code Block': {param: 'code', value: 'Code'}
+        'Code Block': {param: 'code', value: 'Code'},
+        'IgnoreDefaults': {param: 'IgnoreDefaults', value: 'UsingDefaultValue'}
     };
 
     var getInstance = function(id, name, value){
@@ -43,9 +44,6 @@ define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, help
                     values.push(getInstance(options._id, helpers.capitalizeFirstLetter(name), options.extra[name]));
                 }
             }
-        }
-        if(options.ignoreDefaults) {
-            values.push(getInstance(options._id, helpers.capitalizeFirstLetter('UsingDefaultValue'), options.ignoreDefaults.join(';')));
         }
         return values;
     }

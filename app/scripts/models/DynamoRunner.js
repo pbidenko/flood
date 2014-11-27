@@ -16,6 +16,17 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
 
         reset: function () {
             AbstractRunner.prototype.reset.call(this);
+        },
+
+        updateNode: function (node) {
+
+            if(node.changed['ignoreDefaults']) {
+                this.app.socket.send(createMessage.call(this,
+                    new UpdateModelValueCommand( {}, {_id: node.id, typeName: 'IgnoreDefaults', extra: {IgnoreDefaults: node.changed.ignoreDefaults.join(';')} })
+                ));
+            }
+
+            AbstractRunner.prototype.updateNode.call(this, node);
         }
     });
 

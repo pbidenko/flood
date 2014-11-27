@@ -11,7 +11,6 @@ define(['backbone'], function(Backbone) {
       searchTags: [],
       inPort: [],
       outPort: [],
-      defaultValue: [],
       isCustomNode: false,
       functionId: -1
     }, 

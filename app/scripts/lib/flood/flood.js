@@ -809,33 +809,27 @@ define('FLOOD', function() {
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
-    FLOOD.nodeTypes.ServerNode = function (inPort, outPort, defaultValue) {
+    FLOOD.nodeTypes.ServerNode = function (inPort, outPort) {
 
         var inPorts = [],
             outPorts = [],
             that = this;
 
         if (!inPort) {
-            inPorts.push(new FLOOD.baseTypes.InputPort('A', [AnyType]));
+            inPorts.push(new FLOOD.baseTypes.InputPort('A', [AnyType], 0));
         }
         else {
-
-            for(var i = 0; i< inPort.length; i++) {
-                if(!defaultValue || defaultValue[i] === null) {
-                    inPorts.push(new FLOOD.baseTypes.InputPort(inPort[i], [AnyType]));
-                }
-                else {
-                    inPorts.push(new FLOOD.baseTypes.InputPort(inPort[i], [AnyType], defaultValue[i]));
-                }
-            };
+            inPort.forEach(function (x) {
+                inPorts.push(new FLOOD.baseTypes.InputPort(x.name || x, [x.type ? {floodTypeName : x.type} : AnyType], x.defaultValue));
+            });
         }
 
         if (!outPort) {
-            outPorts.push(new FLOOD.baseTypes.OutputPort('⇒', [Number]));
+            outPorts.push(new FLOOD.baseTypes.OutputPort('⇒', [AnyType]));
         }
         else {
             outPort.forEach(function (x) {
-                outPorts.push(new FLOOD.baseTypes.OutputPort(x || '⇒', [Number]));
+                outPorts.push(new FLOOD.baseTypes.OutputPort(x.name || '⇒', [AnyType]));
             });
         }
 

@@ -324,10 +324,10 @@
                         <li class="dropdown-header" style="padding: 0">Use Default</li>
 
                         <span class="node-dropown-menu-item">
-                            <% if(ele.defaultVal !== undefined) { %>
+                            <% if(ele.defaultVal != undefined) { %>
                             <input type="checkbox" class="use-default-checkbox" data-index="<%= index %>" <%= !ignoreDefaults[index] ? "checked" : "" %> >
                             <% } %>
-                            <%= ele.defaultVal !== undefined ? JSON.stringify( ele.defaultVal ) : "None" %>
+                            <%= ele.defaultVal != undefined ? JSON.stringify( ele.defaultVal ) : "None" %>
                         </span>
                     </li>
 
@@ -392,7 +392,7 @@
 
 <script type="text/template" id="code-block-template">
 
-    <textarea class="code-block-input"><%= extra.code %></textarea>
+    <code class="language-designScript code-block-input" contenteditable><%= extra.code %></code>
 
 </script>
 

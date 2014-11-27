@@ -32,11 +32,16 @@ define(['backbone', 'views/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMess
             
             setAcceptAttribute: function () {
                 var guid = this.getCurrentWorkspaceGuid();
+                var path = this.getPathByGuid(guid);
+                if (!path)
+                    path = this.appView.model.getCurrentWorkspace().get('name');
 
                 if (!guid)
                     this.$el.find('#savefile').attr('accept', dyn);
                 else
                     this.$el.find('#savefile').attr('accept', dyf);
+
+                this.$el.find('#savefile').attr('nwsaveas', path);
             },
 
             configViewElements: function () {

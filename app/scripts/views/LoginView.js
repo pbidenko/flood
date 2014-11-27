@@ -16,8 +16,7 @@ define(['backbone'], function(Backbone) {
     initialize: function( args, atts ) {
 
       this.app = atts.app;
-      this.model.on('change:showing', this.render, this);
-      this.model.on('change:isLoggedIn', this.render, this);
+      this.model.on('loginViewRedraw', this.render, this);
       this.model.on('change:failed', this.render, this);
       this.model.on('change:failureMessage', this.render, this);
 
@@ -29,29 +28,33 @@ define(['backbone'], function(Backbone) {
 
     render: function() {
 
-      if ( !this.rendered ) {
+      if(!this.model.get('showing'))
+        return this;
+
+      if (!this.rendered && !this.model.get('isLoggedIn')) {
         this.$el.find('.login-container').html( this.template( this.model.toJSON() ) );
         this.rendered = true;
 
         this.$el.find('.login-container').show(); 
       }
 
-      var failureMessage = this.$el.find('#login-failure-message');
+      if(this.rendered) {
+        var failureMessage = this.$el.find('#login-failure-message');
 
-      if (this.model.get('failed')){
-        failureMessage.html( this.model.get('failureMessage') );
-        failureMessage.show();
-      } else {
-        failureMessage.hide();
+        if (this.model.get('failed')) {
+         failureMessage.html( this.model.get('failureMessage') );
+         failureMessage.show();
+        } else {
+         failureMessage.hide();
+        }
       }
 
-      if (this.model.get('showing') === true){
-        this.$el.show();  
-      } else {
+      if(this.model.get('isLoggedIn')) {
         this.$el.hide();
       }
-
-      this.renderLoginState();
+      else {
+        this.$el.show();
+      }
 
       return this;
     },
@@ -73,17 +76,6 @@ define(['backbone'], function(Backbone) {
       this.$el.find('#login-tab-button').addClass('tab-button-hilite');
       this.$el.find('#signup-form').hide();
       this.$el.find('#login-form').show();
-    },
-
-    renderLoginState: function(){
-
-      if( this.model.get('isLoggedIn') ){
-        this.model.hide();
-      } else {
-        this.$el.show();
-      }
-
-      return this;
     },
 
     tabClick: function(){
