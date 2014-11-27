@@ -1,25 +1,27 @@
-define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
+define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNodeView) {
 
-    var CodeBlock = BaseNodeView.extend({
+    var CodeBlock = ThreeCSGNodeView.extend({
 
         innerTemplate: _.template($('#code-block-template').html()),
 
         initialize: function (args) {
 
-            BaseNodeView.prototype.initialize.apply(this, arguments);
+            ThreeCSGNodeView.prototype.initialize.apply(this, arguments);
             this.model.on('change:extra', this.onChangedExtra, this);
             this.model.on('connections-update', this.onConnectionsUpdate, this);
             this.model.on('cbn-up-to-date', this.finishEvaluating, this);
 
             //Get original element's size right after rendering of template
             this.once('after-render', function () {
-                var $textEl = this.$el.find('textarea');
+                var $textEl = this.$el.find('code');
                 $textEl.data('x', $textEl.outerWidth());
                 $textEl.data('y', $textEl.outerHeight());
             }.bind(this));
 
             this.$el.on('mouseup', adjustElements.bind(this));
             this.$el.on('mousemove', adjustElements.bind(this));
+
+            this.$el.draggable({ cancel: '.code-block-input' }); 
         },
 
         getCustomContents: function () {
@@ -164,7 +166,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 else {
                     // if this output port has already been
                     // and it could change its index
-                    port = outputsCopy[index];
+                    port = outputsCopy[index] || [];
                     outputConnections[i] = port;
                     if (port && i != index) {
                         for (j = 0; j < port.length; j++) {
@@ -208,11 +210,11 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 margintop,
                 port;
 
-            BaseNodeView.prototype.renderNode.apply(this, arguments);
+            ThreeCSGNodeView.prototype.renderNode.apply(this, arguments);
 
             this.input = this.$el.find('.code-block-input');
 
-            this.input.height(this.input[0].scrollHeight);
+            //this.input.height(this.input[0].scrollHeight);
 
             this.input.focus(function (e) {
                 this.selectable = false;
@@ -226,15 +228,15 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
                 var ex = JSON.parse(JSON.stringify(this.model.get('extra')));
 
-                if (!this.input.val()) {
+                if (!this.input[0].innerText) {
                     this.model.workspace.removeNodeById(this.model.get('_id'));
                     return;
                 }
 
-                if (ex.code === this.input.val())
+                if (ex.code === this.input[0].innerText)
                     return;
 
-                ex.code = this.input.val();
+                ex.code = this.input[0].innerText;
 
                 this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
             }.bind(this));
@@ -271,11 +273,13 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
                 this.input.focus();
             this.trigger('after-render');
 
+            Prism.highlightAll();
+
             return this;
         },
 
         moveNode: function() {
-            BaseNodeView.prototype.moveNode.apply(this, arguments);
+            ThreeCSGNodeView.prototype.moveNode.apply(this, arguments);
 
             if(!this.input[0].value){
                 this.input.focus();
@@ -286,7 +290,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
         render: function () {
 
-            BaseNodeView.prototype.render.apply(this, arguments);
+            ThreeCSGNodeView.prototype.render.apply(this, arguments);
 
             return this;
 
@@ -295,7 +299,7 @@ define(['backbone', 'BaseNodeView'], function (Backbone, BaseNodeView) {
 
     //Private methods
     var adjustElements = function () {
-        var $textEl = this.$el.find('textarea');
+        var $textEl = this.$el.find('code');
         if ($textEl.outerWidth() !== $textEl.data('x') || $textEl.outerHeight() !== $textEl.data('y')) {
             this.renderPorts();
             this.model.workspace.trigger('update-connections');
