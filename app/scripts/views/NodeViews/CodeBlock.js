@@ -281,7 +281,7 @@ define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNo
         moveNode: function() {
             ThreeCSGNodeView.prototype.moveNode.apply(this, arguments);
 
-            if(!this.input[0].value){
+            if(!this.input[0].innerText){
                 this.input.focus();
             }
 
