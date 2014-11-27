@@ -1,5 +1,7 @@
-define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers', 'Storage', 'settings'],
-    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers, Storage, settings){
+define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers',
+        'Storage', 'settings', 'SaveUploader'],
+    function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers,
+             Storage, settings, SaveUploader) {
 
   return Backbone.Model.extend({
 
@@ -33,6 +35,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.SearchElements.fetch();
 
       this.context = new Storage({ baseUrl: settings.storageUrl });
+      this.saveUploader = new SaveUploader({ app: this });
 
       this.get('workspaces').on('remove', this.workspaceRemoved, this);
     },

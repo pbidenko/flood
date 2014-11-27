@@ -130,6 +130,7 @@ require.config({
         Help: 'models/Help',
         Feedback: 'models/Feedback',
         Login: 'models/Login',
+        SaveUploader: 'models/BaseSaveUploader', //'models/NWKSaveUploader',
 
         GeometryExport: 'models/GeometryExport',
         WorkspaceResolver: 'models/WorkspaceResolver',
@@ -190,7 +191,7 @@ require.config({
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
         ModelsListView: 'views/ModelsListView',
         SearchCategoryView: 'views/SearchCategoryView',
-        SaveUploader: 'views/BaseSaveUploader', //'views/NWKSaveUploader',
+        SaveUploaderView: 'views/BaseSaveUploaderView', //'views/NWKSaveUploaderView',
 
         // node backbone views
         NodeViewTypes: 'views/NodeViews/NodeViews',

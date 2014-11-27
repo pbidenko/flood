@@ -109,16 +109,22 @@ module.exports = function (grunt) {
                 src: ['app/scripts/config.js'],
                 overwrite: true,
                 replacements: [{
-                  from: "SaveUploader: 'views/NWKSaveUploader'",
-                  to: "SaveUploader: 'views/BaseSaveUploader'"
+                  from: "SaveUploader: 'models/NWKSaveUploader'",
+                  to: "SaveUploader: 'models/BaseSaveUploader'"
+                }, {
+                  from: "SaveUploaderView: 'views/NWKSaveUploaderView'",
+                  to: "SaveUploaderView: 'views/BaseSaveUploaderView'"
                 }]
             },
             basesaveuploader2nwk: {
                 src: ['app/scripts/config.js'],
                 overwrite: true,
                 replacements: [{
-                  from: "SaveUploader: 'views/BaseSaveUploader'",
-                  to: "SaveUploader: 'views/NWKSaveUploader'"
+                  from: "SaveUploader: 'models/BaseSaveUploader'",
+                  to: "SaveUploader: 'models/NWKSaveUploader'"
+                }, {
+                  from: "SaveUploaderView: 'views/BaseSaveUploaderView'",
+                  to: "SaveUploaderView: 'views/NWKSaveUploaderView'"
                 }]
             }
         },
