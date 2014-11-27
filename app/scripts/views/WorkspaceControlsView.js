@@ -38,9 +38,8 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
     },
 
     render: function(arg) {
-      var del = {
-          show: 300
-      };
+
+      var tooltipNowrapTemplate = $('#tooltip-nowrap-template').html().trim();
 
       this.$el.html( this.template( this.model.toJSON() ) );
 
@@ -63,9 +62,9 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       this.$el.find('#delete-button').tooltip({title: "Delete"});
 
-      $('#zoomin-button').tooltip({title: "Zoom in", placement: "left"});
-      $('#zoomout-button').tooltip({title: "Zoom out", placement: "left"});
-      $('#zoomreset-button').tooltip({title: "Zoom reset", placement: "left"});
+      $('#zoomin-button').tooltip({title: "Zoom in", placement: "left", template: tooltipNowrapTemplate});
+      $('#zoomout-button').tooltip({title: "Zoom out", placement: "left", template: tooltipNowrapTemplate});
+      $('#zoomreset-button').tooltip({title: "Zoom reset", placement: "left", template: tooltipNowrapTemplate});
 
       this.$el.find('#export-button').tooltip({title: "Export as STL"});
 
