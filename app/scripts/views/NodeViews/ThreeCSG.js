@@ -225,7 +225,14 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       var i = 0;
       var tick = function() {
-
+        var color, colorLine;
+        if (that.model.get('selected')){
+          color = colorLine = colors.selected;
+        }
+        else {
+          color = colors.notSelected;
+          colorLine = colors.notSelectedLine;
+        }
         var meshMat = new THREE.MeshPhongMaterial({color: color, side: THREE.DoubleSide});
         var partMat = new THREE.ParticleBasicMaterial({color: color, size: 5, sizeAttenuation: false, side: THREE.DoubleSide});
         var lineMat = new THREE.LineBasicMaterial({ color: colorLine });
@@ -235,14 +242,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
         
           var g3  = that.toThreeGeom( list[i] );
 
-          var color, colorLine;
-          if (that.model.get('selected')){
-            color = colorLine = colors.selected;
-          }
-          else {
-            color = colors.notSelected;
-            colorLine = colors.notSelectedLine;
-          }
+
 
           switch (g3._floodType) {
             case 0:
