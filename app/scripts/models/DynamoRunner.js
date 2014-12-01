@@ -46,8 +46,8 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
                 this.app.socket.send(createMessage.call(this,
                     new UpdateModelValueCommand( {}, {_id: node.id, typeName: 'Replication', extra: {Replication: replication} })
                 ));
-            }
-            else if(node.changed['ignoreDefaults']) {
+            } else if(node.changed['ignoreDefaults']) {
+
                 this.app.socket.send(createMessage.call(this,
                     new UpdateModelValueCommand( {}, {_id: node.id, typeName: 'IgnoreDefaults', extra: {IgnoreDefaults: node.changed.ignoreDefaults.join(';')} })
                 ));
