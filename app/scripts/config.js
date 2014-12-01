@@ -164,6 +164,7 @@ require.config({
         UpdateProxyNodesResponse: 'models/responses/UpdateProxyNodesResponse',
         GeometryDataResponse: 'models/responses/GeometryDataResponse',
         WorkspacePathResponse: 'models/responses/WorkspacePathResponse',
+        CodeBlockDataResponse: 'models/responses/CodeBlockDataResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',
