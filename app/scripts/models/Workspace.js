@@ -156,9 +156,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.get('nodes').add(nodeFactory.create({
           config: node,
           workspace: this 
-	}));
+        }));
         // if this custom node is not proxy and dependency haven't been added yet
-        if (id && this.get('workspaceDependencyIds').indexOf(id) == -1) {
+        if (id && this.get('workspaceDependencyIds').indexOf(id) === -1) {
             if (workspaces.length)
                 this.addWorkspaceDependency(id);
             else {
@@ -541,6 +541,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         var id = data.extra.functionId;
         // do not allow recursion
         if (id === this.get('_id')) return;
+
+        var ws = this.app.getLoadedWorkspace(id);
+        if(this.isCyclicDependency(ws, this.get('_id')))
+          return;
+
         this.addWorkspaceDependency( id, true );
         this.sendCompleteDefinitionRunner( id );
       }
@@ -556,6 +561,23 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       this.trigger('requestRun');
 
+    },
+
+    isCyclicDependency: function (workspace, id){
+
+      if (workspace.get('workspaceDependencyIds').indexOf(id) !== -1)
+        return true;
+
+      var ids = workspace.get('workspaceDependencyIds');
+      for(var i = 0; i < ids.length; i++)
+      {
+        var ws = this.app.getLoadedWorkspace(ids[i]);
+
+        if(this.isCyclicDependency(ws, id))
+          return true;
+      };
+
+      return false;
     },
 
     addWorkspaceDependency: function(id, watchDependency){
