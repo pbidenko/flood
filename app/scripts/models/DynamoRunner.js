@@ -16,6 +16,44 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
 
         reset: function () {
             AbstractRunner.prototype.reset.call(this);
+        },
+
+        updateNode: function (node) {
+
+            if(node.changed['replication']) {
+                //     FLOOD          DANAMO
+                // applyShortest  -  Shortest
+                // applyLongest   -  Longest
+                // applyCartesian -  CrossProduct
+
+                var replication;
+
+                switch(node.changed.replication){
+                    case 'applyShortest':
+                        replication = 'Shortest';
+                        break;
+                    case 'applyLongest':
+                        replication = 'Longest';
+                        break;
+                    case 'applyCartesian':
+                        replication = 'CrossProduct';
+                        break;
+                    default:
+                        replication = 'Shortest';
+                        break;
+                }
+
+                this.app.socket.send(createMessage.call(this,
+                    new UpdateModelValueCommand( {}, {_id: node.id, typeName: 'Replication', extra: {Replication: replication} })
+                ));
+            }
+            else if(node.changed['ignoreDefaults']) {
+                this.app.socket.send(createMessage.call(this,
+                    new UpdateModelValueCommand( {}, {_id: node.id, typeName: 'IgnoreDefaults', extra: {IgnoreDefaults: node.changed.ignoreDefaults.join(';')} })
+                ));
+            }
+
+            AbstractRunner.prototype.updateNode.call(this, node);
         }
     });
 
