@@ -282,7 +282,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
         moveNode: function() {
             ThreeCSGNodeView.prototype.moveNode.apply(this, arguments);
 
-            if(!this.input[0].value){
+            if(!this.input[0].innerText){
                 this.input.focus();
             }
 
