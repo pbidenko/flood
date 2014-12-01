@@ -508,7 +508,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
           that.inputPorts.push(nodeCircle);
           inIndex++;
         } else {
-          if(ex.lineIndices)
+          if(ex.lineIndices && ex.lineIndices.length > outIndex)
             portIndex = outIndex > 0 ? ex.lineIndices[outIndex] - ex.lineIndices[outIndex - 1] - 1 : ex.lineIndices[outIndex];
           nodeCircle.setAttribute('cx', that.$el.width() + 2.5 );
           // that.portHeight is equal to 29, but actual height of port is 25

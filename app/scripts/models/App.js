@@ -35,6 +35,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.context = new Storage({ baseUrl: settings.storageUrl });
 
       this.get('workspaces').on('remove', this.workspaceRemoved, this);
+      this.listenTo(this, 'code-block-node-updated:event', this.updateCodeBlockNode);
     },
 
     workspaceIdsAwaitingParse : [],
@@ -103,6 +104,15 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     getLoadedWorkspace: function(id){
       return this.get('workspaces').get(id);
+    },
+
+    updateCodeBlockNode: function (data) {
+        var workspaces = data.workspaceGuid ?
+            this.get('workspaces').where({ guid: data.workspaceGuid }) :
+            this.get('workspaces').where({ isCustomNode: false });
+        if (workspaces.length) {
+            workspaces[0].updateCodeBlockNode(data);
+        }
     },
 
     newWorkspace: function( callback ){

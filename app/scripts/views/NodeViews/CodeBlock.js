@@ -269,8 +269,6 @@ define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNo
                 }
             }
 
-            if (!this.model.get('duringUploading'))
-                this.input.focus();
             this.trigger('after-render');
 
             Prism.highlightAll();
