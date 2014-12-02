@@ -41,12 +41,12 @@ define(['backbone', 'models/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMes
                 // if we have FilePath
                 if (path) {
                     // if it's home ws and path doesn't end with .dyn
-                    if (!guid && !endsWith(path, dyn)) {
+                    if (!guid && !endsWith(path.toLowerCase(), dyn)) {
                         path = path + dyn;
                         this.updatePathByGuid(guid, path);
                     }
                     // if it's custom node ws and path doesn't end with .dyf
-                    else if (guid && !endsWith(path, dyf)) {
+                    else if (guid && !endsWith(path.toLowerCase(), dyf)) {
                         path = path + dyf;
                         this.updatePathByGuid(guid, path);
                     }
@@ -91,6 +91,7 @@ define(['backbone', 'models/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMes
                 else
                     this.pathsToSave.push({guid: guid, path: path});
 
+                // ensure a needed workspace is already created
                 setTimeout(function () {
                     var fileName, wsName;
                     var workspace = this.getWorkspaceByGuid(guid);
