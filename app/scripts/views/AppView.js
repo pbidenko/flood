@@ -16,10 +16,10 @@ define([  'backbone',
           'FeedbackView',
           'Feedback', 
           'fastclick',
-          'SaveUploader' ],
+          'SaveUploaderView' ],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback, fastclick, SaveUploader ) {
+            Help, LoginView, Login, FeedbackView, Feedback, fastclick, SaveUploaderView ) {
 
   return Backbone.View.extend({
 
@@ -30,6 +30,7 @@ define([  'backbone',
       var f = new fastclick(document.body);
 
       this.listenTo(this.model, 'change', this.render, this);
+      this.listenTo(this.model, 'ws-data-loaded', this.zoomresetClick);
 
       this.$workspace_tabs = this.$('#workspace-tabs');
 
@@ -49,7 +50,7 @@ define([  'backbone',
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
-      this.saveUploader = new SaveUploader({ appView : this });
+      this.saveUploaderView = new SaveUploaderView({ model: this.model.saveUploader });
       // deactivate the context menu
       $(document).bind("contextmenu", function (e) { return false; });
 
@@ -177,7 +178,8 @@ define([  'backbone',
         return;
 
       if (!this.browserView){
-        this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser({ app: this.model }) }, { app: this.model });
+        this.model.workspaceBrowser = new WorkspaceBrowser({ app: this.model });
+        this.browserView = new WorkspaceBrowserView({model: this.model.workspaceBrowser }, { app: this.model });
         this.browserView.render();
       }
 
