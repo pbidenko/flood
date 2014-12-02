@@ -411,20 +411,20 @@ input[type="button"].btn-block {
     transition-duration: 0.1s; /* Safari */
 }
 
-    .node:hover .node-last-value-container:hover {
-        right: -100px;
-        left: -100px;
-        height: 60px;
-        bottom: -60px;
-        overflow-x: scroll;
-        overflow-y: scroll;
-    }
+.node:hover .node-last-value-container:hover {
+    right: -100px;
+    left: -100px;
+    height: 60px;
+    bottom: -60px;
+    overflow-x: auto;
+    overflow-y: auto;
+}
 
-        .node:hover .node-last-value-container:hover .node-last-value {
-            width: 100%;
-            -ms-word-wrap: break-word;
-            word-wrap: break-word;
-        }
+.node:hover .node-last-value-container:hover .node-last-value {
+    width: 100%;
+    -ms-word-wrap: break-word;
+    word-wrap: break-word;
+}
 
 .node-failed .node-last-value {
     display: none;
