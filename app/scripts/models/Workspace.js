@@ -156,7 +156,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.get('nodes').add(nodeFactory.create({
           config: node,
           workspace: this 
-	}));
+        }));
         // if this custom node is not proxy and dependency haven't been added yet
         if (id && this.get('workspaceDependencyIds').indexOf(id) == -1) {
             if (workspaces.length)
