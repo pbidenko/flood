@@ -43,8 +43,7 @@ define([  'backbone',
       this.model.on('show-progress', this.showProgress, this);
       this.model.on('hide-progress', this.hideProgress, this);
 
-      this.viewBrowser();
-
+      this.model.login.on('change:isLoggedIn', this.initBrowserView, this);
       this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
@@ -172,20 +171,29 @@ define([  'backbone',
       this.workspaceControlsView && this.workspaceControlsView.hideSearch();
     },
 
-    viewBrowser: function(){
-      if(!this.model.login.get('showing'))
-        return;
+    initBrowserView: function () {
+        if (!this.model.login.get('isLoggedIn'))
+            return;
 
-      if (!this.browserView){
-        this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser({ app: this.model }) }, { app: this.model });
+        this.model.workspaceBrowser = new WorkspaceBrowser({ app: this.model });
+        this.browserView = new WorkspaceBrowserView({model: this.model.workspaceBrowser }, { app: this.model });
         this.browserView.render();
-      }
+    },
 
-      if (this.model.get('showingBrowser') === true){
-        this.browserView.$el.show();  
-      } else {
-        this.browserView.$el.hide();
-      }
+    viewBrowser: function() {
+        if (!this.model.login.get('isLoggedIn'))
+            return;
+
+        if (!this.browserView) {
+            this.initBrowserView();
+        }
+
+        if (this.model.get('showingBrowser') === true) {
+            this.browserView.$el.show();
+        }
+        else {
+            this.browserView.$el.hide();
+        }
     },
 
     viewHelp: function(){
