@@ -21,7 +21,6 @@ define(['backbone'], function(Backbone) {
 	  		if (e.email) {
 	  			this.set('email', e.email);
 	  			this.set('isLoggedIn', true);
-                this.trigger('get-logged-in');
 	  		}
 	  		else {
 	  			this.set('isLoggedIn', false);

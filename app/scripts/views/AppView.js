@@ -43,7 +43,7 @@ define([  'backbone',
       this.model.on('show-progress', this.showProgress, this);
       this.model.on('hide-progress', this.hideProgress, this);
 
-      this.model.login.on('get-logged-in', this.viewBrowser, this);
+      this.viewBrowser();
 
       this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
@@ -173,6 +173,9 @@ define([  'backbone',
     },
 
     viewBrowser: function(){
+      if(!this.model.login.get('showing'))
+        return;
+
       if (!this.browserView){
         this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser({ app: this.model }) }, { app: this.model });
         this.browserView.render();

@@ -25,8 +25,8 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers
             ws.set('name', data.workspaceName);
         }
 
-        var browserViewWorkspaces = this.appView.browserView ? this.appView.browserView.model.get('workspaces')
-            .map(mapWorkspaceFromBrowserView) : [];
+        var browserViewWorkspaces = this.appView.browserView.model.get('workspaces')
+            .map(mapWorkspaceFromBrowserView);
         ws.createNodes(data, browserViewWorkspaces);
         app.changed.currentWorkspace = ws.get('_id');
         this.appView.render();
@@ -161,9 +161,8 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers
                 prepareWorkspace.call(this, currentWorkspace);
             }
             else if (params.workspaceId) {
-                workspaces = this.appView.browserView ? this.appView.browserView.model
-                    .get('workspaces').where({ guid: params.workspaceId }) : [];
-                if (workspaces.length) {
+                workspaces = this.appView.browserView.model.get('workspaces').where({ guid: params.workspaceId });
+                if (workspaces.length > 0) {
                     app.loadWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true, true);
                 }
                 else {
