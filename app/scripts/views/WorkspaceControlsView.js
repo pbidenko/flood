@@ -38,9 +38,6 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
     },
 
     render: function(arg) {
-      var del = {
-          show: 300
-      };
 
       this.$el.html( this.template( this.model.toJSON() ) );
 

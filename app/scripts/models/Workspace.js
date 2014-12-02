@@ -215,12 +215,15 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.customNode.setNumInputs(ni);
       this.customNode.setNumOutputs(no);
 
+      this.customNode.searchTags = [this.get('name').toLowerCase()];
+
       this.app.SearchElements.addCustomNode( this.customNode );
 
       var that = this;
 
       this.on('change:name', function(){
         that.customNode.functionName = that.get('name');
+        that.customNode.searchTags = [that.get('name').toLowerCase()];
         that.app.SearchElements.addCustomNode( that.customNode );
       }, this);
 

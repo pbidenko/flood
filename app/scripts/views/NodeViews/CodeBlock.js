@@ -1,4 +1,4 @@
-define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNodeView) {
+define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
 
     var CodeBlock = ThreeCSGNodeView.extend({
 
@@ -21,7 +21,7 @@ define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNo
             this.$el.on('mouseup', adjustElements.bind(this));
             this.$el.on('mousemove', adjustElements.bind(this));
 
-            this.$el.draggable({ cancel: '.code-block-input' }); 
+            this.$el.draggable({ cancel: '.code-block-input' });
         },
 
         getCustomContents: function () {
@@ -214,8 +214,6 @@ define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNo
 
             this.input = this.$el.find('.code-block-input');
 
-            //this.input.height(this.input[0].scrollHeight);
-
             this.input.focus(function (e) {
                 this.selectable = false;
                 this.model.set('selected', false);
@@ -239,6 +237,11 @@ define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNo
                 ex.code = this.input[0].innerText;
 
                 this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
+            }.bind(this));
+
+            this.input.keyup(function () {
+                this.renderPorts();
+                this.model.trigger('change:position');
             }.bind(this));
 
             ex = this.model.get('extra') || {};
@@ -279,19 +282,11 @@ define(['backbone', 'ThreeCSGNodeView', 'Prism'], function (Backbone, ThreeCSGNo
         moveNode: function() {
             ThreeCSGNodeView.prototype.moveNode.apply(this, arguments);
 
-            if(!this.input[0].value){
+            if(!this.input[0].innerText){
                 this.input.focus();
             }
 
             return this;
-        },
-
-        render: function () {
-
-            ThreeCSGNodeView.prototype.render.apply(this, arguments);
-
-            return this;
-
         }
     });
 

@@ -411,20 +411,20 @@ input[type="button"].btn-block {
     transition-duration: 0.1s; /* Safari */
 }
 
-    .node:hover .node-last-value-container:hover {
-        right: -100px;
-        left: -100px;
-        height: 60px;
-        bottom: -60px;
-        overflow-x: scroll;
-        overflow-y: scroll;
-    }
+.node:hover .node-last-value-container:hover {
+    right: -100px;
+    left: -100px;
+    height: 60px;
+    bottom: -60px;
+    overflow-x: auto;
+    overflow-y: auto;
+}
 
-        .node:hover .node-last-value-container:hover .node-last-value {
-            width: 100%;
-            -ms-word-wrap: break-word;
-            word-wrap: break-word;
-        }
+.node:hover .node-last-value-container:hover .node-last-value {
+    width: 100%;
+    -ms-word-wrap: break-word;
+    word-wrap: break-word;
+}
 
 .node-failed .node-last-value {
     display: none;
@@ -518,10 +518,10 @@ input[type="button"].btn-block {
     border: none;
 }
 
-    #zoom-menu .menu-element:hover {
-        background: #444;
-        color: white;
-    }
+#zoom-menu .menu-element:hover {
+    background: #444;
+    color: white;
+}
 
 #zoom-menu {
     z-index: 99;
@@ -530,6 +530,7 @@ input[type="button"].btn-block {
     width: 38px;
     top: 200px;
     right: 0;
+    white-space: nowrap;
 }
 
 #feedback-box p {
@@ -1861,11 +1862,6 @@ body {
 
 li.notmatch {
     display: none !important;
-}
-
-div.tooltip-inner {
-    max-width: 400px;
-    white-space: pre-line;
 }
 
 .code-block-input {

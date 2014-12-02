@@ -12,15 +12,20 @@
 
             child = execFile('DynamoWebServer.exe', ['headless'], { cwd: 'dynamo' }, function (error, stdout, stderr) {
                 try {
-                    if (error) {
-                        window.location.href = 'error.html';
-                    }
+                    // if (error) {
+                    //     window.location.href = 'error.html';
+                    // }
 
+                    console.log('Error: ' + error);
                     console.log('Child Process stdout: ' + stdout);
                     console.log('Child Process stderr: ' + stderr);
                 }
                 catch (exc){
-                    window.location.href = 'error.html';
+                    // window.location.href = 'error.html';
+
+                    console.log('Exception: ' + exc);
+                    console.log('Child Process stdout: ' + stdout);
+                    console.log('Child Process stderr: ' + stderr);
                 }
             });
 
@@ -37,7 +42,11 @@
             }, 2000);
         }
         catch (exc){
-            window.location.href = 'error.html';
+            // window.location.href = 'error.html';
+
+            console.log('Exception: ' + exc);
+            console.log('Child Process stdout: ' + stdout);
+            console.log('Child Process stderr: ' + stderr);
         }
     </script>
 
