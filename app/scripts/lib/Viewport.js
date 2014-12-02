@@ -226,6 +226,10 @@ function zoomToFit() {
 		controls.object.position = vec;
 		camera.updateProjectionMatrix();
 	}
+	else {
+		controls.reset();
+		camera.updateProjectionMatrix();
+	}
 }
 
 function getBounds(boundingSphere){

@@ -411,20 +411,20 @@ input[type="button"].btn-block {
     transition-duration: 0.1s; /* Safari */
 }
 
-    .node:hover .node-last-value-container:hover {
-        right: -100px;
-        left: -100px;
-        height: 60px;
-        bottom: -60px;
-        overflow-x: scroll;
-        overflow-y: scroll;
-    }
+.node:hover .node-last-value-container:hover {
+    right: -100px;
+    left: -100px;
+    height: 60px;
+    bottom: -60px;
+    overflow-x: auto;
+    overflow-y: auto;
+}
 
-        .node:hover .node-last-value-container:hover .node-last-value {
-            width: 100%;
-            -ms-word-wrap: break-word;
-            word-wrap: break-word;
-        }
+.node:hover .node-last-value-container:hover .node-last-value {
+    width: 100%;
+    -ms-word-wrap: break-word;
+    word-wrap: break-word;
+}
 
 .node-failed .node-last-value {
     display: none;
@@ -1869,9 +1869,20 @@ div.tooltip-inner {
 }
 
 .code-block-input {
-    height: auto;
+    -moz-appearance: textfield-multiline;
+    -webkit-appearance: textarea;
     font-size: 14px;
     line-height: 25px;
+    text-align: left;
+    white-space: pre;
+    overflow: auto;
+    color: black;
+    border: 1px solid gray;
+    background: #f5f2f0;
+    width: auto;
+    min-width: 80px;
+    height: auto;
+    min-height: 40px;
 }
 
 .busy-indicator {
@@ -1883,4 +1894,20 @@ div.tooltip-inner {
     background-position: center center;
     float: right;
     display: inline-block;
+}
+
+.token.string {
+    color: #885D3B;
+}
+
+.token.comment {
+    color: #309130;
+}
+
+.token.keyword {
+    color: #8C5EAA;
+}
+
+.token.number {
+    color: #6897BB;
 }

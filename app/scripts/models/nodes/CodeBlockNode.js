@@ -2,19 +2,12 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
 
     return Node.extend({
 
-        defaults: {
-            duringUploading: false
-        },
-
         initialize: function (attrs, vals) {
             var inPort = [],
                 outPort = [],
                 i = 0,
                 len = 0;
 
-            if (attrs.duringUploading) {
-                this.set('duringUploading', true);
-            }
             if (attrs.extra && attrs.extra.inputs) {
                 len = attrs.extra.inputs.length;
                 attrs.extra.oldInputs = attrs.extra.inputs;
@@ -49,7 +42,7 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
             this.initAttrs(attrs, vals);
         },
 
-        updateValue: function (values) {
+        updateData: function (values) {
             var codeBlock = JSON.parse(values.data),
                 updated = false,
                 extraCopy = JSON.parse(JSON.stringify( this.get('extra')));

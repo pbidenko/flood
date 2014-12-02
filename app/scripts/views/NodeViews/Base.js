@@ -131,7 +131,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
           that.model.workspace.setNodeProperty( cmd );
 
         }
-      });  
+      });
       this.$el.css('position', 'absolute');
 
     },
@@ -221,7 +221,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
     touchstart: function(event){
       // is the user pressing on an input?
       var shouldIgnore = event.target != null 
-          && ( event.target.tagName.toLowerCase() == "input" || event.target.tagName.toLowerCase() == "textarea" );
+          && ( event.target.tagName.toLowerCase() == "input" || event.target.tagName.toLowerCase() == "code" );
 
       if(shouldIgnore) {
         // need to focus the input - on iOS the input never gets focussed
@@ -508,7 +508,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
           that.inputPorts.push(nodeCircle);
           inIndex++;
         } else {
-          if(ex.lineIndices)
+          if(ex.lineIndices && ex.lineIndices.length > outIndex)
             portIndex = outIndex > 0 ? ex.lineIndices[outIndex] - ex.lineIndices[outIndex - 1] - 1 : ex.lineIndices[outIndex];
           nodeCircle.setAttribute('cx', that.$el.width() + 2.5 );
           // that.portHeight is equal to 29, but actual height of port is 25

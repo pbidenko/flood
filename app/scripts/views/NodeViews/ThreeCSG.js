@@ -45,15 +45,15 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       if (this.model.get('selected')) {
 
-        var meshMat = new THREE.MeshPhongMaterial({color: colors.selected});
-        var partMat = new THREE.ParticleBasicMaterial({color: colors.selected, size: 5, sizeAttenuation: false});
-        var lineMat = new THREE.LineBasicMaterial({ color: colors.selected });
+        var meshMat = new THREE.MeshPhongMaterial({color: colors.selected, side: THREE.DoubleSide});
+        var partMat = new THREE.ParticleBasicMaterial({color: colors.selected, size: 5, sizeAttenuation: false, side: THREE.DoubleSide});
+        var lineMat = new THREE.LineBasicMaterial({color: colors.selected});
 
       } else {
 
-        var meshMat = new THREE.MeshPhongMaterial({color: colors.notSelected});
-        var partMat = new THREE.ParticleBasicMaterial({color: colors.notSelected, size: 5, sizeAttenuation: false});
-        var lineMat = new THREE.LineBasicMaterial({ color: colors.notSelectedLine });
+        var meshMat = new THREE.MeshPhongMaterial({color: colors.notSelected, side: THREE.DoubleSide});
+        var partMat = new THREE.ParticleBasicMaterial({color: colors.notSelected, size: 5, sizeAttenuation: false, side: THREE.DoubleSide});
+        var lineMat = new THREE.LineBasicMaterial({color: colors.notSelectedLine});
 
       }
 
@@ -225,30 +225,34 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       var i = 0;
       var tick = function() {
+        var color, colorLine;
+        if (that.model.get('selected')){
+          color = colorLine = colors.selected;
+        }
+        else {
+          color = colors.notSelected;
+          colorLine = colors.notSelectedLine;
+        }
+        var meshMat = new THREE.MeshPhongMaterial({color: color, side: THREE.DoubleSide});
+        var partMat = new THREE.ParticleBasicMaterial({color: color, size: 5, sizeAttenuation: false, side: THREE.DoubleSide});
+        var lineMat = new THREE.LineBasicMaterial({ color: colorLine });
 
         var start = new Date().getTime();
         for (; i < list.length && (new Date().getTime()) - start < 50; i++) {
         
           var g3  = that.toThreeGeom( list[i] );
 
-          var color, colorLine;
-          if (that.model.get('selected')){
-            color = colorLine = colors.selected;
-          }
-          else {
-            color = colors.notSelected;
-            colorLine = colors.notSelectedLine;
-          }
+
 
           switch (g3._floodType) {
             case 0:
-              geom.add( new THREE.Mesh(g3, new THREE.MeshPhongMaterial({color: color})) );
+              geom.add( new THREE.Mesh(g3, meshMat));
               break;
             case 1:
-              geom.add( new THREE.ParticleSystem(g3, new THREE.ParticleBasicMaterial({color: color, size: 5, sizeAttenuation: false}) ));
+              geom.add( new THREE.ParticleSystem(g3, partMat));
               break;
             case 2:
-              geom.add( new THREE.Line(g3, new THREE.LineBasicMaterial({ color: colorLine })));
+              geom.add( new THREE.Line(g3, lineMat));
               break;
           }
 
