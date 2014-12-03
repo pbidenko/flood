@@ -51,7 +51,6 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 }
 
                 this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort));
-                this.set('replication', 'applyShortest');
             }
 
             this.initAttrs(attrs, vals);
