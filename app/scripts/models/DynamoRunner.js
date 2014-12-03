@@ -82,6 +82,7 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
                 else {
                     commands.push(new CreateNodeCommand({}, data.nodes[i]));
                 }
+                // Use Array.prototype.push.apply because UpdateModelValueCommand returns an array.
                 Array.prototype.push.apply(commands, new UpdateModelValueCommand( {}, data.nodes[i] ));
                 Array.prototype.push.apply(commands, new UpdateModelValueCommand( {}, {
                     _id: data.nodes[i]._id,
