@@ -99,6 +99,9 @@ require.config({
             deps: [
             ],
             exports: 'almond'
+        },
+        prism: {
+            exports: 'Prism'
         }
     },
     paths: {
@@ -127,6 +130,7 @@ require.config({
         Help: 'models/Help',
         Feedback: 'models/Feedback',
         Login: 'models/Login',
+        SaveUploader: 'models/BaseSaveUploader', //'models/NWKSaveUploader',
 
         GeometryExport: 'models/GeometryExport',
         WorkspaceResolver: 'models/WorkspaceResolver',
@@ -161,6 +165,7 @@ require.config({
         UpdateProxyNodesResponse: 'models/responses/UpdateProxyNodesResponse',
         GeometryDataResponse: 'models/responses/GeometryDataResponse',
         WorkspacePathResponse: 'models/responses/WorkspacePathResponse',
+        CodeBlockDataResponse: 'models/responses/CodeBlockDataResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',
@@ -187,7 +192,7 @@ require.config({
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
         ModelsListView: 'views/ModelsListView',
         SearchCategoryView: 'views/SearchCategoryView',
-        SaveUploader: 'views/BaseSaveUploader', //'views/NWKSaveUploader',
+        SaveUploaderView: 'views/BaseSaveUploaderView', //'views/NWKSaveUploaderView',
 
         // node backbone views
         NodeViewTypes: 'views/NodeViews/NodeViews',
@@ -207,8 +212,9 @@ require.config({
         FLOOD: 'lib/flood/flood',
         CSG: 'lib/flood/csg',
         scheme: 'lib/flood/scheme',
-
+        
         // bower
+        Prism: '../bower_components/prism/prism',
         Hammer: '../bower_components/hammerjs/hammer',
         almond: '../bower_components/almond/almond',
         bootstrap: '../bower_components/bootstrap/dist/js/bootstrap',

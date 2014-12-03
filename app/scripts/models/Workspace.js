@@ -127,7 +127,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       var allWorkspaces = this.app.get('workspaces');
       for(i = 0; i < data.nodes.length; i++) {
           node = data.nodes[i];
-          node.duringUploading = true;
+
           // besides creating nodes we should set all dependencies
           if (node.isCustomNode) {
               guid = node.extra.creationName;
@@ -218,12 +218,15 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.customNode.setNumInputs(ni);
       this.customNode.setNumOutputs(no);
 
+      this.customNode.searchTags = [this.get('name').toLowerCase()];
+
       this.app.SearchElements.addCustomNode( this.customNode );
 
       var that = this;
 
       this.on('change:name', function(){
         that.customNode.functionName = that.get('name');
+        that.customNode.searchTags = [that.get('name').toLowerCase()];
         that.app.SearchElements.addCustomNode( that.customNode );
       }, this);
 
@@ -960,6 +963,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
                     node.clearGeometry();
                 }
             }
+        }
+    },
+
+    updateCodeBlockNode: function (param) {
+        var node = this.get('nodes').get(param.nodeId);
+        if (node && node.updateData) {
+            node.updateData(param);
         }
     },
 

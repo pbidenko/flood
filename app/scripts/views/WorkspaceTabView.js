@@ -74,13 +74,14 @@ define(['backbone'], function(Backbone) {
     },
 
     endEdit: function() {
+        // the edit button is still visible on touch devices
+        this.hideEditButton();
 
-      // the edit button is still visible on touch devices
-      this.hideEditButton();
-
-      this.$input.prop('disabled', true);
-      this.$input.css('pointer-events', 'none');
-      this.model.set('tabName', this.$input.val() );
+        this.$input.prop('disabled', true);
+        this.$input.css('pointer-events', 'none');
+        var newName = this.$input.val();
+        this.model.set('name', newName);
+        this.model.set('tabName', newName);
     },
 
     click: function(e) {

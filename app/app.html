@@ -321,19 +321,21 @@
                     <% } %>
 
                     <li role="presentation" style="color: black">
-                    <li class="dropdown-header" style="padding: 0">Use Default</li>
+                        <li class="dropdown-header" style="padding: 0">Use Default</li>
 
-                    <span class="node-dropown-menu-item">
-                        <input type="checkbox" class="use-default-checkbox" data-index="<%= index %>"><%= !ignoreDefaults[index] ? "checked" : ""%> >
-                        <%= ele.defaultVal != undefined ? JSON.stringify( ele.defaultVal ) : "None" %>
-                    </span>
+                        <span class="node-dropown-menu-item">
+                            <% if(ele.defaultVal != undefined) { %>
+                            <input type="checkbox" class="use-default-checkbox" data-index="<%= index %>" <%= !ignoreDefaults[index] ? "checked" : "" %> >
+                            <% } %>
+                            <%= ele.defaultVal != undefined ? JSON.stringify( ele.defaultVal ) : "None" %>
+                        </span>
+                    </li>
+
+                </ul>
+            </div>
+
         </li>
-
-    </ul>
-    </div>
-
-    </li>
-    <% }); %>
+        <% }); %>
     </ul>
 
     <div class="node-data-container">
@@ -364,6 +366,7 @@
 
             <li class="node-dropown-menu-item">
                 <div class="btn-group btn-group-xs" style="padding: 0; padding-top: 5px; font-size: 10px">
+                    <button type="button" class="rep-type btn btn-default" style="font-size: 10px" data-rep-type="applyShortest">Short</button>
                     <button type="button" class="rep-type btn btn-default" style="font-size: 10px" data-rep-type="applyLongest">Long</button>
                     <button type="button" class="rep-type btn btn-default" style="font-size: 10px" data-rep-type="applyCartesian">Cross</button>
                 </div>
@@ -390,7 +393,7 @@
 
 <script type="text/template" id="code-block-template">
 
-    <textarea class="code-block-input"><%= extra.code %></textarea>
+    <code class="language-designScript code-block-input" contenteditable><%= extra.code %></code>
 
 </script>
 
@@ -437,8 +440,9 @@
 </script>
 
 <script type="text/template" id="workspace-tab-template">
-
+    <!-- build:remove -->
     <i class="icon-pencil dim-button edit-button" style="visibility: hidden; margin-left: 10px"></i>
+	<!-- /build -->
     <span class="workspace-tab-function <%= isCustomNode ? " " : " hidden" %>
         ">
         <i class="fa fa-bolt"></i>
@@ -731,7 +735,6 @@
     </div>
 
 </script>
-
 
 <script>
 

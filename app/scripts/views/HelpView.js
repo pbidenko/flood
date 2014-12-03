@@ -26,7 +26,8 @@ define(['backbone'], function(Backbone) {
 
         var el = $('#' + section.targetId );
         
-        if (!el) return;
+        if (!el.length) 
+            return;
 
         var offset = el.offset();
         var height = el.height();

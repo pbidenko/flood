@@ -16,10 +16,10 @@ define([  'backbone',
           'FeedbackView',
           'Feedback', 
           'fastclick',
-          'SaveUploader' ],
+          'SaveUploaderView' ],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback, fastclick, SaveUploader ) {
+            Help, LoginView, Login, FeedbackView, Feedback, fastclick, SaveUploaderView ) {
 
   return Backbone.View.extend({
 
@@ -30,6 +30,7 @@ define([  'backbone',
       var f = new fastclick(document.body);
 
       this.listenTo(this.model, 'change', this.render, this);
+      this.listenTo(this.model, 'ws-data-loaded', this.zoomresetClick);
 
       this.$workspace_tabs = this.$('#workspace-tabs');
 
@@ -43,13 +44,12 @@ define([  'backbone',
       this.model.on('show-progress', this.showProgress, this);
       this.model.on('hide-progress', this.hideProgress, this);
 
-      this.viewBrowser();
-
+      this.model.login.on('change:isLoggedIn', this.initBrowserView, this);
       this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
-      this.saveUploader = new SaveUploader({ appView : this });
+      this.saveUploaderView = new SaveUploaderView({ model: this.model.saveUploader });
       // deactivate the context menu
       $(document).bind("contextmenu", function (e) { return false; });
 
@@ -134,8 +134,8 @@ define([  'backbone',
       if (e.target.nodeName === "INPUT") return;
 
       // do not capture from textarea
-      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "TEXTAREA" ) return;
-      if (e.target.nodeName === "TEXTAREA") return;
+      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "CODE" ) return;
+      if (e.target.nodeName === "CODE") return;
 
       // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
       switch (e.keyCode) {
@@ -172,20 +172,31 @@ define([  'backbone',
       this.workspaceControlsView && this.workspaceControlsView.hideSearch();
     },
 
-    viewBrowser: function(){
-      if(!this.model.login.get('showing'))
-        return;
+    initBrowserView: function () {
+      if (!this.model.login.get('isLoggedIn'))
+          return;
 
       if (!this.browserView){
-        this.browserView = new WorkspaceBrowserView({model: new WorkspaceBrowser({ app: this.model }) }, { app: this.model });
+        this.model.workspaceBrowser = new WorkspaceBrowser({ app: this.model });
+        this.browserView = new WorkspaceBrowserView({model: this.model.workspaceBrowser }, { app: this.model });
         this.browserView.render();
       }
+    },
 
-      if (this.model.get('showingBrowser') === true){
-        this.browserView.$el.show();  
-      } else {
-        this.browserView.$el.hide();
-      }
+    viewBrowser: function() {
+        if (!this.model.login.get('isLoggedIn'))
+            return;
+
+        if (!this.browserView) {
+            this.initBrowserView();
+        }
+
+        if (this.model.get('showingBrowser') === true) {
+            this.browserView.$el.show();
+        }
+        else {
+            this.browserView.$el.hide();
+        }
     },
 
     viewHelp: function(){

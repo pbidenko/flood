@@ -1,7 +1,7 @@
 /**
- * Created by Masha on 10/30/2014.
+ * Created by Masha on 11/26/2014.
  */
-define(['backbone', 'views/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMessage'],
+define(['backbone', 'models/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMessage'],
     function (Backbone, BaseSaveUploader, SaveFileMessage, UploadFileMessage) {
         var dyn = '.dyn',
             dyf = '.dyf';
@@ -14,88 +14,50 @@ define(['backbone', 'views/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMess
 
             pathsToSave: [],
 
-            events: {
-                'change #savefile': 'pickUpFilePath',
-                'click #savefile': 'setAcceptAttribute',
-                'click #save-file-button': 'trySaveFile',
-                'change #openfile': 'loadSelectedFile'
-            },
-
             initialize: function (attrs) {
                 BaseSaveUploader.prototype.initialize.call(this, attrs);
-                this.listenTo( this.appView.model, 'ws-path-received:event', this.receiveWorkspacePathData );
+                // this init will be done only in NWK
+                this.listenTo(this.app, 'ws-path-received:event', this.receiveWorkspacePathData);
             },
 
             receiveWorkspacePathData: function (data) {
                 this.updatePathByGuid(data.guid, data.path);
             },
-            
-            setAcceptAttribute: function () {
+
+            saveAtPath: function (path) {
                 var guid = this.getCurrentWorkspaceGuid();
-                var path = this.getPathByGuid(guid);
-                if (!path)
-                    path = this.appView.model.getCurrentWorkspace().get('name');
-
-                if (!guid)
-                    this.$el.find('#savefile').attr('accept', dyn);
-                else
-                    this.$el.find('#savefile').attr('accept', dyf);
-
-                this.$el.find('#savefile').attr('nwsaveas', path);
+                this.updatePathByGuid(guid, path);
+                this.trySaveFile();
             },
 
-            configViewElements: function () {
-                this.$el.removeClass('no-save-button');
-                this.$el.find('#savefile').show();
-                this.$el.find('#saveas-file-button div').addClass('over-hidden-file-input');
+            loadFromPath: function (path) {
+                this.sendStringMessage(new UploadFileMessage(path));
             },
 
-            pickUpFilePath: function(e) {
-                var files = e.target.files;
-                if (files && files.length == 1) {
-                    if (files[0].path) {
-                        var guid = this.getCurrentWorkspaceGuid();
-                        this.updatePathByGuid(guid, files[0].path);
-                        this.trySaveFile();
-                    }
-
-                    e.target.value = null;
-                }
-            },
-
-            loadSelectedFile: function (e) {
-                var files = e.target.files;
-                if (files && files.length == 1) {
-                    if (files[0].path)
-                        this.sendStringMessage(new UploadFileMessage(files[0].path));
-
-                    e.target.value = null;
-                }
-            },
-
-            trySaveFile: function() {
+            trySaveFile: function () {
                 var guid = this.getCurrentWorkspaceGuid(),
                     path = this.getPathByGuid(guid);
 
                 // if we have FilePath
                 if (path) {
                     // if it's home ws and path doesn't end with .dyn
-                    if (!guid && !endsWith(path, dyn)) {
+                    if (!guid && !endsWith(path.toLowerCase(), dyn)) {
                         path = path + dyn;
                         this.updatePathByGuid(guid, path);
                     }
                     // if it's custom node ws and path doesn't end with .dyf
-                    else if (guid && !endsWith(path, dyf)) {
+                    else if (guid && !endsWith(path.toLowerCase(), dyf)) {
                         path = path + dyf;
                         this.updatePathByGuid(guid, path);
                     }
 
                     this.synchronizeNodeCoordinates();
                     this.sendStringMessage(new SaveFileMessage(guid, path));
+                    this.trigger('saving-is-done');
                 }
                 // ask for FilePath
                 else {
-                    this.$el.find('#savefile').trigger('click');
+                    this.trigger('no-path-to-save');
                 }
             },
 
@@ -129,6 +91,7 @@ define(['backbone', 'views/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMess
                 else
                     this.pathsToSave.push({guid: guid, path: path});
 
+                // ensure a needed workspace is already created
                 setTimeout(function () {
                     var fileName, wsName;
                     var workspace = this.getWorkspaceByGuid(guid);
