@@ -110,10 +110,14 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
     },
 
-    elementClick: function(model){
+    elementClick: function(model) {
+        var currentWS = this.app.getCurrentWorkspace();
+        var cName = model.get('creationName');
+        // Input and Output nodes can be added only into custom node ws
+        if (!currentWS.get('isCustomNode') && (cName === 'Input' || cName === 'Output'))
+            return;
 
-      this.addNode(model);
-
+        this.addNode(model);
     },
     
     hideSearch: function(){
