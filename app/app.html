@@ -440,13 +440,14 @@
 </script>
 
 <script type="text/template" id="workspace-tab-template">
-
+    <!-- build:remove -->
     <i class="icon-pencil dim-button edit-button" style="visibility: hidden; margin-left: 10px"></i>
+	<!-- /build -->
     <span class="workspace-tab-function <%= isCustomNode ? " " : " hidden" %>
         ">
         <i class="fa fa-bolt"></i>
     </span>
-    <input class="workspace-name" disabled="disabled" value="<%= name %>"></input>
+    <input class="workspace-name" disabled="disabled" value="<%= tabName %>"></input>
     <i class="icon-remove dim-button remove-button"></i>
 
 </script>

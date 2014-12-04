@@ -11,6 +11,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     defaults: {
       name: "Unnamed Workspace",
+      tabName: "",
       nodes: null,
       connections: null,
       zoom: 1,
@@ -93,6 +94,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.on('change:workspaceDependencyIds', throttledSync, this);
       this.on('requestRun', this.run, this);
 
+      this.set('tabName', this.get('name'));
+      
       if ( this.get('isCustomNode') ) this.initializeCustomNode();
 
       this.resolver = new WorkspaceResolver(null, { app : this.app, workspace : this });

@@ -8,7 +8,7 @@ define(['backbone'], function(Backbone) {
     initialize: function(atts) { 
 
       this.app = this.model.app;
-      this.listenTo( this.model, 'change:name', this.render);
+      this.listenTo( this.model, 'change:tabName', this.render);
       this.listenTo( this.model, 'change:current', this.render);
 
     },
@@ -74,13 +74,14 @@ define(['backbone'], function(Backbone) {
     },
 
     endEdit: function() {
+        // the edit button is still visible on touch devices
+        this.hideEditButton();
 
-      // the edit button is still visible on touch devices
-      this.hideEditButton();
-
-      this.$input.prop('disabled', true);
-      this.$input.css('pointer-events', 'none');
-      this.model.set('name', this.$input.val() );
+        this.$input.prop('disabled', true);
+        this.$input.css('pointer-events', 'none');
+        var newName = this.$input.val();
+        this.model.set('name', newName);
+        this.model.set('tabName', newName);
     },
 
     click: function(e) {
