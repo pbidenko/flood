@@ -518,10 +518,10 @@ input[type="button"].btn-block {
     border: none;
 }
 
-    #zoom-menu .menu-element:hover {
-        background: #444;
-        color: white;
-    }
+#zoom-menu .menu-element:hover {
+    background: #444;
+    color: white;
+}
 
 #zoom-menu {
     z-index: 99;
@@ -530,6 +530,7 @@ input[type="button"].btn-block {
     width: 38px;
     top: 200px;
     right: 0;
+    white-space: nowrap;
 }
 
 #feedback-box p {
@@ -1861,11 +1862,6 @@ body {
 
 li.notmatch {
     display: none !important;
-}
-
-div.tooltip-inner {
-    max-width: 400px;
-    white-space: pre-line;
 }
 
 .code-block-input {

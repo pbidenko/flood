@@ -156,7 +156,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.get('nodes').add(nodeFactory.create({
           config: node,
           workspace: this 
-	}));
+        }));
         // if this custom node is not proxy and dependency haven't been added yet
         if (id && this.get('workspaceDependencyIds').indexOf(id) == -1) {
             if (workspaces.length)
@@ -215,12 +215,15 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.customNode.setNumInputs(ni);
       this.customNode.setNumOutputs(no);
 
+      this.customNode.searchTags = [this.get('name').toLowerCase()];
+
       this.app.SearchElements.addCustomNode( this.customNode );
 
       var that = this;
 
       this.on('change:name', function(){
         that.customNode.functionName = that.get('name');
+        that.customNode.searchTags = [that.get('name').toLowerCase()];
         that.app.SearchElements.addCustomNode( that.customNode );
       }, this);
 
