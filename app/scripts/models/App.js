@@ -136,15 +136,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newNodeWorkspace: function( callback, silent, hasTabName ) {
-      if (!hasTabName) {
-          var customNodeName = prompt('Enter a name of Custom Node', 'New custom node');
-          if (!customNodeName || !customNodeName.trim().length)
-              return;
-
-          customNodeName = customNodeName.trim();
-      }
-
+    newNodeWorkspace: function( callback, silent, customNodeName ) {
       this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
