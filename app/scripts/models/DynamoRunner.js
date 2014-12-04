@@ -19,27 +19,7 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
         },
 
         updateNode: function (node) {
-
-            if(node.changed['replication']) {
-
-                this.app.socket.send(createMessage.call(this,
-                    new UpdateModelValueCommand( {}, {
-                        _id: node.id,
-                        typeName: 'Replication',
-                        extra: {Replication: getReplicationType(node.changed.replication)}
-                    })
-                ));
-            }
-            else if(node.changed['ignoreDefaults']) {
-
-                this.app.socket.send(createMessage.call(this,
-                    new UpdateModelValueCommand( {}, {
-                        _id: node.id,
-                        typeName: 'IgnoreDefaults',
-                        extra: {IgnoreDefaults: node.changed.ignoreDefaults.join(';')} 
-                    })
-                ));
-            }
+            this.app.socket.send(createMessage.call(this, UpdateModelValueCommand.syncProperties({ full: true }, node.attributes)));
 
             AbstractRunner.prototype.updateNode.call(this, node);
         }
@@ -48,16 +28,11 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
     var commands = {
         addNode: function (data) {
             var commands = [instantiateCommand(data)];
-            Array.prototype.push.apply(commands, new UpdateModelValueCommand( {}, {
-                _id: data._id,
-                typeName: 'Replication',
-                extra: {Replication: getReplicationType(data.replication)} 
-            }));
-
+            Array.prototype.push.apply(commands, UpdateModelValueCommand.syncProperties({ full: true }, data));
             return createMessage.call(this, commands);
         },
-        updateNode: function(data){
-            return createMessage.call(this, instantiateCommand(data));
+        updateNode: function (data) {
+            return createMessage.call(this, UpdateModelValueCommand.syncProperties({}, data));
         },
         removeNode: function (data) {
             return createMessage.call(this, instantiateCommand(data));
@@ -82,18 +57,8 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
                 else {
                     commands.push(new CreateNodeCommand({}, data.nodes[i]));
                 }
-                // Use Array.prototype.push.apply because UpdateModelValueCommand returns an array.
-                Array.prototype.push.apply(commands, new UpdateModelValueCommand( {}, data.nodes[i] ));
-                Array.prototype.push.apply(commands, new UpdateModelValueCommand( {}, {
-                    _id: data.nodes[i]._id,
-                    typeName: 'Replication',
-                    extra: {Replication: getReplicationType(data.nodes[i].replication)} 
-                }));
-                Array.prototype.push.apply(commands, new UpdateModelValueCommand( {}, {
-                    _id: data.nodes[i]._id,
-                    typeName: 'IgnoreDefaults',
-                    extra: {IgnoreDefaults: data.nodes[i].ignoreDefaults.join(';')} 
-                }));
+
+                Array.prototype.push.apply(commands, UpdateModelValueCommand.syncProperties({full: true}, data.nodes[i]));
             }
 
             for( i = 0, len = data.connections.length; i < len; i++ ){
@@ -125,20 +90,6 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
         }
 
         return JSON.stringify(new RecordableCommandsMessage(commands, this.workspace.get('guid')));
-    },
-    getReplicationType = function(replicationType) {
-        return replicationTypes[replicationType] || replicationtype.Longest;
-    },
-    replicationTypes = {
-        //     FLOOD          DYNAMO
-        // applyShortest  -  Shortest
-        // applyLongest   -  Longest
-        // applyCartesian -  CrossProduct
-        // applyDisabled  -  Disabled
-        applyShortest: 'Shortest',
-        applyLongest: 'Longest',
-        applyCartesian: 'CrossProduct',
-        applyDisabled: 'Disabled'
     };
 
     return DynamoRunner;
