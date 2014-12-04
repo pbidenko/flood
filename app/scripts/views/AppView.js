@@ -118,9 +118,15 @@ define([  'backbone',
       this.hideAddWorkspaceSelect();
     },
 
-    newNodeWorkspace: function(){
-      this.model.newNodeWorkspace();
-      this.hideAddWorkspaceSelect();
+    newNodeWorkspace: function() {
+        var customNodeName = prompt('Provide a name for the Custom Node', 'New custom node');
+        if (!customNodeName || !customNodeName.trim().length)
+            return;
+
+        customNodeName = customNodeName.trim();
+
+        this.model.newNodeWorkspace(null, null, customNodeName);
+        this.hideAddWorkspaceSelect();
     },
 
     keydownHandler: function(e){

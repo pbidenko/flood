@@ -156,7 +156,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers
                         app.loadWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true, true);
                     }
                     else {
-                        app.newNodeWorkspace(prepareWorkspace.bind(this), true, true);
+                        app.newNodeWorkspace(prepareWorkspace.bind(this), true);
                     }
                 }
                 else {
