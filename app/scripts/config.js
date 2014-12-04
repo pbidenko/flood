@@ -130,6 +130,7 @@ require.config({
         Help: 'models/Help',
         Feedback: 'models/Feedback',
         Login: 'models/Login',
+        ModelsList: 'models/ModelsList',
         SaveUploader: 'models/BaseSaveUploader', //'models/NWKSaveUploader',
 
         GeometryExport: 'models/GeometryExport',
