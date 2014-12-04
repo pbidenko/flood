@@ -17,15 +17,35 @@ define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, help
         }
     });
 
-    var typeMap = {
-        'Input': {param: 'name', value: 'InputSymbol'},
-        'Output': {param: 'name', value: 'Symbol'},
-        'Code Block': {param: 'code', value: 'Code'},
-        'Replication': {param: 'Replication', value: 'ArgumentLacing'},
-        'IgnoreDefaults': {param: 'IgnoreDefaults', value: 'UsingDefaultValue'}
+    UpdateModelValueCommand.syncProperties = function(config, options) {
+        var values = [];
+        for (var name in options.extra) {
+            if (!options.lastValue || (options.lastValue[name] !== options.extra[name])) {
+
+                if (typeMap.hasOwnProperty(options.typeName) && typeMap[options.typeName].param === name) {
+                    values.push(getInstance(options._id, typeMap[options.typeName].value, options.extra[name]));
+                } else if (name === 'value') {
+                    values.push(getInstance(options._id, helpers.capitalizeFirstLetter(name), options.extra[name]));
+                }
+            }
+        }
+
+        // if config.full - send information about ArgumentLacing and UsingDefaultValue 
+        if (config.full) {
+            values.push(getInstance(options._id, 'ArgumentLacing', getReplicationType(options.replication)));
+            values.push(getInstance(options._id, 'UsingDefaultValue', options.ignoreDefaults.join(';')));
+        }
+
+        return values;
     };
 
-    var getInstance = function(id, name, value){
+    var typeMap = {
+        'Input': { param: 'name', value: 'InputSymbol' },
+        'Output': { param: 'name', value: 'Symbol' },
+        'Code Block': { param: 'code', value: 'Code' }
+    };
+
+    var getInstance = function (id, name, value) {
         return new UpdateModelValueCommand({}, {
             modelGuid: id,
             name: name,
@@ -33,19 +53,21 @@ define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, help
         });
     };
 
-    return function UpdateModel(config, options){
-        var values = [];
-        for(var name in options.extra) {
-            if (!options.lastValue || ( options.lastValue[name] !== options.extra[name]) ) {
+    var getReplicationType = function (replicationType) {
+        return replicationTypes[replicationType] || replicationtype.Longest;
+    };
 
-                if (typeMap.hasOwnProperty(options.typeName) && typeMap[options.typeName].param === name) {
-                    values.push(getInstance(options._id, typeMap[options.typeName].value, options.extra[name]));
-                }
-                else if (name === 'value') {
-                    values.push(getInstance(options._id, helpers.capitalizeFirstLetter(name), options.extra[name]));
-                }
-            }
-        }
-        return values;
-    }
+    var replicationTypes = {
+        //     FLOOD          DYNAMO
+        // applyShortest  -  Shortest
+        // applyLongest   -  Longest
+        // applyCartesian -  CrossProduct
+        // applyDisabled  -  Disabled
+        applyShortest: 'Shortest',
+        applyLongest: 'Longest',
+        applyCartesian: 'CrossProduct',
+        applyDisabled: 'Disabled'
+    };
+
+    return UpdateModelValueCommand;
 });
