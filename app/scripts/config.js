@@ -130,6 +130,7 @@ require.config({
         Help: 'models/Help',
         Feedback: 'models/Feedback',
         Login: 'models/Login',
+        ModelsList: 'models/ModelsList',
 
         GeometryExport: 'models/GeometryExport',
         WorkspaceResolver: 'models/WorkspaceResolver',

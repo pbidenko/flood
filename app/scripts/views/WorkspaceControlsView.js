@@ -1,5 +1,5 @@
-define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', 'ModelsListView'],
- function(Backbone, List, SearchElement, SearchElementView, bootstrap, ModelsListView) {
+define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', 'ModelsListView', 'ModelsList'],
+ function(Backbone, List, SearchElement, SearchElementView, bootstrap, ModelsListView, ModelsList) {
 
   return Backbone.View.extend({
 
@@ -46,7 +46,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       this.$input = this.$('.library-search-input');
 
-      this.modelsListView = new ModelsListView({}, {
+      this.modelsListView = new ModelsListView({model: new ModelsList()}, {
                 app: this.app,
                 searchView: this
       });
