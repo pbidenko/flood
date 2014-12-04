@@ -122,6 +122,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       this.context.createNewWorkspace().done(function(data){
 
+        data.name = 'Home';
         var ws = new Workspace(data, {app: this });
         this.get('workspaces').add( ws );
         this.set('currentWorkspace', ws.get('_id') );
@@ -135,12 +136,20 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newNodeWorkspace: function( callback, silent ) {
+    newNodeWorkspace: function( callback, silent, hasTabName ) {
+      if (!hasTabName) {
+          var customNodeName = prompt('Enter a name of Custom Node', 'New custom node');
+          if (!customNodeName || !customNodeName.trim().length)
+              return;
+
+          customNodeName = customNodeName.trim();
+      }
 
       this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
         data.guid = this.makeId();
+        data.name = customNodeName;
 
         // if we need to not send it to the dynamo
         if (silent) {

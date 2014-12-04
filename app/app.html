@@ -164,9 +164,6 @@
             <div id="add-workspace-select-element">
                 <div id="add-workspace-select-container">
                     <ul>
-                        <!-- build:remove -->
-                        <li id="add-project-workspace">Project</li>
-                        <!-- /build -->
                         <li id="add-node-workspace">Custom node</li>
                     </ul>
                 </div>
@@ -440,8 +437,9 @@
 </script>
 
 <script type="text/template" id="workspace-tab-template">
-
+    <!-- build:remove -->
     <i class="icon-pencil dim-button edit-button" style="visibility: hidden; margin-left: 10px"></i>
+	<!-- /build -->
     <span class="workspace-tab-function <%= isCustomNode ? " " : " hidden" %>
         ">
         <i class="fa fa-bolt"></i>

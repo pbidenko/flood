@@ -87,9 +87,14 @@ define(['backbone'], function(Backbone) {
       this.model.app.set('currentWorkspace', this.model.get('_id'));
     },
 
-    remove: function(e){
-      this.model.app.get('workspaces').remove(this.model);
-      e.stopPropagation();
+    remove: function(e) {
+        // don't remove Home workspace
+        if (this.model.get('isCustomNode')) {
+
+            this.model.app.get('workspaces').remove(this.model);
+        }
+
+        e.stopPropagation();
     }
 
   });
