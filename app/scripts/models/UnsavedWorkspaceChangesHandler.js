@@ -14,9 +14,6 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
         initialize: function(attrs) {
             this.app = attrs.app;
 
-            this.app.get('workspaces').each(this.setWorkspaceProperty.bind(this));
-            this.listenTo( this.app.get('workspaces'), 'add', this.setWorkspaceProperty);
-
             this.listenTo( attrs.saveUploader, 'clear-home-request', this.clearHomeRequest );
 
             this.listenTo( this.app, 'ws-unsaved-changes-presence-received:event', this.askForSaving );
@@ -73,10 +70,6 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
                 // remove path for Home ws
                 saveUploader.updatePathByGuid();
             }
-        },
-
-        setWorkspaceProperty: function (ws) {
-            ws.set('askForUnsavedChanges', true);
         },
 
         clearHomeRequest: function () {
