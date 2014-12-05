@@ -13,18 +13,18 @@ define(['backbone', 'staticHelpers'], function (Backbone, staticHelpers) {
             returnValue.extra = { value: node.value };
         }
         else if (node.value){
-            var codeBlock = JSON.parse(node.value);
-            returnValue.extra = codeBlock;
+            var data = JSON.parse(node.value);
+            returnValue.extra = data;
 
-            if (codeBlock.Code) {
-                returnValue.extra.code = codeBlock.Code;
+            if (data.Code) {
+                returnValue.extra.code = data.Code;
             }
 
-            returnValue.extra.inputs = codeBlock.InPorts;
-            returnValue.extra.outputs = codeBlock.OutPorts;
+            returnValue.extra.inputs = data.InPorts;
+            returnValue.extra.outputs = data.OutPorts;
 
-            if (codeBlock.LineIndices) {
-                returnValue.extra.lineIndices = codeBlock.LineIndices;
+            if (data.LineIndices) {
+                returnValue.extra.lineIndices = data.LineIndices;
             }
 
             if (node.isCustomNode) {
@@ -33,8 +33,8 @@ define(['backbone', 'staticHelpers'], function (Backbone, staticHelpers) {
                 returnValue.creationName = "CustomNode";
                 returnValue.extra.functionName = node.displayName;
                 returnValue.extra.displayName = node.displayName;
-                returnValue.extra.numInputs = codeBlock.InPorts.length;
-                returnValue.extra.numOutputs = codeBlock.OutPorts.length;
+                returnValue.extra.numInputs = data.InPorts.length;
+                returnValue.extra.numOutputs = data.OutPorts.length;
             }
         }
 

@@ -48,10 +48,12 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
         },
 
         syncUI: function(value){
-            if (value)
+            if (value) {
                 this.$el.find('.true-flag').prop('checked', true);
-            else
+            }
+            else {
                 this.$el.find('.false-flag').prop('checked', true);
+            }
         }
     });
 });
