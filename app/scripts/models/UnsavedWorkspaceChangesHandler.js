@@ -23,7 +23,7 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
         },
 
         continueAction: function () {
-            if (currentAction == actions.clearHomeWS) {
+            if (currentAction === actions.clearHomeWS) {
                 this.clearHomeWorkspace(savingData);
             }
 
