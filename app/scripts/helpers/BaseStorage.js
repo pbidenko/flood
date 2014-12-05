@@ -23,7 +23,7 @@ define(['backbone', 'staticHelpers'], function(Backbone, helpers) {
         this.session = {
             __v: 0,
             _id: "540429880879db500f0f2be8",
-            isFirstExperience: true,
+            isFirstExperience: false,
             name: "Empty session",
             workspaces: []
         };
