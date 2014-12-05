@@ -1,9 +1,9 @@
 ﻿define(['backbone', 'ComputationResponse', 'ContentResponse', 'LibraryItemsListResponse',
         'SavedFileResponse', 'NodeCreationDataResponse', 'GeometryDataResponse', 'CodeBlockDataResponse',
-        'UpdateProxyNodesResponse', 'WorkspacePathResponse', 'settings' ],
+        'UpdateProxyNodesResponse', 'WorkspacePathResponse', 'HasUnsavedChangesResponse', 'settings' ],
     function (Backbone, ComputationResponse, ContentResponse, LibraryItemsListResponse,
               SavedFileResponse, NodeCreationDataResponse, GeometryDataResponse, CodeBlockDataResponse,
-              UpdateProxyNodesResponse, WorkspacePathResponse, globalSettings ) {
+              UpdateProxyNodesResponse, WorkspacePathResponse, HasUnsavedChangesResponse, globalSettings ) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -24,6 +24,7 @@
             'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : GeometryDataResponse,
             'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : UpdateProxyNodesResponse,
             'DynamoWebServer.Responses.WorkspacePathResponse, DynamoWebServer' : WorkspacePathResponse,
+            'DynamoWebServer.Responses.HasUnsavedChangesResponse, DynamoWebServer' : HasUnsavedChangesResponse,
             'DynamoWebServer.Responses.CodeBlockDataResponse, DynamoWebServer' : CodeBlockDataResponse
         },
         responseEventMap = {
@@ -34,6 +35,7 @@
             'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : 'geometry-data-received:event',
             'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : 'proxy-nodes-data-received:event',
             'DynamoWebServer.Responses.WorkspacePathResponse, DynamoWebServer' : 'ws-path-received:event',
+            'DynamoWebServer.Responses.HasUnsavedChangesResponse, DynamoWebServer' : 'ws-unsaved-changes-presence-received:event',
             'DynamoWebServer.Responses.CodeBlockDataResponse, DynamoWebServer' : 'code-block-node-updated:event'
         },
         app;

@@ -1,8 +1,8 @@
 /**
  * Created by Masha on 11/26/2014.
  */
-define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers'],
-    function(Backbone, SaveFileMessage, SetModelPositionMessage, helpers) {
+define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspaceMessage', 'staticHelpers'],
+    function(Backbone, SaveFileMessage, SetModelPositionMessage, ClearWorkspaceMessage, helpers) {
 
         var data = null;
 
@@ -62,6 +62,34 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers
                 this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);
                 // when we upload a custom node definition we should make all its instances not proxy anymore
                 this.listenTo( this.app, 'proxy-nodes-data-received:event', this.setProxyNodesDependenciesData);
+            },
+
+            clearHomeWorkspace: function () {
+                var home = this.getHomeWorkspace();
+                var setName = function (ws) {
+                    ws.set('name', 'Home');
+                    ws.set('tabName', 'Home');
+                };
+
+                this.sendStringMessage(new ClearWorkspaceMessage(true));
+
+                if (home) {
+                    data = {
+                        connections: [],
+                        nodes: [],
+                        result: []
+                    };
+
+                    prepareWorkspace.call(this, home);
+                    setName(home);
+                }
+                else {
+                    this.app.newWorkspace(setName);
+                }
+            },
+
+            getHomeWorkspace: function () {
+                return this.getWorkspaceByGuid();
             },
 
             getWorkspaceByGuid: function(guid) {

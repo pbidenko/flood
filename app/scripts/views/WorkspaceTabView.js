@@ -94,6 +94,10 @@ define(['backbone'], function(Backbone) {
 
             this.model.app.get('workspaces').remove(this.model);
         }
+        else {
+            // clear Home workspace
+            $('#new-file-button').click();
+        }
 
         e.stopPropagation();
     }

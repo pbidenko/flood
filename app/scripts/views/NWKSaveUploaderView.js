@@ -15,7 +15,8 @@ define(['backbone'], function (Backbone) {
                 'change #savefile': 'pickUpFilePath',
                 'click #savefile': 'setAcceptAttribute',
                 'click #save-file-button': 'saveClick',
-                'change #openfile': 'loadSelectedFile'
+                'change #openfile': 'loadSelectedFile',
+                'click #new-file-button': 'newButtonClick'
             },
 
             initialize: function () {
@@ -29,6 +30,10 @@ define(['backbone'], function (Backbone) {
 
             saveClick: function () {
                 this.model.trySaveFile();
+            },
+
+            newButtonClick: function () {
+                this.model.trigger('clear-home-request');
             },
 
             setAcceptAttribute: function () {

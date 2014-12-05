@@ -131,6 +131,7 @@ require.config({
         Feedback: 'models/Feedback',
         Login: 'models/Login',
         ModelsList: 'models/ModelsList',
+        UnsavedWorkspaceChangesHandler: 'models/UnsavedWorkspaceChangesHandler',
         SaveUploader: 'models/BaseSaveUploader', //'models/NWKSaveUploader',
 
         GeometryExport: 'models/GeometryExport',
@@ -156,6 +157,8 @@ require.config({
         GeometryMessage: 'models/messages/GeometryMessage',
         UploadFileMessage: 'models/messages/UploadFileMessage',
         SetModelPositionMessage: 'models/messages/SetModelPositionMessage',
+        HasUnsavedChangesMessage: 'models/messages/HasUnsavedChangesMessage',
+        ClearWorkspaceMessage: 'models/messages/ClearWorkspaceMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
@@ -166,6 +169,7 @@ require.config({
         UpdateProxyNodesResponse: 'models/responses/UpdateProxyNodesResponse',
         GeometryDataResponse: 'models/responses/GeometryDataResponse',
         WorkspacePathResponse: 'models/responses/WorkspacePathResponse',
+        HasUnsavedChangesResponse: 'models/responses/HasUnsavedChangesResponse',
         CodeBlockDataResponse: 'models/responses/CodeBlockDataResponse',
 
         //helpers

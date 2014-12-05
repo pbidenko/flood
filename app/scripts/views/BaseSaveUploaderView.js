@@ -9,7 +9,8 @@ define(['backbone'], function(Backbone) {
 
         events: {
             'click #saveas-file-button': 'saveFile',
-            'change #openfile': 'loadSelectedFile'
+            'change #openfile': 'loadSelectedFile',
+            'click #new-file-button': 'clearHomeWorkspace'
         },
 
         initialize: function (attrs) {
@@ -20,6 +21,10 @@ define(['backbone'], function(Backbone) {
             this.$el.addClass('no-save-button');
             this.$el.find('#savefile').hide();
             this.$el.find('#saveas-file-button div').removeClass('over-hidden-file-input');
+        },
+
+        clearHomeWorkspace: function () {
+            this.model.clearHomeWorkspace();
         },
 
         saveFile: function () {
