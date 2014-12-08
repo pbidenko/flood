@@ -35,7 +35,7 @@ define(['backbone'], function (Backbone) {
                 var guid = this.model.getCurrentWorkspaceGuid();
                 var path = this.model.getPathByGuid(guid);
                 if (!path)
-                    path = this.app.getCurrentWorkspace().get('name');
+                    path = this.model.app.getCurrentWorkspace().get('name');
 
                 if (!guid)
                     this.$el.find('#savefile').attr('accept', dyn);
