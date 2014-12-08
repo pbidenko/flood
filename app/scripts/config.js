@@ -197,6 +197,7 @@ require.config({
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
         ModelsListView: 'views/ModelsListView',
         SearchCategoryView: 'views/SearchCategoryView',
+        UnsavedChangesHandlerView: 'views/UnsavedChangesHandlerView',
         SaveUploaderView: 'views/BaseSaveUploaderView', //'views/NWKSaveUploaderView',
 
         // node backbone views

@@ -9,8 +9,7 @@ define(['backbone'], function(Backbone) {
 
         events: {
             'click #saveas-file-button': 'saveFile',
-            'change #openfile': 'loadSelectedFile',
-            'click #new-file-button': 'clearHomeWorkspace'
+            'change #openfile': 'loadSelectedFile'
         },
 
         initialize: function (attrs) {

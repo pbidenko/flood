@@ -6,8 +6,7 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
             clearHomeWS: 'Clear home workspace',
             waitForRequest: 'Wait for request'
         },
-        currentAction,
-        savingData;
+        currentAction;
 
     return Backbone.Model.extend({
 
@@ -16,49 +15,18 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
 
             this.listenTo( attrs.saveUploader, 'clear-home-request', this.clearHomeRequest );
 
-            this.listenTo( this.app, 'ws-unsaved-changes-presence-received:event', this.askForSaving );
             this.listenTo( attrs.saveUploader, 'saving-is-done', this.continueAction );
 
             currentAction = actions.waitForRequest;
         },
 
         continueAction: function () {
-            if (currentAction == actions.clearHomeWS) {
-                this.clearHomeWorkspace(savingData);
+            if (currentAction === actions.clearHomeWS) {
+                this.clearHomeWorkspace(this.savingData);
             }
 
             // reset
             currentAction = actions.waitForRequest;
-        },
-
-        askForSaving: function (data) {
-            savingData = data;
-            var path, fileName, dialogText,
-                ws, saveUploader;
-            if (data.hasUnsavedChanges) {
-                saveUploader = this.app.saveUploader;
-                ws = saveUploader.getWorkspaceByGuid(data.guid);
-
-                path = saveUploader.getPathByGuid(data.guid);
-                fileName = saveUploader.getFilename(path);
-                if (!fileName)
-                    fileName = ws.get('name') + ' workspace';
-
-                dialogText = "You have unsaved changes to " + fileName +
-                    ".\n\n Would you like to save your changes?";
-
-                this.app.set('currentWorkspace', ws.get('_id'));
-                if (confirm(dialogText)) {
-                    // action will be continued after saving is done
-                    saveUploader.trySaveFile();
-                }
-                else {
-                    this.continueAction();
-                }
-            }
-            else {
-                this.continueAction();
-            }
         },
 
         clearHomeWorkspace: function (data) {
