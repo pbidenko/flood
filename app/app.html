@@ -408,6 +408,20 @@
 
 </script>
 
+<script type="text/template" id="node-string-template">
+
+    <div class="node-data-container node-input-container">
+        <textarea class="string-node-input"><%= extra.value %></textarea>
+    </div>
+
+    <ul class="node-outputs">
+        <% _.each(type.outputs, function(ele, index) { %>
+        <li class="node-port node-port-output" data-index=" <%= index %> "> <span class="node-port-name"> <%= ele.name %> </span> </li>
+        <% }); %>
+    </ul>
+
+</script>
+
 <script type="text/template" id="node-output-template">
 
     <ul class="node-inputs">
