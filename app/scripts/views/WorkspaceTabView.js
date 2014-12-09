@@ -89,10 +89,16 @@ define(['backbone'], function(Backbone) {
     },
 
     remove: function(e) {
+        var app = this.model.app;
+
         // don't remove Home workspace
         if (this.model.get('isCustomNode')) {
 
-            this.model.app.get('workspaces').remove(this.model);
+            app.get('workspaces').remove(this.model);
+        }
+        else {
+            // clear Home workspace
+            $('#new-home-workspace').click();
         }
 
         e.stopPropagation();

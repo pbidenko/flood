@@ -1,9 +1,9 @@
 ﻿define(['backbone', 'ComputationResponse', 'ContentResponse', 'LibraryItemsListResponse',
         'SavedFileResponse', 'NodeCreationDataResponse', 'GeometryDataResponse', 'CodeBlockDataResponse',
-        'UpdateProxyNodesResponse', 'WorkspacePathResponse', 'settings' ],
+        'UpdateProxyNodesResponse', 'WorkspacePathResponse', 'HasUnsavedChangesResponse', 'settings' ],
     function (Backbone, ComputationResponse, ContentResponse, LibraryItemsListResponse,
               SavedFileResponse, NodeCreationDataResponse, GeometryDataResponse, CodeBlockDataResponse,
-              UpdateProxyNodesResponse, WorkspacePathResponse, globalSettings ) {
+              UpdateProxyNodesResponse, WorkspacePathResponse, HasUnsavedChangesResponse, globalSettings ) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -24,17 +24,19 @@
             'GeometryDataResponse' : GeometryDataResponse,
             'UpdateProxyNodesResponse' : UpdateProxyNodesResponse,
             'WorkspacePathResponse' : WorkspacePathResponse,
+            'HasUnsavedChangesResponse' : HasUnsavedChangesResponse,
             'CodeBlockDataResponse' : CodeBlockDataResponse
         },
         responseEventMap = {
             'ComputationResponse': 'computation-completed:event',
             'LibraryItemsListResponse': 'libraryItemsList-received:event',
             'SavedFileResponse': 'saved-file-received:event',
-            'NodeCreationDataResponse' : 'creation-data-received:event',
-            'GeometryDataResponse' : 'geometry-data-received:event',
-            'UpdateProxyNodesResponse' : 'proxy-nodes-data-received:event',
-            'WorkspacePathResponse' : 'ws-path-received:event',
-            'CodeBlockDataResponse' : 'code-block-node-updated:event'
+            'NodeCreationDataResponse': 'creation-data-received:event',
+            'GeometryDataResponse': 'geometry-data-received:event',
+            'UpdateProxyNodesResponse': 'proxy-nodes-data-received:event',
+            'WorkspacePathResponse': 'ws-path-received:event',
+            'HasUnsavedChangesResponse': 'ws-unsaved-changes-presence-received:event',
+            'CodeBlockDataResponse': 'code-block-node-updated:event'
         },
         app;
 

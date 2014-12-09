@@ -120,6 +120,7 @@ require.config({
         Marquee: 'models/Marquee',
         Node: 'models/nodes/Node',
         NumberNode: 'models/nodes/NumberNode',
+        BooleanNode: 'models/nodes/BooleanNode',
         CodeBlockNode: 'models/nodes/CodeBlockNode',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
@@ -131,6 +132,7 @@ require.config({
         Feedback: 'models/Feedback',
         Login: 'models/Login',
         ModelsList: 'models/ModelsList',
+        UnsavedWorkspaceChangesHandler: 'models/UnsavedWorkspaceChangesHandler',
         SaveUploader: 'models/BaseSaveUploader', //'models/NWKSaveUploader',
 
         GeometryExport: 'models/GeometryExport',
@@ -156,6 +158,8 @@ require.config({
         GeometryMessage: 'models/messages/GeometryMessage',
         UploadFileMessage: 'models/messages/UploadFileMessage',
         SetModelPositionMessage: 'models/messages/SetModelPositionMessage',
+        HasUnsavedChangesMessage: 'models/messages/HasUnsavedChangesMessage',
+        ClearWorkspaceMessage: 'models/messages/ClearWorkspaceMessage',
 
         //Responses
         ComputationResponse: 'models/responses/ComputationResponse',
@@ -166,6 +170,7 @@ require.config({
         UpdateProxyNodesResponse: 'models/responses/UpdateProxyNodesResponse',
         GeometryDataResponse: 'models/responses/GeometryDataResponse',
         WorkspacePathResponse: 'models/responses/WorkspacePathResponse',
+        HasUnsavedChangesResponse: 'models/responses/HasUnsavedChangesResponse',
         CodeBlockDataResponse: 'models/responses/CodeBlockDataResponse',
 
         //helpers
@@ -193,6 +198,7 @@ require.config({
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
         ModelsListView: 'views/ModelsListView',
         SearchCategoryView: 'views/SearchCategoryView',
+        UnsavedChangesHandlerView: 'views/UnsavedChangesHandlerView',
         SaveUploaderView: 'views/BaseSaveUploaderView', //'views/NWKSaveUploaderView',
 
         // node backbone views
@@ -206,6 +212,7 @@ require.config({
         OutputView: 'views/NodeViews/Output',
         CustomNodeView: 'views/NodeViews/CustomNode',
         ThreeCSGNodeView: 'views/NodeViews/ThreeCSG',
+        BooleanView: 'views/NodeViews/BooleanView',
 
         OrbitControls: 'lib/OrbitControls',
         Viewport: 'lib/Viewport',

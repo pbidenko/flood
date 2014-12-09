@@ -164,6 +164,9 @@
             <div id="add-workspace-select-element">
                 <div id="add-workspace-select-container">
                     <ul>
+                        <li id="new-home-workspace">Home</li>
+                    </ul>
+                    <ul>
                         <li id="add-node-workspace">Custom node</li>
                     </ul>
                 </div>
@@ -398,6 +401,23 @@
 
     <div class="node-data-container node-input-container">
         <input type="text" class="text-input" placeholder="Input name" value="<%= extra.script %>">
+    </div>
+
+    <ul class="node-outputs">
+        <% _.each(type.outputs, function(ele, index) { %>
+        <li class="node-port node-port-output" data-index=" <%= index %> "> <span class="node-port-name"> <%= ele.name %> </span> </li>
+        <% }); %>
+    </ul>
+
+</script>
+
+<script type="text/template" id="node-boolean-template">
+
+    <div class="node-data-container">
+        <input type="radio" class="true-flag" name=<%= "radio" +_id %> <%= extra.value ? 'checked' : '' %> />
+        <label>True</label>
+        <input type="radio" class="false-flag" name=<%= "radio" +_id %> <%= extra.value ? '' : 'checked' %> />
+        <label>False</label>
     </div>
 
     <ul class="node-outputs">

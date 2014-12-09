@@ -49,7 +49,7 @@ define([  'backbone',
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
-      this.saveUploaderView = new SaveUploaderView({ model: this.model.saveUploader });
+      this.saveUploaderView = new SaveUploaderView({ model: this.model.saveUploader, appView: this });
       // deactivate the context menu
       $(document).bind("contextmenu", function (e) { return false; });
 
@@ -72,7 +72,7 @@ define([  'backbone',
       'click #zoomout-button': 'zoomoutClick',
       'click #zoomreset-button': 'zoomresetClick',
 
-      'click #add-project-workspace' : 'newWorkspace',
+      'click #new-home-workspace' : 'newHomeClick',
       'click #add-node-workspace' : 'newNodeWorkspace',
 
       'mouseover #add-workspace-button': 'showAddWorkspaceSelect',
@@ -83,6 +83,10 @@ define([  'backbone',
       // touch
       'touchstart #add-workspace-button': 'toggleAddWorkspaceSelect'
 
+    },
+
+    newHomeClick: function () {
+        this.saveUploaderView.clearHomeWorkspace();
     },
 
     toggleAddWorkspaceSelect: function(){
