@@ -1,7 +1,7 @@
 /**
  * Created by Masha on 10/30/2014.
  */
-define(['backbone'], function (Backbone) {
+define(['backbone', 'UnsavedChangesHandlerView'], function (Backbone, UnsavedChangesHandlerView) {
         var dyn = '.dyn',
             dyf = '.dyf';
 
@@ -18,9 +18,12 @@ define(['backbone'], function (Backbone) {
                 'change #openfile': 'loadSelectedFile'
             },
 
-            initialize: function () {
+            initialize: function (attrs) {
                 this.configViewElements();
                 this.listenTo(this.model, 'no-path-to-save', this.performSaveAsClick);
+                // this init will be done only in NWK
+                var handlerModel = attrs.appView.model.unsavedChangesHandler;
+                attrs.appView.unsavedChangesHandlerView = new UnsavedChangesHandlerView({ model: handlerModel });
             },
 
             performSaveAsClick: function () {
@@ -29,6 +32,10 @@ define(['backbone'], function (Backbone) {
 
             saveClick: function () {
                 this.model.trySaveFile();
+            },
+
+            clearHomeWorkspace: function () {
+                this.model.trigger('clear-home-request');
             },
 
             setAcceptAttribute: function () {

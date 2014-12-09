@@ -22,6 +22,10 @@ define(['backbone'], function(Backbone) {
             this.$el.find('#saveas-file-button div').removeClass('over-hidden-file-input');
         },
 
+        clearHomeWorkspace: function () {
+            this.model.clearHomeWorkspace();
+        },
+
         saveFile: function () {
             this.model.saveFile();
         },
