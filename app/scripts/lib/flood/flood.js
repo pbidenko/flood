@@ -363,7 +363,7 @@ define('FLOOD', function() {
 
 		FLOOD.baseTypes.NodePort.call(this, name, type, parentNode, parentIndex, oppNode, oppIndex );
 		this.defaultVal = defaultVal;
-		this.useDefault = defaultVal === undefined ? false : true;
+		this.useDefault = (defaultVal === undefined || defaultVal === null) ? false : true;
 
 		this.printExpression = function() {
 			if (this.oppNode && this.oppIndex === 0 && this.oppNode.outputs.length === 1)
