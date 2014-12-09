@@ -3,7 +3,7 @@
  */
 define(function(){
     function UploadFileMessage(path){
-        this.$type = 'DynamoWebServer.Messages.UploadFileMessage, DynamoWebServer';
+        this.type = 'UploadFileMessage';
         this.path = path;
     }
 
