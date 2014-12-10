@@ -1,5 +1,5 @@
 define(['backbone', 'staticHelpers'], function (Backbone, staticHelpers) {
-    var inputNodeNames = ['Number', 'String'];
+    var inputNodeNames = ['Number', 'String', 'Boolean'];
 
     function mapNode (node) {
         var returnValue = {

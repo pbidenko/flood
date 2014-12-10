@@ -1,8 +1,8 @@
 /**
  * Created by Masha on 11/26/2014.
  */
-define(['backbone', 'models/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMessage'],
-    function (Backbone, BaseSaveUploader, SaveFileMessage, UploadFileMessage) {
+define(['backbone', 'models/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMessage', 'UnsavedWorkspaceChangesHandler'],
+    function (Backbone, BaseSaveUploader, SaveFileMessage, UploadFileMessage, UnsavedWorkspaceChangesHandler) {
         var dyn = '.dyn',
             dyf = '.dyf';
 
@@ -17,6 +17,11 @@ define(['backbone', 'models/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMes
             initialize: function (attrs) {
                 BaseSaveUploader.prototype.initialize.call(this, attrs);
                 // this init will be done only in NWK
+                this.app.unsavedChangesHandler = new UnsavedWorkspaceChangesHandler({
+                    app : this.app,
+                    saveUploader: this
+                });
+
                 this.listenTo(this.app, 'ws-path-received:event', this.receiveWorkspacePathData);
             },
 

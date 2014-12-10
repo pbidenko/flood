@@ -1,9 +1,10 @@
-define(['Node', 'NumberNode', 'CodeBlockNode', 'StringNode'], 
-function (Node, NumberNode, CodeBlockNode, StringNode) {
+define(['Node', 'NumberNode', 'CodeBlockNode', 'StringNode', 'BooleanNode'], 
+function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode) {
     var map = {
         'Code Block': CodeBlockNode,
         'Number': NumberNode,
         'String' : StringNode
+        'BooleanNode' : BooleanNode
     };
 
     return {

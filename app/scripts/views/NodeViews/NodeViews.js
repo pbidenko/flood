@@ -1,7 +1,7 @@
 define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'ThreeCSGNodeView', 'FormulaView',
-'CodeBlockView', 'OutputView', 'InputView', 'CustomNodeView', 'StringView'], 
+'CodeBlockView', 'OutputView', 'InputView', 'CustomNodeView', 'StringView', 'BooleanView'], 
   function(BaseNodeView, WatchNodeView, NumNodeView, ThreeCSGNodeView, FormulaView,
-  CodeBlockView, OutputView, InputView, CustomNodeView, StringView){
+  CodeBlockView, OutputView, InputView, CustomNodeView, StringView, BooleanView){
 
   var nodeViewTypes = {
       'Code Block': CodeBlockView
@@ -16,6 +16,7 @@ define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'ThreeCSGNodeView', 'For
   nodeViewTypes.Input = InputView;
   nodeViewTypes.Output = OutputView;
   nodeViewTypes.String = StringView;
+  nodeViewTypes.Boolean = BooleanView;
 
   return nodeViewTypes;
 
