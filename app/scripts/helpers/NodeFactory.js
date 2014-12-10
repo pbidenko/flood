@@ -4,7 +4,7 @@ function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode) {
         'Code Block': CodeBlockNode,
         'Number': NumberNode,
         'String' : StringNode
-        'BooleanNode' : BooleanNode
+        'Boolean' : BooleanNode
     };
 
     return {
