@@ -15,11 +15,10 @@ define([  'backbone',
           'Login',
           'FeedbackView',
           'Feedback', 
-          'fastclick',
-          'SaveUploaderView' ],
+          'fastclick' ],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback, fastclick, SaveUploaderView ) {
+            Help, LoginView, Login, FeedbackView, Feedback, fastclick ) {
 
   return Backbone.View.extend({
 
@@ -49,7 +48,7 @@ define([  'backbone',
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
-      this.saveUploaderView = new SaveUploaderView({ model: this.model.saveUploader });
+
       // deactivate the context menu
       $(document).bind("contextmenu", function (e) { return false; });
 
@@ -60,7 +59,6 @@ define([  'backbone',
     },
 
     events: {
-      'click #save-button' : 'saveClick',
       'click .workspaces_curtain' : 'endSearch',
       'click #help-button': 'toggleHelp',
       'click #settings-button': 'showSettings',
@@ -125,7 +123,7 @@ define([  'backbone',
 
         customNodeName = customNodeName.trim();
 
-        this.model.newNodeWorkspace(null, null, customNodeName);
+        this.model.newNodeWorkspace(null, customNodeName);
         this.hideAddWorkspaceSelect();
     },
 
@@ -152,10 +150,6 @@ define([  'backbone',
 
       this.currentWorkspaceView.keydownHandler(e);
     },
-
-    saveClick: function(e){
-      this.model.sync("update", this.model);
-    },  
 
     endSearch: function() {
       this.model.set('showingSearch', false);

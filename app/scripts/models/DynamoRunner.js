@@ -22,6 +22,17 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
             this.app.socket.send(createMessage.call(this, UpdateModelValueCommand.syncProperties({ full: true }, node.attributes)));
 
             AbstractRunner.prototype.updateNode.call(this, node);
+        },
+
+        initWorkspace: function () {
+            // notNotifyServer property is needed when we create a workspace from file
+            // and dynamo already have it
+            if (this.workspace.get('notNotifyServer')) {
+                this.workspace.set('notNotifyServer', false);
+                return;
+            }
+
+            AbstractRunner.prototype.initWorkspace.call(this);
         }
     });
 

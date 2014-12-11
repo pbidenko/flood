@@ -18,7 +18,8 @@ define(['backbone'], function (Backbone) {
                 'change #openfile': 'loadSelectedFile'
             },
 
-            initialize: function () {
+            initialize: function (attrs) {
+                this.app = attrs.model.app;
                 this.configViewElements();
                 this.listenTo(this.model, 'no-path-to-save', this.performSaveAsClick);
             },
@@ -53,7 +54,7 @@ define(['backbone'], function (Backbone) {
 
             pickUpFilePath: function(e) {
                 var files = e.target.files;
-                if (files && files.length == 1) {
+                if (files && files.length === 1) {
                     if (files[0].path) {
                         this.model.saveAtPath(files[0].path);
                     }
@@ -64,7 +65,7 @@ define(['backbone'], function (Backbone) {
 
             loadSelectedFile: function (e) {
                 var files = e.target.files;
-                if (files && files.length == 1) {
+                if (files && files.length === 1) {
                     if (files[0].path) {
                         this.model.loadFromPath(files[0].path);
                     }

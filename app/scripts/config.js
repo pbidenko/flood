@@ -178,7 +178,7 @@ require.config({
         settings: 'helpers/Settings',
 
         // backbone views
-        AppView: 'views/AppView',
+        AppView: 'views/DynamoAppView', //'views/AppView',
         ConnectionView: 'views/ConnectionView',
         MarqueeView: 'views/MarqueeView',
         SearchView: 'views/SearchView',

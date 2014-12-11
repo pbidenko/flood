@@ -1,11 +1,12 @@
-define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
-    function (Backbone, App, SocketConnection, SearchElement) {
+define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'SaveUploader', 'Workspace'],
+    function (Backbone, App, SocketConnection, SearchElement, SaveUploader, Workspace) {
 
         return App.extend({
 
             initialize: function () {
                 this.socket = new SocketConnection({ app: this });
                 this.on('libraryItemsList-received:event', this.mapLibraryItems, this);
+                this.saveUploader = new SaveUploader({ app: this });
                 App.prototype.initialize.call(this);
             },
 
@@ -51,6 +52,57 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
                     .fail(function (response) {
                         options.error(response);
                     });
+            },
+
+            newNodeWorkspace: function( callback, silent, customNodeName ) {
+              this.context.createNewNodeWorkspace().done(function(data){
+
+                data.isCustomNode = true;
+                data.guid = this.makeId();
+                data.name = customNodeName;
+
+                // if we need to not send it to the dynamo
+                if (silent) {
+                    data.notNotifyServer = true;
+                }
+                var ws = new Workspace(data, { app: this });
+
+                this.get('workspaces').add( ws );
+                this.set('currentWorkspace', ws.get('_id') );
+                if (callback) callback( ws );
+
+              }.bind(this)).fail(function(){
+
+                console.error("failed to get new workspace");
+
+              });
+
+            },
+
+            loadWorkspace: function( id, callback, silent, makeCurrent ) {
+
+                this.context.loadWorkspace(id).done(function (data) {
+
+                    var ws = this.get('workspaces').get(id);
+                    if (ws) return;
+
+                    // if we need to not send it to the dynamo
+                    if (silent) {
+                        data.notNotifyServer = true;
+                    }
+                    ws = new Workspace(data, {app: this});
+                    this.get('workspaces').add(ws);
+
+                    if (makeCurrent)
+                        this.set('currentWorkspace', ws.get('_id'));
+
+                    if (callback)
+                        callback(ws);
+
+                }.bind(this)).fail(function () {
+
+                    console.error("failed to get workspace with id: " + id);
+                });
             }
 
         });

@@ -80,7 +80,7 @@ define(['backbone', 'models/BaseSaveUploader', 'SaveFileMessage', 'UploadFileMes
                     return pair.guid;
                 }).indexOf(guid);
 
-                if (!path && index == -1)
+                if (!path && index === -1)
                     return;
 
                 if (!path && index > -1) {

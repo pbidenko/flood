@@ -165,7 +165,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers
             },
 
             setProxyNodesDependenciesData: function (data) {
-                if (this.proxyNodesDependencies.indexOf(data) == -1) {
+                if (this.proxyNodesDependencies.indexOf(data) === -1) {
                     this.proxyNodesDependencies.push(data);
                 }
 
@@ -175,7 +175,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers
             },
 
             setAvailableCustomNodeDefinitions: function(guid) {
-                if (this.availableCustomNodeDefinitions.indexOf(guid) == -1) {
+                if (this.availableCustomNodeDefinitions.indexOf(guid) === -1) {
                     this.availableCustomNodeDefinitions.push(guid);
                 }
 
@@ -212,7 +212,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'staticHelpers
 
                             node.set('isProxy', false);
 
-                            if (customNodeId && workspace.get('workspaceDependencyIds').indexOf(customNodeId) == -1) {
+                            if (customNodeId && workspace.get('workspaceDependencyIds').indexOf(customNodeId) === -1) {
                                 node.get('extra').functionId = customNodeId;
                                 workspace.addWorkspaceDependency(customNodeId);
                             }
