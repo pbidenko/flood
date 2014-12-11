@@ -13,7 +13,7 @@ define(['views/AppView', 'SaveUploaderView'],
         },
 
         saveClick: function(e){
-            this.model.sync("update", this.model);
+            this.model.sync('update', this.model);
         },
 
         newNodeWorkspace: function() {
