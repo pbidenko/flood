@@ -1,7 +1,9 @@
-define(['Node', 'NumberNode', 'CodeBlockNode'], function (Node, NumberNode, CodeBlockNode) {
+define(['Node', 'NumberNode', 'CodeBlockNode', 'BooleanNode'], 
+function (Node, NumberNode, CodeBlockNode, BooleanNode) {
     var map = {
         'Code Block': CodeBlockNode,
-        'Number': NumberNode
+        'Number': NumberNode,
+        'BooleanNode' : BooleanNode
     };
 
     return {

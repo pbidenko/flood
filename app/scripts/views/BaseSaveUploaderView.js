@@ -13,7 +13,6 @@ define(['backbone'], function(Backbone) {
         },
 
         initialize: function (attrs) {
-            this.app = attrs.model.app;
             this.configViewElements();
         },
 
@@ -21,6 +20,10 @@ define(['backbone'], function(Backbone) {
             this.$el.addClass('no-save-button');
             this.$el.find('#savefile').hide();
             this.$el.find('#saveas-file-button div').removeClass('over-hidden-file-input');
+        },
+
+        clearHomeWorkspace: function () {
+            this.model.clearHomeWorkspace();
         },
 
         saveFile: function () {

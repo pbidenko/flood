@@ -1,7 +1,7 @@
 /**
  * Created by Masha on 10/30/2014.
  */
-define(['backbone'], function (Backbone) {
+define(['backbone', 'UnsavedChangesHandlerView'], function (Backbone, UnsavedChangesHandlerView) {
         var dyn = '.dyn',
             dyf = '.dyf';
 
@@ -19,9 +19,11 @@ define(['backbone'], function (Backbone) {
             },
 
             initialize: function (attrs) {
-                this.app = attrs.model.app;
                 this.configViewElements();
                 this.listenTo(this.model, 'no-path-to-save', this.performSaveAsClick);
+                // this init will be done only in NWK
+                var handlerModel = attrs.appView.model.unsavedChangesHandler;
+                attrs.appView.unsavedChangesHandlerView = new UnsavedChangesHandlerView({ model: handlerModel });
             },
 
             performSaveAsClick: function () {
@@ -32,11 +34,15 @@ define(['backbone'], function (Backbone) {
                 this.model.trySaveFile();
             },
 
+            clearHomeWorkspace: function () {
+                this.model.trigger('clear-home-request');
+            },
+
             setAcceptAttribute: function () {
                 var guid = this.model.getCurrentWorkspaceGuid();
                 var path = this.model.getPathByGuid(guid);
                 if (!path)
-                    path = this.app.getCurrentWorkspace().get('name');
+                    path = this.model.app.getCurrentWorkspace().get('name');
 
                 if (!guid)
                     this.$el.find('#savefile').attr('accept', dyn);

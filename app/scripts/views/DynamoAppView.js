@@ -9,7 +9,7 @@ define(['views/AppView', 'SaveUploaderView'],
 
         initialize: function() { 
             AppView.prototype.initialize.call(this);
-            this.saveUploaderView = new SaveUploaderView({ model: this.model.saveUploader });
+            this.saveUploaderView = new SaveUploaderView({ model: this.model.saveUploader, appView: this });
         },
 
         saveClick: function(e){
@@ -25,6 +25,10 @@ define(['views/AppView', 'SaveUploaderView'],
 
             this.model.newNodeWorkspace(null, false, customNodeName);
             this.hideAddWorkspaceSelect();
+        },
+
+        newHomeClick: function () {
+            this.saveUploaderView.clearHomeWorkspace();
         }
 
     });

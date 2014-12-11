@@ -70,7 +70,7 @@ define([  'backbone',
       'click #zoomout-button': 'zoomoutClick',
       'click #zoomreset-button': 'zoomresetClick',
 
-      'click #add-project-workspace' : 'newWorkspace',
+      'click #new-home-workspace' : 'newHomeClick',
       'click #add-node-workspace' : 'newNodeWorkspace',
 
       'mouseover #add-workspace-button': 'showAddWorkspaceSelect',
@@ -87,6 +87,10 @@ define([  'backbone',
 
       $('#add-workspace-select-element').toggle();
 
+    },
+
+    newHomeClick: function () {
+      this.newWorkspace();
     },
 
     showHelpOnFirstExperience: function(){
