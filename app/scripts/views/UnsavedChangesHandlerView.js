@@ -1,7 +1,7 @@
 /**
  * Created by Masha on 12/5/2014.
  */
-define(['backbone'], function(Backbone) {
+define(['backbone', 'jqueryuidialog'], function(Backbone, jqueryuidialog) {
 
     return Backbone.View.extend({
 
@@ -10,11 +10,12 @@ define(['backbone'], function(Backbone) {
         },
 
         askForSaving: function (data) {
-            this.model.savingData = data;
             var path, fileName, dialogText,
-                ws, saveUploader;
+                ws, saveUploader,
+                model = this.model;
+            model.savingData = data;
             if (data.hasUnsavedChanges) {
-                saveUploader = this.model.app.saveUploader;
+                saveUploader = model.app.saveUploader;
                 ws = saveUploader.getWorkspaceByGuid(data.guid);
 
                 path = saveUploader.getPathByGuid(data.guid);
@@ -26,17 +27,29 @@ define(['backbone'], function(Backbone) {
                 dialogText = "You have unsaved changes to " + fileName +
                     ".\n\n Would you like to save your changes?";
 
-                this.model.app.set('currentWorkspace', ws.get('_id'));
-                if (confirm(dialogText)) {
-                    // action will be continued after saving is done
-                    saveUploader.trySaveFile();
-                }
-                else {
-                    this.model.continueAction();
-                }
+                model.app.set('currentWorkspace', ws.get('_id'));
+
+                $('#dialog-confirm-text').html(dialogText);
+                var dialog = $( '#dialog-confirm' ).dialog({
+                    buttons: {
+                        "Yes": function() {
+                            dialog.dialog('close');
+                            // action will be continued after saving is done
+                            saveUploader.trySaveFile();
+                        },
+                        "No":  function() {
+                            dialog.dialog('close');
+                            model.continueAction();
+                        },
+                        "Cancel":  function() {
+                            dialog.dialog('close');
+                            model.resetAction();
+                        }
+                    }
+                });
             }
             else {
-                this.model.continueAction();
+                model.continueAction();
             }
         }
     });
