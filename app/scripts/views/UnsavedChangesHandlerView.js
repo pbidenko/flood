@@ -31,6 +31,7 @@ define(['backbone', 'jqueryuidialog'], function(Backbone, jqueryuidialog) {
 
                 $('#dialog-confirm-text').html(dialogText);
                 var dialog = $( '#dialog-confirm' ).dialog({
+                    modal: true,
                     buttons: {
                         "Yes": function() {
                             dialog.dialog('close');
