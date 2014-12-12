@@ -53,7 +53,6 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
             return canProcess;
         },
 
-        closingRequest: function (ws) {
         clearHomeRequest: function () {
             // if previous action is in progress
             if (!this.canProcessNextAction())
