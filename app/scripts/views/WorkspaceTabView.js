@@ -94,7 +94,12 @@ define(['backbone'], function(Backbone) {
         // don't remove Home workspace
         if (this.model.get('isCustomNode')) {
 
-            app.get('workspaces').remove(this.model);
+            if (this.model.get('askForUnsavedChanges')) {
+                app.trigger('closing-request', this.model);
+            }
+            else {
+                app.get('workspaces').remove(this.model);
+            }
         }
         else {
             // clear Home workspace
