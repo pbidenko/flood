@@ -120,6 +120,7 @@ require.config({
         Marquee: 'models/Marquee',
         Node: 'models/nodes/Node',
         NumberNode: 'models/nodes/NumberNode',
+        StringNode: 'models/nodes/StringNode',
         BooleanNode: 'models/nodes/BooleanNode',
         CodeBlockNode: 'models/nodes/CodeBlockNode',
         Search: 'models/Search',
@@ -212,6 +213,7 @@ require.config({
         OutputView: 'views/NodeViews/Output',
         CustomNodeView: 'views/NodeViews/CustomNode',
         ThreeCSGNodeView: 'views/NodeViews/ThreeCSG',
+        StringView: 'views/NodeViews/StringView',
         BooleanView: 'views/NodeViews/BooleanView',
 
         OrbitControls: 'lib/OrbitControls',
