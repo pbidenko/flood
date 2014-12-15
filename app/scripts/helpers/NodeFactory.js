@@ -3,7 +3,7 @@ function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode) {
     var map = {
         'Code Block': CodeBlockNode,
         'Number': NumberNode,
-        'String' : StringNode
+        'String' : StringNode,
         'Boolean' : BooleanNode
     };
 
