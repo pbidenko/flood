@@ -1,5 +1,5 @@
-define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', 'ModelsListView', 'ModelsList'],
- function(Backbone, List, SearchElement, SearchElementView, bootstrap, ModelsListView, ModelsList) {
+define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', 'CategorySearchView', 'CategorySearch'],
+ function(Backbone, List, SearchElement, SearchElementView, bootstrap, CategorySearchView, CategorySearch) {
 
   return Backbone.View.extend({
 
@@ -43,12 +43,12 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       this.$input = this.$('.library-search-input');
 
-      this.modelsListView = new ModelsListView({model: new ModelsList()}, {
+      this.categorySearchView = new CategorySearchView({model: new CategorySearch()}, {
                 app: this.app,
                 searchView: this
       });
 
-      this.$list = this.$('.search-list-container').append(this.modelsListView.render().$el);
+      this.$list = this.$('.search-list-container').append(this.categorySearchView.render().$el);
 
       
       // build button tooltips
@@ -124,7 +124,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
       this.$list.hide();
     },
 
-    searchKeyup: _.debounce(function (event) {            
+    searchKeyup: _.debounce(function (event) {
         var searchText = this.$input.val();
         //If the key is Escape or search text is empty, just quit
         if( event.keyCode === 27 ){
@@ -133,13 +133,13 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
         }
 
         if (event.keyCode === 13) { // enter key causes first result to be inserted
-            var elementToAdd = this.modelsListView.topResult;
-            elementToAdd && this.elementClick(elementToAdd.model);                
+            var elementToAdd = this.categorySearchView.topResult;
+            elementToAdd && this.elementClick(elementToAdd.model);
 
         } 
         //Expand categories containing matching elements
         else {
-            this.modelsListView.expandElements(searchText);
+            this.categorySearchView.expandElements(searchText);
         }
     }, 400)
 

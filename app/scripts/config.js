@@ -131,7 +131,7 @@ require.config({
         Help: 'models/Help',
         Feedback: 'models/Feedback',
         Login: 'models/Login',
-        ModelsList: 'models/ModelsList',
+        CategorySearch: 'models/CategorySearch',
         UnsavedWorkspaceChangesHandler: 'models/UnsavedWorkspaceChangesHandler',
         SaveUploader: 'models/BaseSaveUploader', //'models/NWKSaveUploader',
 
@@ -196,7 +196,7 @@ require.config({
         LoginView: 'views/LoginView',
         WorkspaceBrowserElementView: 'views/WorkspaceBrowserElementView',
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
-        ModelsListView: 'views/ModelsListView',
+        CategorySearchView: 'views/CategorySearchView',
         SearchCategoryView: 'views/SearchCategoryView',
         UnsavedChangesHandlerView: 'views/UnsavedChangesHandlerView',
         SaveUploaderView: 'views/BaseSaveUploaderView', //'views/NWKSaveUploaderView',

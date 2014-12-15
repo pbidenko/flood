@@ -1,6 +1,6 @@
 define(['backbone'], function (Backbone) {
 
-    var ModelsList = Backbone.Model.extend({
+    var CategorySearch = Backbone.Model.extend({
 
         maxNumberResults: 10,
         minResultsForTolerantSearch: 0,
@@ -176,6 +176,6 @@ define(['backbone'], function (Backbone) {
         return regExp.test(tag);
     };
 
-    return ModelsList;
+    return CategorySearch;
 
 });
