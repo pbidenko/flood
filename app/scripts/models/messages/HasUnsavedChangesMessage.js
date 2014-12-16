@@ -3,7 +3,7 @@
  */
 define(function(){
     function HasUnsavedChangesMessage(guid){
-        this.$type = 'DynamoWebServer.Messages.HasUnsavedChangesMessage, DynamoWebServer';
+        this.type = 'HasUnsavedChangesMessage';
         this.WorkspaceGuid = guid;
     }
 
