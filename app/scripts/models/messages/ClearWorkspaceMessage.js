@@ -3,7 +3,7 @@
  */
 define(function(){
     function ClearWorkspaceMessage(onlyHome){
-        this.$type = 'DynamoWebServer.Messages.ClearWorkspaceMessage, DynamoWebServer';
+        this.type = 'ClearWorkspaceMessage';
         this.ClearOnlyHome = onlyHome;
     }
 
