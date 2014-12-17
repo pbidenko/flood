@@ -344,31 +344,35 @@ define([  'backbone',
       this.workspaceTabViews[workspace.get('_id')] = view;
 
       view.render();
-      this.$workspace_tabs.append( view.$el );      
+      var index = this.model.get('workspaces').indexOf(workspace);
+      if (index) {
+          this.$workspace_tabs.append(view.$el);
+      }
+      else { // insert at the begin
+          this.$workspace_tabs.prepend(view.$el);
+      }
     },
 
     removeWorkspaceTab: function(workspace){
+      var workspaceId = workspace.get('_id');
 
       // The Workspace can no longer be current
       workspace.set('current', false);
 
        // check if the removed workspace is the current one
-      if (workspace.get('_id') == this.model.get('currentWorkspace') ){
+      if (workspaceId == this.model.get('currentWorkspace') ){
 
         // are there any more workspaces?
-        if ( this.model.get('workspaces').length != 0 ){
-          this.model.set('currentWorkspace', this.model.get('workspaces').first().get('_id') );
-
-        // if we're out of workspaces, just add a new one
-        } else {
-          var that = this;
-          this.newWorkspace();
+        if ( this.model.get('workspaces').length != 0 ) {
+            this.model.set('currentWorkspace', this.model.get('workspaces').first().get('_id'));
         }
       }
       
-      this.workspaceTabViews[workspace.get('_id')].$el.remove();
-      delete this.workspaceTabViews[workspace.get('_id')];
-
+      this.workspaceTabViews[workspaceId].$el.remove();
+      delete this.workspaceTabViews[workspaceId];
+      this.workspaceViews[workspaceId].$el.remove();
+      delete this.workspaceViews[workspaceId];
+      workspace.dispose();
     },
 
     getCurrentWorkspaceCenter: function(){

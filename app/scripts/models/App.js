@@ -124,7 +124,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
         data.name = 'Home';
         var ws = new Workspace(data, {app: this });
-        this.get('workspaces').add( ws );
+        this.get('workspaces').add( ws, { at: 0 } );
         this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
 
@@ -173,22 +173,44 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     loadWorkspace: function( id, callback, silent, makeCurrent ) {
 
         this.context.loadWorkspace(id).done(function (data) {
-
-            var ws = this.get('workspaces').get(id);
+            var allWorkspaces = this.get('workspaces');
+            var ws = allWorkspaces.get(id);
             if (ws) return;
 
-            // if we need to not send it to the dynamo
+            // if we need to not send it to dynamo
             if (silent) {
                 data.notNotifyServer = true;
             }
-            ws = new Workspace(data, {app: this});
-            this.get('workspaces').add(ws);
 
-            if (makeCurrent)
+            // if we try to open another Home ws
+            // currently opened one should be closed
+            // because only one Home tab is allowed
+            if (!data.isCustomNode) {
+                this.trigger('replace-old-home');
+                var homes = allWorkspaces.where({ isCustomNode: false });
+                if (homes.length) {
+                    allWorkspaces.remove(homes[0]);
+                }
+            }
+
+            ws = new Workspace(data, {
+                app: this
+            });
+
+            if (data.isCustomNode) {
+                allWorkspaces.add(ws);
+            }
+            else {
+                allWorkspaces.add(ws, {at: 0});
+            }
+
+            if (makeCurrent) {
                 this.set('currentWorkspace', ws.get('_id'));
+            }
 
-            if (callback)
+            if (callback) {
                 callback(ws);
+            }
 
         }.bind(this)).fail(function () {
 

@@ -265,6 +265,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     },
 
+    dispose: function () {
+        this.get('connections').reset();
+        this.get('nodes').reset();
+        this.resolver.stopListening();
+        this.stopListening();
+    },
+
     getCustomNodeInputsOutputs: function(getOutputs){
 
       var typeName = getOutputs ? "Output" : "Input";
