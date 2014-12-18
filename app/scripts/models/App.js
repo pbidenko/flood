@@ -135,13 +135,17 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newNodeWorkspace: function( callback, customNodeName ) {
+    newNodeWorkspace: function( callback, customNodeName, silent ) {
       this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
         data.guid = this.makeId();
         data.name = customNodeName;
 
+        // if we need to not send it to the dynamo
+        if (silent) {
+            data.notNotifyServer = true;
+        }
         var ws = new Workspace(data, { app: this });
 
         this.get('workspaces').add( ws );
@@ -165,15 +169,23 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    loadWorkspace: function( id, callback ) {
+    loadWorkspace: function( id, callback, silent, makeCurrent ) {
 
         this.context.loadWorkspace(id).done(function (data) {
 
             var ws = this.get('workspaces').get(id);
             if (ws) return;
 
+            // if we need to not send it to the dynamo
+            if (silent) {
+                data.notNotifyServer = true;
+            }
+
             ws = new Workspace(data, {app: this});
             this.get('workspaces').add(ws);
+
+            if (makeCurrent)
+                this.set('currentWorkspace', ws.get('_id'));
 
             if (callback)
                 callback(ws);

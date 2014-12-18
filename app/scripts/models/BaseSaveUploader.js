@@ -184,7 +184,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                         app.loadWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true, true);
                     }
                     else {
-                        app.newNodeWorkspace(prepareWorkspace.bind(this), true);
+                        app.newNodeWorkspace(prepareWorkspace.bind(this), null, true);
                     }
                 }
                 else {

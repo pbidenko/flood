@@ -16,17 +16,6 @@ define(['views/AppView', 'SaveUploaderView'],
             this.model.sync('update', this.model);
         },
 
-        newNodeWorkspace: function() {
-            var customNodeName = prompt('Provide a name for the Custom Node', 'New custom node');
-            if (!customNodeName || !customNodeName.trim().length)
-                return;
-
-            customNodeName = customNodeName.trim();
-
-            this.model.newNodeWorkspace(null, false, customNodeName);
-            this.hideAddWorkspaceSelect();
-        },
-
         newHomeClick: function () {
             this.saveUploaderView.clearHomeWorkspace();
         }
