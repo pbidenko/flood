@@ -17,7 +17,7 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
 
             this.listenTo( attrs.saveUploader, 'saving-is-done', this.continueAction );
 
-            currentAction = actions.waitForRequest;
+            this.resetAction();
         },
 
         continueAction: function () {
@@ -26,6 +26,10 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
             }
 
             // reset
+            this.resetAction();
+        },
+
+        resetAction: function () {
             currentAction = actions.waitForRequest;
         },
 
