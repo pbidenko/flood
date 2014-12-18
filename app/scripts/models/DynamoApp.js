@@ -1,11 +1,12 @@
-define(['backbone', 'models/App', 'SocketConnection', 'SearchElement'],
-    function (Backbone, App, SocketConnection, SearchElement) {
+define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'SaveUploader', 'Workspace'],
+    function (Backbone, App, SocketConnection, SearchElement, SaveUploader, Workspace) {
 
         return App.extend({
 
             initialize: function () {
                 this.socket = new SocketConnection({ app: this });
                 this.on('libraryItemsList-received:event', this.mapLibraryItems, this);
+                this.saveUploader = new SaveUploader({ app: this });
                 App.prototype.initialize.call(this);
             },
 

@@ -193,7 +193,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                         app.loadWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true, true);
                     }
                     else {
-                        app.newNodeWorkspace(prepareWorkspace.bind(this), true);
+                        app.newNodeWorkspace(prepareWorkspace.bind(this), null, true);
                     }
                 }
                 else {
@@ -202,7 +202,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
             },
 
             setProxyNodesDependenciesData: function (data) {
-                if (this.proxyNodesDependencies.indexOf(data) == -1) {
+                if (this.proxyNodesDependencies.indexOf(data) === -1) {
                     this.proxyNodesDependencies.push(data);
                 }
 
@@ -212,7 +212,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
             },
 
             setAvailableCustomNodeDefinitions: function(guid) {
-                if (this.availableCustomNodeDefinitions.indexOf(guid) == -1) {
+                if (this.availableCustomNodeDefinitions.indexOf(guid) === -1) {
                     this.availableCustomNodeDefinitions.push(guid);
                 }
 
@@ -249,7 +249,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
 
                             node.set('isProxy', false);
 
-                            if (customNodeId && workspace.get('workspaceDependencyIds').indexOf(customNodeId) == -1) {
+                            if (customNodeId && workspace.get('workspaceDependencyIds').indexOf(customNodeId) === -1) {
                                 node.get('extra').functionId = customNodeId;
                                 workspace.addWorkspaceDependency(customNodeId);
                             }

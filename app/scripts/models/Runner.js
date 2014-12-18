@@ -46,12 +46,6 @@ define(['backbone'], function (Backbone) {
 
         initWorkspace: function () {
 
-            // notNotifyServer property is needed when we create a workspace from file
-            // and dynamo already have it
-            if (this.workspace.get('notNotifyServer')) {
-                this.workspace.get('notNotifyServer', false);
-                return;
-            }
             this.post({ kind: 'addWorkspace' });
 
             var wsc = this.workspace.toJSON();

@@ -28,6 +28,7 @@ define(['backbone', 'UnsavedChangesHandlerView'], function (Backbone, UnsavedCha
 
             performSaveAsClick: function () {
                 this.$el.find('#savefile').trigger('click');
+                this.model.savingWasStarted = true;
             },
 
             saveClick: function () {
@@ -59,8 +60,9 @@ define(['backbone', 'UnsavedChangesHandlerView'], function (Backbone, UnsavedCha
             },
 
             pickUpFilePath: function(e) {
+                this.model.savingWasStarted = false;
                 var files = e.target.files;
-                if (files && files.length == 1) {
+                if (files && files.length === 1) {
                     if (files[0].path) {
                         this.model.saveAtPath(files[0].path);
                     }
@@ -71,7 +73,7 @@ define(['backbone', 'UnsavedChangesHandlerView'], function (Backbone, UnsavedCha
 
             loadSelectedFile: function (e) {
                 var files = e.target.files;
-                if (files && files.length == 1) {
+                if (files && files.length === 1) {
                     if (files[0].path) {
                         this.model.loadFromPath(files[0].path);
                     }
