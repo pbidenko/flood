@@ -344,8 +344,8 @@ define([  'backbone',
       this.workspaceTabViews[workspace.get('_id')] = view;
 
       view.render();
-      var index = this.model.get('workspaces').indexOf(workspace);
-      if (index) {
+
+      if (workspace.get('isCustomNode')) {
           this.$workspace_tabs.append(view.$el);
       }
       else { // insert at the begin
