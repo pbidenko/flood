@@ -1,4 +1,4 @@
-define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView', 'ModelsList'], function (Backbone, SearchElement, SearchElementView, ModelsListView, ModelsList) {
+define(['backbone', 'SearchElement', 'SearchElementView', 'CategorySearchView', 'CategorySearch'], function (Backbone, SearchElement, SearchElementView, CategorySearchView, CategorySearch) {
 
     return Backbone.View.extend({
 
@@ -25,12 +25,12 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView', 'Mod
 
             this.$input = this.$('.library-search-input');
 
-            this.modelsListView = new ModelsListView({model: new ModelsList()}, {
+            this.categorySearchView = new CategorySearchView({model: new CategorySearch()}, {
                 app: this.app,
                 searchView: this
             });
 
-            this.$el.append(this.modelsListView.render().$el);
+            this.$el.append(this.categorySearchView.render().$el);
         },
 
         addNode: function (nodeModel) {
@@ -48,7 +48,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView', 'Mod
             this.app.trigger('hide-search');
         },
 
-        searchKeyup: _.debounce(function (event) {
+        searchKeyup: function (event) {
             var searchText = this.$input.val();
             //If the key is Escape or search text is empty, just quit
             if( event.keyCode === 27 ){
@@ -57,15 +57,15 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'ModelsListView', 'Mod
             }
 
             if (event.keyCode === 13) { // enter key causes first result to be inserted
-                var elementToAdd = this.modelsListView.topResult;
+                var elementToAdd = this.categorySearchView.topResult;
                 elementToAdd && this.elementClick(elementToAdd.model);                
 
             } 
             //Expand categories containing matching elements
             else {
-                this.modelsListView.expandElements(searchText);
+                this.categorySearchView.expandElements(searchText);
             }
-        }, 400)
+        }
     });
 });
 

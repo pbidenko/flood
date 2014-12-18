@@ -3,8 +3,7 @@ var mongoose = require('mongoose')
 	, Workspace = require('../models/Workspace').WorkspaceModel
 	, User = require('../models/User')
 	, async = require('async')
-	, _ = require('underscore')
-	, ExampleWorkspaces = require('./exampleWorkspaces');
+	, _ = require('underscore');
 
 var initNonUserSession = function(req, res){
 
@@ -36,43 +35,35 @@ var initNonUserSession = function(req, res){
 var initUserSession = function(req, res){
 
 	var user = req.user;
-	var nws = new Workspace(ExampleWorkspaces.myFirstProject);
-	var nws1 = new Workspace(ExampleWorkspaces.myFirstCustomNode);
-	var newSesh = new Session({name : "Session", workspaces : [ nws, nws1 ]});
+	var nws = new Workspace({ name: "My First Project" });
+	var newSesh = new Session({name : "Session", workspaces : [ nws ]});
 
 	nws.maintainers = [ req.user ];
-	nws1.maintainers = [ req.user ];
 
 	nws.save(function(errWs){
 
 		if (errWs) return res.status(500).send("Failed to initialize user workspace");
 
-		nws1.save(function(errWs1){
+		newSesh.save(function(errSesh){
+			
+			if (errSesh) return res.status(500).send("Failed to initialize user session");
 
-			if (errWs1) return res.status(500).send("Failed to initialize user workspace");
+			user.lastSession = newSesh;
+			user.workspaces = [ nws ]; 
+			user.markModified("lastSession workspaces");		
 
-			newSesh.save(function(errSesh){
-				
-				if (errSesh) return res.status(500).send("Failed to initialize user session");
+			user.save(function(err){
+				if (err) return res.status(500).send("Failed to save user session");
 
-				user.lastSession = newSesh;
-				user.workspaces = [ nws, nws1 ];
-				user.markModified("lastSession workspaces");		
+				Session	
+				.findById(user.lastSession )
+				.populate('workspaces')
+				.exec( function(err, sesh){
 
-				user.save(function(err){
-					if (err) return res.status(500).send("Failed to save user session");
-
-					Session	
-					.findById(user.lastSession )
-					.populate('workspaces')
-					.exec( function(err, sesh){
-
-						if (err || !sesh ) return res.status(500).send("Failed to obtain user session");
-						return res.send(sesh);
-					});
+					if (err || !sesh ) return res.status(500).send("Failed to obtain user session");
+					return res.send(sesh);
 				});
 			});
-
 		});
 		
 	});

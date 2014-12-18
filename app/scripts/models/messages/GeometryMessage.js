@@ -1,6 +1,6 @@
 define(function(){
     function GeometryMessage(nodeId){
-        this.$type = 'DynamoWebServer.Messages.GetNodeGeometryMessage, DynamoWebServer';
+        this.type = 'GetNodeGeometryMessage';
         this.NodeId = nodeId;
     }
 

@@ -16,27 +16,27 @@
         },
         messageStack = [],
         responseMap = {
-            'DynamoWebServer.Responses.ContentResponse, DynamoWebServer': ContentResponse,
-            'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': ComputationResponse,
-            'DynamoWebServer.Responses.LibraryItemsListResponse, DynamoWebServer': LibraryItemsListResponse,
-            'DynamoWebServer.Responses.SavedFileResponse, DynamoWebServer': SavedFileResponse,
-            'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : NodeCreationDataResponse,
-            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : GeometryDataResponse,
-            'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : UpdateProxyNodesResponse,
-            'DynamoWebServer.Responses.WorkspacePathResponse, DynamoWebServer' : WorkspacePathResponse,
-            'DynamoWebServer.Responses.HasUnsavedChangesResponse, DynamoWebServer' : HasUnsavedChangesResponse,
-            'DynamoWebServer.Responses.CodeBlockDataResponse, DynamoWebServer' : CodeBlockDataResponse
+            'ContentResponse': ContentResponse,
+            'ComputationResponse': ComputationResponse,
+            'LibraryItemsListResponse': LibraryItemsListResponse,
+            'SavedFileResponse': SavedFileResponse,
+            'NodeCreationDataResponse' : NodeCreationDataResponse,
+            'GeometryDataResponse' : GeometryDataResponse,
+            'UpdateProxyNodesResponse' : UpdateProxyNodesResponse,
+            'WorkspacePathResponse' : WorkspacePathResponse,
+            'HasUnsavedChangesResponse' : HasUnsavedChangesResponse,
+            'CodeBlockDataResponse' : CodeBlockDataResponse
         },
         responseEventMap = {
-            'DynamoWebServer.Responses.ComputationResponse, DynamoWebServer': 'computation-completed:event',
-            'DynamoWebServer.Responses.LibraryItemsListResponse, DynamoWebServer': 'libraryItemsList-received:event',
-            'DynamoWebServer.Responses.SavedFileResponse, DynamoWebServer': 'saved-file-received:event',
-            'DynamoWebServer.Responses.NodeCreationDataResponse, DynamoWebServer' : 'creation-data-received:event',
-            'DynamoWebServer.Responses.GeometryDataResponse, DynamoWebServer' : 'geometry-data-received:event',
-            'DynamoWebServer.Responses.UpdateProxyNodesResponse, DynamoWebServer' : 'proxy-nodes-data-received:event',
-            'DynamoWebServer.Responses.WorkspacePathResponse, DynamoWebServer' : 'ws-path-received:event',
-            'DynamoWebServer.Responses.HasUnsavedChangesResponse, DynamoWebServer' : 'ws-unsaved-changes-presence-received:event',
-            'DynamoWebServer.Responses.CodeBlockDataResponse, DynamoWebServer' : 'code-block-node-updated:event'
+            'ComputationResponse': 'computation-completed:event',
+            'LibraryItemsListResponse': 'libraryItemsList-received:event',
+            'SavedFileResponse': 'saved-file-received:event',
+            'NodeCreationDataResponse': 'creation-data-received:event',
+            'GeometryDataResponse': 'geometry-data-received:event',
+            'UpdateProxyNodesResponse': 'proxy-nodes-data-received:event',
+            'WorkspacePathResponse': 'ws-path-received:event',
+            'HasUnsavedChangesResponse': 'ws-unsaved-changes-presence-received:event',
+            'CodeBlockDataResponse': 'code-block-node-updated:event'
         },
         app;
 

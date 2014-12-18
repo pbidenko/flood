@@ -111,6 +111,10 @@ app.use(function(req, res, next) {
 
 // flood routes
 
+function redirectToApp(req, res){ return res.redirect('app.html')}
+app.get('/', redirectToApp);
+app.get('/index.html', redirectToApp);
+
 app.get('/mys', floodController.getMySession);
 app.put('/mys', floodController.putMySession);
 app.get('/nws', floodController.getNewWorkspace );
@@ -119,8 +123,6 @@ app.get('/ws', floodController.getWorkspaces);
 
 app.get('/ws/:id', floodController.getWorkspace);
 app.put('/ws/:id', floodController.putWorkspace);
-
-app.get('/', homeController.index);
 
 app.get('/email', userController.getEmail );
 
