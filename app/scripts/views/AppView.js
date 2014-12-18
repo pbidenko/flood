@@ -135,22 +135,18 @@ define([  'backbone',
 
       var isBackspaceOrDelete = e.keyCode === 46 || e.keyCode === 8;
 
-      if ( !(e.metaKey || e.ctrlKey) && !isBackspaceOrDelete ) return;
+      if ( !(e.metaKey || e.ctrlKey) && !isBackspaceOrDelete )
+          return;
 
-      // do not capture from input
-      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "INPUT") return;
-      if (e.target.nodeName === "INPUT") return;
+      var excludedNames = ["INPUT", "CODE", "TEXTAREA"];
+      var srcEl = e.originalEvent.srcElement;
 
-      // do not capture from textarea
-      if (e.originalEvent.srcElement && e.originalEvent.srcElement.nodeName === "CODE" ) return;
-      if (e.target.nodeName === "CODE") return;
+      // do not capture from input and textarea
+      if (srcEl && excludedNames.indexOf(srcEl.nodeName) > -1
+          || excludedNames.indexOf(e.target.nodeName) > -1)
+          return;
 
       // keycodes: http://css-tricks.com/snippets/javascript/javascript-keycodes/
-      switch (e.keyCode) {
-        case 78:
-          this.newWorkspace();
-          return e.preventDefault();
-      }
 
       this.currentWorkspaceView.keydownHandler(e);
     },

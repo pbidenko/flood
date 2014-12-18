@@ -40,9 +40,22 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
             }
         },
 
+        canProcessNextAction: function () {
+            var saveUploader = this.app.saveUploader;
+            // it can be true only if a user closed
+            // save dialog without saving (Cancel or X)
+            if (saveUploader.savingWasStarted) {
+                saveUploader.savingWasStarted = false;
+                currentAction = actions.waitForRequest;
+            }
+
+            var canProcess = (currentAction === actions.waitForRequest);
+            return canProcess;
+        },
+
         clearHomeRequest: function () {
             // if previous action is in progress
-            if (currentAction !== actions.waitForRequest)
+            if (!this.canProcessNextAction())
                 return;
 
             currentAction = actions.clearHomeWS;

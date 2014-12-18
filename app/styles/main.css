@@ -1170,6 +1170,13 @@ input[type="button"].btn-block {
     margin: 2px;
 }
 
+.string-node-input {
+    max-width: 150px;
+    min-width: 150px;
+    min-height: 22px;
+    max-height: 300px;
+}
+
 .currentValue {
     box-shadow: none;
 }

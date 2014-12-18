@@ -120,6 +120,7 @@ require.config({
         Marquee: 'models/Marquee',
         Node: 'models/nodes/Node',
         NumberNode: 'models/nodes/NumberNode',
+        StringNode: 'models/nodes/StringNode',
         BooleanNode: 'models/nodes/BooleanNode',
         CodeBlockNode: 'models/nodes/CodeBlockNode',
         Search: 'models/Search',
@@ -131,7 +132,7 @@ require.config({
         Help: 'models/Help',
         Feedback: 'models/Feedback',
         Login: 'models/Login',
-        ModelsList: 'models/ModelsList',
+        CategorySearch: 'models/CategorySearch',
         UnsavedWorkspaceChangesHandler: 'models/UnsavedWorkspaceChangesHandler',
         SaveUploader: 'models/BaseSaveUploader', //'models/NWKSaveUploader',
 
@@ -196,7 +197,7 @@ require.config({
         LoginView: 'views/LoginView',
         WorkspaceBrowserElementView: 'views/WorkspaceBrowserElementView',
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
-        ModelsListView: 'views/ModelsListView',
+        CategorySearchView: 'views/CategorySearchView',
         SearchCategoryView: 'views/SearchCategoryView',
         UnsavedChangesHandlerView: 'views/UnsavedChangesHandlerView',
         SaveUploaderView: 'views/BaseSaveUploaderView', //'views/NWKSaveUploaderView',
@@ -212,6 +213,7 @@ require.config({
         OutputView: 'views/NodeViews/Output',
         CustomNodeView: 'views/NodeViews/CustomNode',
         ThreeCSGNodeView: 'views/NodeViews/ThreeCSG',
+        StringView: 'views/NodeViews/StringView',
         BooleanView: 'views/NodeViews/BooleanView',
 
         OrbitControls: 'lib/OrbitControls',

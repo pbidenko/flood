@@ -3,7 +3,7 @@
  */
 define(function(){
     function SetModelPositionMessage(nodePositions, guid, name){
-        this.$type = 'DynamoWebServer.Messages.SetModelPositionMessage, DynamoWebServer';
+        this.type = 'SetModelPositionMessage';
         this.ModelPositions = nodePositions || [];
         this.WorkspaceGuid = guid;
         this.WorkspaceName = name;

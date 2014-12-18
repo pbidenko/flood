@@ -28,6 +28,7 @@ define(['backbone', 'UnsavedChangesHandlerView'], function (Backbone, UnsavedCha
 
             performSaveAsClick: function () {
                 this.$el.find('#savefile').trigger('click');
+                this.model.savingWasStarted = true;
             },
 
             saveClick: function () {
@@ -59,6 +60,7 @@ define(['backbone', 'UnsavedChangesHandlerView'], function (Backbone, UnsavedCha
             },
 
             pickUpFilePath: function(e) {
+                this.model.savingWasStarted = false;
                 var files = e.target.files;
                 if (files && files.length === 1) {
                     if (files[0].path) {
