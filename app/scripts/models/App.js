@@ -1,7 +1,7 @@
 define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers',
-        'Storage', 'settings', 'SaveUploader'],
+        'Storage', 'settings'],
     function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers,
-             Storage, settings, SaveUploader) {
+             Storage, settings) {
 
   return Backbone.Model.extend({
 
@@ -35,7 +35,6 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.SearchElements.fetch();
 
       this.context = new Storage({ baseUrl: settings.storageUrl });
-      this.saveUploader = new SaveUploader({ app: this });
 
       this.get('workspaces').on('remove', this.workspaceRemoved, this);
       this.listenTo(this, 'code-block-node-updated:event', this.updateCodeBlockNode);
@@ -136,7 +135,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newNodeWorkspace: function( callback, silent, customNodeName ) {
+    newNodeWorkspace: function( callback, customNodeName, silent ) {
       this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
@@ -181,6 +180,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
             if (silent) {
                 data.notNotifyServer = true;
             }
+
             ws = new Workspace(data, {app: this});
             this.get('workspaces').add(ws);
 

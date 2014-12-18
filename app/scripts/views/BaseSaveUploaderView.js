@@ -32,7 +32,7 @@ define(['backbone'], function(Backbone) {
 
         loadSelectedFile: function (e) {
             var files = e.target.files;
-            if (files && files.length == 1) {
+            if (files && files.length === 1) {
                 this.model.app.socket.send(files[0]);
 
                 e.target.value = null;
