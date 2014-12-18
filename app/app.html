@@ -34,28 +34,28 @@
             left: 0;
             top: 0;
             bottom: 0;
-            background-image: -ms-radial-gradient(center, circle closest-corner, #E3E3E3 0, #C4C4C4 100%);
-            background-image: -moz-radial-gradient(center, circle closest-corner, #E3E3E3 0, #C4C4C4 100%);
-            background-image: -o-radial-gradient(center, circle closest-corner, #E3E3E3 0, #C4C4C4 100%);
-            background-image: -webkit-gradient(radial, center center, 0, center center, 497, color-stop(0, #E3E3E3), color-stop(1, #C4C4C4));
-            background-image: -webkit-radial-gradient(center, circle closest-corner, #E3E3E3 0, #C4C4C4 100%);
-            background-image: radial-gradient(circle closest-corner at center, #E3E3E3 0, #C4C4C4 100%);
+            background-image: -ms-radial-gradient(center top, circle farthest-corner, #7C7C7C 0%, #3C3C3C 100%);
+            background-image: -moz-radial-gradient(center top, circle farthest-corner, #7C7C7C 0%, #3C3C3C 100%);
+            background-image: -o-radial-gradient(center top, circle farthest-corner, #7C7C7C 0%, #3C3C3C 100%);
+            background-image: -webkit-gradient(radial, center top, 0, center top, 478, color-stop(0, #7C7C7C), color-stop(1, #3C3C3C));
+            background-image: -webkit-radial-gradient(center top, circle farthest-corner, #7C7C7C 0%, #3C3C3C 100%);
+            background-image: radial-gradient(circle farthest-corner at center top, #7C7C7C 0%, #3C3C3C 100%);
         }
 
         .editor-container {
-            letter-spacing: 60px;
+            letter-spacing: 64px;
             padding-top: 230px;
             width: 450px;
             margin-left: auto;
             margin-right: auto;
             font-size: 16px;
-            color: #666;
-            text-shadow: 0 1px white;
+            color: #444;
+            text-shadow: 0 -1px #222;
         }
 
-            .editor-container span {
-                margin-left: 45px;
-            }
+        .editor-container span {
+            margin-left: 35px;
+        }
 
         #title a {
             text-decoration: none;
@@ -65,9 +65,10 @@
             font-family: Helvetica, Arial, "Lucida Grande", sans-serif;
             padding: 0;
             margin: 0;
-            font-size: 180px;
-            text-shadow: 0 1px white;
+            font-size: 160px;
+            text-shadow: 0 -1px #222;
             width: 500px;
+            padding-top: 40px;
             left: 50%;
             margin-left: -250px;
             position: absolute;
@@ -80,13 +81,13 @@
         #title-grey {
             height: 145px;
             z-index: 122;
-            color: #272822;
+            color: black;
             width: 500px;
         }
 
         #title-blue {
             position: absolute;
-            color: #589cc8;
+            color: #3c3c3c;
             width: 500px;
         }
 
@@ -94,9 +95,9 @@
             padding: 5px;
         }
 
-            .form-group label {
-                color: #AAA;
-            }
+        .form-group label {
+            color: #AAA;
+        }
 
         .login-container {
             padding-top: 50px;
@@ -105,11 +106,10 @@
             margin-right: auto;
         }
 
-            .login-container h5 {
-                font-size: 18px;
-                color: #666;
-                text-shadow: 0 1px white;
-            }
+        .login-container h5 {
+            font-size: 18px;
+            color: #444;
+        }
 
         #app-fail {
             position: absolute;
@@ -132,19 +132,19 @@
             margin-top: 50px;
         }
 
-            #app-fail-container i {
-                font-size: 150px;
-                color: grey;
-            }
+        #app-fail-container i {
+            font-size: 150px;
+            color: grey;
+        }
 
-            #app-fail-container h1 {
-                text-align: center;
-            }
+        #app-fail-container h1 {
+            text-align: center;
+        }
 
-            #app-fail-container p {
-                padding-top: 20px;
-                color: grey;
-            }
+        #app-fail-container p {
+            padding-top: 20px;
+            color: grey;
+        }
     </style>
 
 </head>
@@ -666,7 +666,7 @@
     </div>
 
     <div id="tab-button-container">
-        <a id="login-tab-button" href="#" class="btn btn-block btn-flood btn-social"><i class="fa fa-check"></i>Sign in with Flood</a>
+        <a id="login-tab-button" href="#" class="btn btn-block btn-flood btn-social"><i class="fa fa-check"></i>Sign in</a>
     </div>
 
     <form id="signup-form" style="display:none">
@@ -716,9 +716,10 @@
 
     <div id="signup-tab-button" class="tab-button"><a href="#">New account...</a></div>
 
+    <!--
     <a href="/auth/google" class="btn btn-block btn-google-plus btn-social"><i class="fa fa-google-plus"></i>Sign in with Google</a>
     <a href="/auth/facebook" class="btn btn-block btn-facebook btn-social"><i class="fa fa-facebook"></i>Sign in with Facebook</a>
-
+    -->
 </script>
 
 <script type="text/template" id="feedback-template">

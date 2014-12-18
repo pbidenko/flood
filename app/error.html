@@ -2,6 +2,8 @@
 <head>
     <title>Error</title>
 
+    <link rel="stylesheet" href="styles/style.min.css">
+
     <style>
 
         body {
@@ -11,20 +13,54 @@
             text-align: center;
         }
 
-        #text {
-            padding-top: 90px;
+        #app-fail {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;            
+            color: #333;
+            z-index: 125;
+            background: #960018;
+        }
+
+        #app-fail-container {
+            border-radius: 6px;
+            width: 450px;
             margin-left: auto;
             margin-right: auto;
-            font-size: 60px;
-            color: #589cc8;
-            text-shadow: 0 1px white;
+            padding: 20px;
+            background: whitesmoke;
+            margin-top: 50px;
+        }
+
+        #app-fail-container i {
+            font-size: 150px;
+            color: grey;
+        }
+
+        #app-fail-container h1 {
+            text-align: center;
+        }
+
+        #app-fail-container p {
+            padding-top: 20px;
+            color: grey;
         }
 
     </style>
 </head>
 <body>
-    <div id="text">Oops! Something went wrong.</div>
-	<br />
-	<div id="text">Please, restart the application.</div>
+
+    <div id="app-fail">
+
+        <div id="app-fail-container">
+            <h1><i class="fa fa-fw fa-2x fa-frown-o"></i></h1>
+            <h1>Reach couldn't start</h1>
+            <p> Please exit and restart the application. </p>
+        </div>
+
+    </div>
+
 </body>
 </html>
