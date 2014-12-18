@@ -7,21 +7,21 @@
                 child;
 
             <!-- build:remove:selenium -->
-            require('nw.gui').Window.get().showDevTools();
+            // require('nw.gui').Window.get().showDevTools();
             <!-- /build -->
 
             child = execFile('DynamoWebServer.exe', ['headless'], { cwd: 'dynamo' }, function (error, stdout, stderr) {
                 try {
-                    // if (error) {
-                    //     window.location.href = 'error.html';
-                    // }
+                    if (error) {
+                        window.location.href = 'error.html';
+                    }
 
                     console.log('Error: ' + error);
                     console.log('Child Process stdout: ' + stdout);
                     console.log('Child Process stderr: ' + stderr);
                 }
                 catch (exc){
-                    // window.location.href = 'error.html';
+                    window.location.href = 'error.html';
 
                     console.log('Exception: ' + exc);
                     console.log('Child Process stdout: ' + stdout);
@@ -39,10 +39,10 @@
                     window.location.href = 'app.html';
                 };
 
-            }, 2000);
+            }, 500);
         }
         catch (exc){
-            // window.location.href = 'error.html';
+            window.location.href = 'error.html';
 
             console.log('Exception: ' + exc);
             console.log('Child Process stdout: ' + stdout);
