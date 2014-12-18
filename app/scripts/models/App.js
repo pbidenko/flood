@@ -124,7 +124,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
         data.name = 'Home';
         var ws = new Workspace(data, {app: this });
-        this.get('workspaces').add( ws, { at: 0 } );
+        this.get('workspaces').add( ws );
         this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
 
@@ -197,13 +197,8 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
                 app: this
             });
 
-            if (data.isCustomNode) {
-                allWorkspaces.add(ws);
-            }
-            else {
-                allWorkspaces.add(ws, {at: 0});
-            }
-
+            allWorkspaces.add(ws);
+            
             if (makeCurrent) {
                 this.set('currentWorkspace', ws.get('_id'));
             }
