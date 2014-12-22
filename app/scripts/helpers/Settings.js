@@ -1,8 +1,13 @@
 (function () {
 
+	function getCurrentUrl(){
+	  var domain = document.URL.match(/:\/\/(.[^/:]+)/)[1];
+      return domain;
+	}
+
     var settings = {
         storageUrl: '',
-        socketUrl: 'ws://127.0.0.1:2100'
+        socketUrl: 'ws://' + getCurrentUrl() +':2100'
     };
 
     if (typeof exports === 'object') { // Node.js
