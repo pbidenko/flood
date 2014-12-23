@@ -135,18 +135,20 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newNodeWorkspace: function( callback, customNodeName, silent ) {
+    newNodeWorkspace: function( callback, customNodeName, gotFromDynamo ) {
       this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
         data.guid = this.makeId();
         data.name = customNodeName;
 
+        var attr = { app : this };
         // if we need to not send it to the dynamo
-        if (silent) {
+        if (gotFromDynamo) {
             data.notNotifyServer = true;
+            attr.initCustomNodeLater = true;
         }
-        var ws = new Workspace(data, { app: this });
+        var ws = new Workspace(data, attr);
 
         this.get('workspaces').add( ws );
         this.set('currentWorkspace', ws.get('_id') );
@@ -236,7 +238,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    openWorkspace: function( id, callback ){
+    openWorkspace: function( id, callback, silent ){
 
       this.removeWorkspaceFromBackground( id );
 
@@ -251,7 +253,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
 
-      }.bind(this));
+      }.bind(this), null, silent);
 
     },
 

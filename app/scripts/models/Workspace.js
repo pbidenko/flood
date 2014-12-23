@@ -95,8 +95,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.on('requestRun', this.run, this);
 
       this.set('tabName', this.get('name'));
-      
-      if ( this.get('isCustomNode') ) this.initializeCustomNode();
+
+      // if initCustomNodeLater is set to true it means
+      // the workspace hasn't right now all proper data
+      // for correct initialization (name, guid, nodes, etc)
+      if ( this.get('isCustomNode') && !arr.initCustomNodeLater ) {
+          this.initializeCustomNode();
+      }
 
       this.resolver = new WorkspaceResolver(null, { app : this.app, workspace : this });
       this.resolver.resolveAll();
@@ -588,7 +593,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
         if(this.isCyclicDependency(ws, id))
           return true;
-      };
+      }
 
       return false;
     },

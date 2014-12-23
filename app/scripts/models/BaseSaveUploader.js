@@ -41,6 +41,10 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                 this.watchNodeEvents(x);
             }.bind(ws.runner));
 
+            if (ws.get('isCustomNode')) {
+                ws.initializeCustomNode();
+            }
+
             app.trigger('computation-completed:event', data);
             
             if (data.workspaceId) {
@@ -190,7 +194,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                     workspaces = this.app.workspaceBrowser ? this.app.workspaceBrowser
                         .get('workspaces').where({ guid: params.workspaceId }) : [];
                     if (workspaces.length) {
-                        app.loadWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true, true);
+                        app.openWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true);
                     }
                     else {
                         app.newNodeWorkspace(prepareWorkspace.bind(this), null, true);
