@@ -463,10 +463,11 @@ input[type="button"].btn-block {
 }
 
 #extra-menu .menu-element {
-    height: 40px;
-    width: 38px;
-    font-size: 14px;
-    border: none;
+	height: 38px;
+	width: 38px;
+	font-size: 14px;
+	background: #222;
+	border:none;
 }
 
 #extra-menu #help-button:hover {
@@ -503,12 +504,11 @@ input[type="button"].btn-block {
 }
 
 #extra-menu {
-    z-index: 99;
-    background: #222;
-    position: absolute;
-    width: 38px;
-    top: 80px;
-    right: 0;
+	z-index: 99;
+	position: absolute;
+	width: 38px;
+	top: 80px;
+	right: 0px;
 }
 
 #zoom-menu .menu-element {
@@ -533,9 +533,9 @@ input[type="button"].btn-block {
     white-space: nowrap;
 }
 
-#feedback-box p {
-    font-style: 12px;
-    padding: 5px;
+.modal-box p {
+	font-style: 12px;
+	padding: 5px;
 }
 
 #feedback-sending-message {
@@ -774,7 +774,59 @@ input[type="button"].btn-block {
     margin: 30px;
 }
 
-#feedback {
+#share .inner-box {
+	padding-top: 8px;
+	padding-bottom: 15px;
+}
+
+#share .inner-box .label {
+	font-weight: bold;
+	color: grey;
+}
+
+#share .is-customizer-checkbox {
+	padding: 8px;
+	margin: 10px;
+	margin-right: 24px;
+	font-size: 20px;
+}
+
+.indicator {
+	border-radius: 2px;
+	color: white;
+	padding: 8px;
+	font-size: 14px;
+	text-transform: uppercase;
+}
+
+.private {
+	background-color: #666;
+}
+
+.public {
+	background-color: green;
+}
+
+#share .customizer-url {
+	width: 100%;
+	font-size: 14px;
+	color: black;
+	padding: 4px;
+}
+
+#share span {
+	text-transform: uppercase;
+	padding: 5px;
+	font-size: 14px;
+}
+
+#exit-share {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+}
+
+.modal {
     z-index: 130;
     display: none;
     top: 0;
@@ -788,7 +840,7 @@ input[type="button"].btn-block {
     color: white;
 }
 
-#feedback-box {
+.modal-box {
     background: whitesmoke;
     border: 1px solid #AAA;
     position: relative;
@@ -800,9 +852,19 @@ input[type="button"].btn-block {
     margin-bottom: auto;
 }
 
-    #feedback-box h3 {
-        color: grey;
-    }
+.modal p {
+	font-size: 18px;
+	color: #444;
+	padding-top: 20px;
+	padding-bottom: 10px;
+	text-shadow: 0px 1px 0px white;
+}
+
+.modal-box h3 {
+	color: #444;
+	text-shadow: 0px 1px 0px white;
+	font-size: 35px;
+}
 
 #exit-feedback {
     position: absolute;
@@ -953,6 +1015,12 @@ input[type="button"].btn-block {
     border-right: 1px solid #c7bbb1;
 }
 
+#add-workspace-button i {
+	color: black;
+	font-size: 12px;
+	padding-top: 3px;
+}
+
 #add-workspace-select-element {
     float: left;
     overflow: visible;
@@ -960,12 +1028,12 @@ input[type="button"].btn-block {
 }
 
 #add-workspace-select-container {
-    z-index: 200;
-    position: relative;
-    top: 30px;
-    left: -24px;
-    width: 80px;
-    color: #DDD;
+	z-index: 200; 
+	position:relative; 
+	top: 30px; 
+	left: -25px; 
+	width: 80px;
+	color: #DDD
 }
 
     #add-workspace-select-container ul {
@@ -1010,13 +1078,18 @@ input[type="button"].btn-block {
     border-left: 1px solid #c7bbb1;
 }
 
-    .workspace-tab input {
-        border: none;
-        margin: 0 5px 0 0;
-        padding: 8px 0 5px 5px;
-        display: inline-block;
-        background: rgba(0,0,0,0);
-    }
+.workspace-tab i {
+	color: black;
+	font-size: 12px;
+}
+
+.workspace-tab input{
+	border: none;
+	margin: 0px 5px 0px 0px;
+	padding: 8px 0 5px 5px;
+	display: inline-block;
+	background: rgba(0,0,0,0);
+}
 
         .workspace-tab input:focus {
             outline: none;
@@ -1163,6 +1236,10 @@ input[type="button"].btn-block {
 
 .toggle-vis {
     display: none;
+}
+
+.toggle-vis i {
+	font-size: 13px;
 }
 
 .node-number-input {

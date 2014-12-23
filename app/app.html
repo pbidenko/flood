@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
@@ -158,7 +158,7 @@
             <div id="workspace-tabs"></div>
 
             <div id="add-workspace-button" class="menu-element" style="float: left;">
-                <i class="icon-file dim-button"></i>
+              <i class="fa fa-file dim-button"></i>
             </div>
 
             <div id="add-workspace-select-element">
@@ -211,7 +211,11 @@
             <div id="help-button" class="menu-element">
                 <i class="fa fa-question fa-fw"></i>
             </div>
-        </div>
+
+            <div id="share-button" style="margin-top: 15px" class="menu-element">
+              <i class="fa fa-share fa-fw"></i>
+            </div>
+          </div>
 
         <div id="zoom-menu" class="non-selectable">
 
@@ -255,10 +259,19 @@
         <div id="help" class="col">
 
         </div>
+          <div id="feedback" class="modal row col">
+            
+          </div>
 
-        <div id="feedback" class="row col">
+          <div id="share" class="modal row col">
+            
+          </div>
 
-        </div>
+          <div id="workspace-browser" class="col">
+            
+          </div>
+
+          <div id="viewer" class="row blur"></div>
 
         <div id="workspace-browser" class="col">
 
@@ -343,9 +356,15 @@
         <% }); %>
     </ul>
 
-    <div class="node-data-container">
-        <span class="name searchfield"><%= typeName != "CustomNode" ? displayName : type.functionName  %></span>
-    </div>
+        <div class="node-data-container" >
+            <span class="name searchfield">
+                <% if ( !name || name === "DefaultNodeName" || name === "") { %>
+                <%= typeName != "CustomNode" ? displayName : type.functionName  %>
+                <% } else { %>
+                <%= name %>
+                <% } %>
+            </span>
+        </div>
 
     <ul class="node-outputs">
         <% _.each(type.outputs, function(ele, index) { %>
@@ -364,7 +383,7 @@
             <li class="dropdown-header" style="font-size: 10px; padding: 0">Visibility</li>
 
             <li class="toggle-vis node-dropown-menu-item">
-                <i class="icon-eye-open"></i><span style="padding-left: 5px">Hide geometry</span>
+              <i class="fa fa-fw fa-eye"></i><span style="padding-left: 5px">Hide geometry</span>
             </li>
 
             <li class="dropdown-header">Replication</li>
@@ -377,8 +396,13 @@
                 </div>
             </li>
 
-        </ul>
-    </div>
+            <li class="dropdown-header">Name</li>
+            <li class="node-dropown-menu-item">
+              <input class="name-input" value="<%= name %>">
+            </li>
+
+          </ul>
+        </div>
 
 </script>
 
@@ -477,14 +501,13 @@
 
 <script type="text/template" id="workspace-tab-template">
     <!-- build:remove -->
-    <i class="icon-pencil dim-button edit-button" style="visibility: hidden; margin-left: 10px"></i>
+    <i class="fa fa-fw fa-pencil dim-button edit-button" style="visibility: hidden; margin-left: 10px"></i>
 	<!-- /build -->
-    <span class="workspace-tab-function <%= isCustomNode ? " " : " hidden" %>
-        ">
+    <span class="workspace-tab-function <%= isCustomNode ? " " : " hidden" %>">
         <i class="fa fa-bolt"></i>
     </span>
     <input class="workspace-name" disabled="disabled" value="<%= tabName %>"></input>
-    <i class="icon-remove dim-button remove-button"></i>
+    <i class="fa fa-fw fa-times dim-button remove-button"></i>
 
 </script>
 
@@ -492,7 +515,13 @@
 
     <div class="node-data-container">
 
-        <div class="slider" style="display: inline-block; width: 140px; height: 8px; margin: 0; padding: 0"></div>
+        <% if (name && name != "DefaultNodeName" && name != "") { %>
+            <span style="margin-right: 10px" class="name">
+              <%= name %>
+            </span>
+          <% } %>
+
+        <div class="slider" style="display: inline-block; width: 120px; height: 8px; margin: 0; padding: 0"></div>
 
         <div class="num-data-container" style="display: inline-block;">
             <input type="number" class="currentValue" style="number-node-input" value="<%= type.value %>" />
@@ -514,17 +543,32 @@
 
         <ul class="dropdown-menu node-dropdown-menu" role="menu" style="color: black" aria-labelledby="dLabel">
 
-            <span class="dropdown-header">Min</span>
-            <input type="number" class="num-min">
+            <li class="dropdown-header">Min</li>
+            <li class="node-dropown-menu-item">
+              <input type="number" class="num-min">
+            </li>
 
-            <span class="dropdown-header">Max</span>
-            <input type="number" class="num-max">
+            <li class="dropdown-header">Max</li>
+            <li class="node-dropown-menu-item">
+              <input type="number" class="num-max">
+            </li>
 
-            <span class="dropdown-header">Stepsize</span>
-            <input type="number" class="num-step">
+            <li class="dropdown-header">Stepsize</li>
+            <li class="node-dropown-menu-item">
+              <input type="number" class="num-step">
+            </li>
 
-        </ul>
-    </div>
+            <li class="dropdown-header">Name</li>
+            <li class="node-dropown-menu-item">
+              <input class="name-input" value="<%= name %>">
+            </li>
+            
+            <li class="dropdown-header">
+              Hide in customizer <input type="checkbox" style="margin-left: 10px" <%= extra.lock ? "checked" : ""%> class="lock-input">
+            </li>
+
+          </ul>
+        </div>
 
 </script>
 
@@ -585,7 +629,6 @@
     <div style="float: right; visibility: hidden" class="workspace-browser-element-open">
         Open
     </div>
-
 </script>
 
 <script type="text/template" id="workspace-search-template">
@@ -645,6 +688,9 @@
 
     </div>
 
+          <div id="export-button" class="workspace-search-button workspace-search-button-active">
+            <i class="fa fa-lg fa-fw dim-button fa-download white-icon"></i>
+          </div>
 </script>
 
 <script type="text/template" id="workspace-runner-status-template">
@@ -722,11 +768,38 @@
     -->
 </script>
 
-<script type="text/template" id="feedback-template">
+      <script type="text/template" id="share-template">
 
-    <div id="feedback-box">
-        <i id="exit-feedback" class="icon-remove dim-button"></i>
-        <h3 id="feedback-title">
+        <div id="share-box" class="modal-box">
+
+          <i id="exit-share" class="fa fa-fw fa-times dim-button"></i>
+          <h3 id="feedback-title">
+            <i class="fa fa-share fa-2x fa-fw" style="padding-right: 10px"></i>Share
+          </h3>
+          <p>Share your project as a customizable product website</p>
+
+          <div class="inner-box">
+           <span class="label">Sharing</span> 
+           <br>
+            <i class="fa fa-fw fa-toggle-off dim-button is-customizer-checkbox"></i> 
+            <span class="indicator public">public</span> <span class="indicator private">private</span>
+          </div>
+
+          <div class="inner-box">
+            <span class="label">Stable URL</span> <a href="http://<%= url %>" target="_blank" style="font-style: italic; ">Visit</a>
+            <br>
+            <input type="text" readonly class="customizer-url" placeholder="Project Url" value="<%= url %>">
+          </div>
+
+        </div>
+
+      </script>
+
+      <script type="text/template" id="feedback-template">
+
+        <div id="feedback-box" class="modal-box">
+          <i id="exit-feedback" class="fa fa-fw fa-times dim-button"></i>
+          <h3 id="feedback-title">
             <i class="fa fa-comment fa-2x fa-fw" style="padding-right: 10px"></i>Send Feedback
         </h3>
         <p>Feel free to send comments, suggestions, or issues.</p>
