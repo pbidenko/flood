@@ -23,6 +23,7 @@ var workspaceSchema = new Schema({
   , redoStack: [ Schema.Types.Mixed ]
   , isModified: { type: Boolean, default: false }
   , isCustomNode: { type: Boolean, default: false }
+  , isCustomizer: { type: Boolean, default: false }
   , workspaceDependencyIds: [{type: Schema.ObjectId, ref: 'Workspace' }]
   , guid: { type: String, default: '00000000-0000-0000-0000-000000000000' }
 });

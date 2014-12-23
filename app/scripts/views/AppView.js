@@ -15,11 +15,13 @@ define([  'backbone',
           'Login',
           'FeedbackView',
           'Feedback', 
+          'ShareView',
+          'Share',
           'fastclick',
           'SaveUploaderView' ],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback, fastclick, SaveUploaderView ) {
+            Help, LoginView, Login, FeedbackView, Feedback, ShareView, Share, fastclick, SaveUploaderView ) {
 
   return Backbone.View.extend({
 
@@ -38,6 +40,7 @@ define([  'backbone',
       this.model.get('workspaces').on('remove', this.removeWorkspaceTab, this);
       this.model.on('change:showingSettings', this.viewSettings, this);
       this.model.on('change:showingFeedback', this.viewFeedback, this);
+      this.model.on('change:showingShare', this.viewShare, this);
       this.model.on('change:showingHelp', this.viewHelp, this);
       this.model.on('change:showingBrowser', this.viewBrowser, this);
       this.model.on('hide-search', this.hideSearch, this);
@@ -67,6 +70,7 @@ define([  'backbone',
       'click #workspace_hide' : 'toggleViewer',
       'click #workspace-browser-button': 'toggleBrowser',
       'click #feedback-button': 'toggleFeedback',
+      'click #share-button': 'toggleShare',
 
       'click #zoomin-button': 'zoominClick',
       'click #zoomout-button': 'zoomoutClick',
@@ -232,12 +236,29 @@ define([  'backbone',
       }
     },
 
+    viewShare: function(){
+      if (!this.shareView){
+        this.shareView = new ShareView({model: new Share({ app : this.model }) }, { app: this.model });
+      }
+
+      if (this.model.get('showingShare') === true){
+        this.shareView.render();
+        this.shareView.$el.fadeIn();  
+      } else {
+        this.shareView.$el.fadeOut();
+      }
+    },
+
     toggleHelp: function(){
       this.model.set('showingHelp', !this.model.get('showingHelp'));
     },
 
     toggleFeedback: function(){
       this.model.set('showingFeedback', !this.model.get('showingFeedback'));
+    },
+
+    toggleShare: function(){
+      this.model.set('showingShare', !this.model.get('showingShare'));
     },
 
     showHelp: function(){
