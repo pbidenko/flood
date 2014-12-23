@@ -89,6 +89,12 @@ require.config({
             ],
             exports: 'jqueryuidraggable'
         },
+        jqueryuidialog: {
+            deps: [
+                'jqueryuidraggable'
+            ],
+            exports: 'jqueryuidialog'
+        },
         bootstrap: {
             deps: [
                 'jquery'
@@ -201,7 +207,7 @@ require.config({
         CustomizerWorkspaceView: 'views/customizer/CustomizerWorkspaceView',
 
         // editor
-        AppView: 'views/AppView',
+        AppView: 'views/DynamoAppView', //'views/AppView',
         ConnectionView: 'views/ConnectionView',
         MarqueeView: 'views/MarqueeView',
         SearchView: 'views/SearchView',
@@ -255,6 +261,7 @@ require.config({
         jqueryuicore: '../bower_components/jquery.ui/ui/jquery.ui.core',
         jqueryuimouse: '../bower_components/jquery.ui/ui/jquery.ui.mouse',
         jqueryuiwidget: '../bower_components/jquery.ui/ui/jquery.ui.widget',
+        jqueryuidialog: '../bower_components/jquery.ui/ui/jquery.ui.dialog',
         jquery: '../bower_components/jquery/jquery.min',
         backbone: '../bower_components/backbone-amd/backbone-min',
         underscore: '../bower_components/underscore-amd/underscore-min',

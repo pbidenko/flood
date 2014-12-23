@@ -58,6 +58,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                 this.proxyNodesDependencies = [];
                 this.availableCustomNodeDefinitions = [];
 
+                this.listenTo( this.app, 'replace-old-home', this.replaceOldHome);
                 this.listenTo( this.app, 'creation-data-received:event', this.createWorkspaceWithData);
                 this.listenTo( this.app, 'saved-file-received:event', this.downloadFile);
                 // when we upload a custom node definition we should make all its instances not proxy anymore
@@ -74,18 +75,16 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                 this.sendStringMessage(new ClearWorkspaceMessage(true));
 
                 if (home) {
-                    data = {
-                        connections: [],
-                        nodes: [],
-                        result: []
-                    };
+                    // remove current home ws and add new one
+                    // to keep current one in Mongo
+                    this.app.get('workspaces').remove(home);
+                }
 
-                    prepareWorkspace.call(this, home);
-                    setName(home);
-                }
-                else {
-                    this.app.newWorkspace(setName);
-                }
+                this.app.newWorkspace(setName);
+            },
+
+            replaceOldHome: function () {
+                this.sendStringMessage(new ClearWorkspaceMessage(true));
             },
 
             getHomeWorkspace: function () {
@@ -164,27 +163,37 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
 
                 var workspaces;
                 var allWorkspaces = app.get('workspaces');
-                if (params.workspaceId) {
+                var isCustomNode = !!params.workspaceId;
+                if (isCustomNode) {
                     workspaces = allWorkspaces.where({ guid: params.workspaceId });
                 }
                 else {
                     workspaces = allWorkspaces.where({ isCustomNode: false });
                 }
 
-                if (workspaces.length > 0) {
+                if (workspaces.length) {
                     var currentWorkspace = workspaces[0];
-                    app.set('currentWorkspace', currentWorkspace.get('_id'));
-
-                    prepareWorkspace.call(this, currentWorkspace);
+                    if (isCustomNode) {
+                        app.set('currentWorkspace', currentWorkspace.get('_id'));
+                        prepareWorkspace.call(this, currentWorkspace);
+                    }
+                    else {
+                        // remove current ws and add new one
+                        // to keep current one in Mongo.
+                        // Don't do this way with custom node ws
+                        // to avoid a mess with dependencies
+                        allWorkspaces.remove(currentWorkspace);
+                        app.newWorkspace(prepareWorkspace.bind(this));
+                    }
                 }
-                else if (params.workspaceId) {
+                else if (isCustomNode) {
                     workspaces = this.app.workspaceBrowser ? this.app.workspaceBrowser
                         .get('workspaces').where({ guid: params.workspaceId }) : [];
                     if (workspaces.length) {
                         app.loadWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true, true);
                     }
                     else {
-                        app.newNodeWorkspace(prepareWorkspace.bind(this), true);
+                        app.newNodeWorkspace(prepareWorkspace.bind(this), null, true);
                     }
                 }
                 else {
@@ -193,7 +202,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
             },
 
             setProxyNodesDependenciesData: function (data) {
-                if (this.proxyNodesDependencies.indexOf(data) == -1) {
+                if (this.proxyNodesDependencies.indexOf(data) === -1) {
                     this.proxyNodesDependencies.push(data);
                 }
 
@@ -203,7 +212,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
             },
 
             setAvailableCustomNodeDefinitions: function(guid) {
-                if (this.availableCustomNodeDefinitions.indexOf(guid) == -1) {
+                if (this.availableCustomNodeDefinitions.indexOf(guid) === -1) {
                     this.availableCustomNodeDefinitions.push(guid);
                 }
 
@@ -240,7 +249,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
 
                             node.set('isProxy', false);
 
-                            if (customNodeId && workspace.get('workspaceDependencyIds').indexOf(customNodeId) == -1) {
+                            if (customNodeId && workspace.get('workspaceDependencyIds').indexOf(customNodeId) === -1) {
                                 node.get('extra').functionId = customNodeId;
                                 workspace.addWorkspaceDependency(customNodeId);
                             }

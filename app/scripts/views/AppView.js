@@ -52,7 +52,7 @@ define([  'backbone',
       this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
 
       $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
-      this.saveUploaderView = new SaveUploaderView({ model: this.model.saveUploader, appView: this });
+
       // deactivate the context menu
       $(document).bind("contextmenu", function (e) { return false; });
 
@@ -63,7 +63,6 @@ define([  'backbone',
     },
 
     events: {
-      'click #save-button' : 'saveClick',
       'click .workspaces_curtain' : 'endSearch',
       'click #help-button': 'toggleHelp',
       'click #settings-button': 'showSettings',
@@ -89,14 +88,14 @@ define([  'backbone',
 
     },
 
-    newHomeClick: function () {
-        this.saveUploaderView.clearHomeWorkspace();
-    },
-
     toggleAddWorkspaceSelect: function(){
 
       $('#add-workspace-select-element').toggle();
 
+    },
+
+    newHomeClick: function () {
+      this.newWorkspace();
     },
 
     showHelpOnFirstExperience: function(){
@@ -133,7 +132,7 @@ define([  'backbone',
 
         customNodeName = customNodeName.trim();
 
-        this.model.newNodeWorkspace(null, null, customNodeName);
+        this.model.newNodeWorkspace(null, customNodeName);
         this.hideAddWorkspaceSelect();
     },
 
@@ -156,10 +155,6 @@ define([  'backbone',
 
       this.currentWorkspaceView.keydownHandler(e);
     },
-
-    saveClick: function(e){
-      this.model.sync("update", this.model);
-    },  
 
     endSearch: function() {
       this.model.set('showingSearch', false);
@@ -365,31 +360,35 @@ define([  'backbone',
       this.workspaceTabViews[workspace.get('_id')] = view;
 
       view.render();
-      this.$workspace_tabs.append( view.$el );      
+
+      if (workspace.get('isCustomNode')) {
+          this.$workspace_tabs.append(view.$el);
+      }
+      else { // insert at the begin
+          this.$workspace_tabs.prepend(view.$el);
+      }
     },
 
     removeWorkspaceTab: function(workspace){
+      var workspaceId = workspace.get('_id');
 
       // The Workspace can no longer be current
       workspace.set('current', false);
 
        // check if the removed workspace is the current one
-      if (workspace.get('_id') == this.model.get('currentWorkspace') ){
+      if (workspaceId == this.model.get('currentWorkspace') ){
 
         // are there any more workspaces?
-        if ( this.model.get('workspaces').length != 0 ){
-          this.model.set('currentWorkspace', this.model.get('workspaces').first().get('_id') );
-
-        // if we're out of workspaces, just add a new one
-        } else {
-          var that = this;
-          this.newWorkspace();
+        if ( this.model.get('workspaces').length != 0 ) {
+            this.model.set('currentWorkspace', this.model.get('workspaces').first().get('_id'));
         }
       }
       
-      this.workspaceTabViews[workspace.get('_id')].$el.remove();
-      delete this.workspaceTabViews[workspace.get('_id')];
-
+      this.workspaceTabViews[workspaceId].$el.remove();
+      delete this.workspaceTabViews[workspaceId];
+      this.workspaceViews[workspaceId].$el.remove();
+      delete this.workspaceViews[workspaceId];
+      workspace.dispose();
     },
 
     getCurrentWorkspaceCenter: function(){

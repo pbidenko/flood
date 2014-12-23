@@ -1,7 +1,7 @@
 define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements', 'staticHelpers',
-        'Storage', 'settings', 'SaveUploader'],
+        'Storage', 'settings'],
     function(Backbone, Workspaces, Node, Login, Workspace, SearchElements, helpers,
-             Storage, settings, SaveUploader) {
+             Storage, settings) {
 
   return Backbone.Model.extend({
 
@@ -36,7 +36,6 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.SearchElements.fetch();
 
       this.context = new Storage({ baseUrl: settings.storageUrl });
-      this.saveUploader = new SaveUploader({ app: this });
 
       this.get('workspaces').on('remove', this.workspaceRemoved, this);
       this.listenTo(this, 'code-block-node-updated:event', this.updateCodeBlockNode);
@@ -137,7 +136,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newNodeWorkspace: function( callback, silent, customNodeName ) {
+    newNodeWorkspace: function( callback, customNodeName, silent ) {
       this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
@@ -174,22 +173,39 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     loadWorkspace: function( id, callback, silent, makeCurrent ) {
 
         this.context.loadWorkspace(id).done(function (data) {
-
-            var ws = this.get('workspaces').get(id);
+            var allWorkspaces = this.get('workspaces');
+            var ws = allWorkspaces.get(id);
             if (ws) return;
 
-            // if we need to not send it to the dynamo
+            // if we need to not send it to dynamo
             if (silent) {
                 data.notNotifyServer = true;
             }
-            ws = new Workspace(data, {app: this});
-            this.get('workspaces').add(ws);
 
-            if (makeCurrent)
+            // if we try to open another Home ws
+            // currently opened one should be closed
+            // because only one Home tab is allowed
+            if (!data.isCustomNode) {
+                this.trigger('replace-old-home');
+                var homes = allWorkspaces.where({ isCustomNode: false });
+                if (homes.length) {
+                    allWorkspaces.remove(homes[0]);
+                }
+            }
+
+            ws = new Workspace(data, {
+                app: this
+            });
+
+            allWorkspaces.add(ws);
+            
+            if (makeCurrent) {
                 this.set('currentWorkspace', ws.get('_id'));
+            }
 
-            if (callback)
+            if (callback) {
                 callback(ws);
+            }
 
         }.bind(this)).fail(function () {
 

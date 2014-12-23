@@ -48,7 +48,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'CategorySearchView', 
             this.app.trigger('hide-search');
         },
 
-        searchKeyup: _.debounce(function (event) {
+        searchKeyup: function (event) {
             var searchText = this.$input.val();
             //If the key is Escape or search text is empty, just quit
             if( event.keyCode === 27 ){
@@ -65,7 +65,7 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'CategorySearchView', 
             else {
                 this.categorySearchView.expandElements(searchText);
             }
-        }, 400)
+        }
     });
 });
 
