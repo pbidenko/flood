@@ -134,6 +134,7 @@ require.config({
         StringNode: 'models/nodes/StringNode',
         BooleanNode: 'models/nodes/BooleanNode',
         CodeBlockNode: 'models/nodes/CodeBlockNode',
+        ListNode: 'models/nodes/ListNode',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
@@ -240,6 +241,7 @@ require.config({
         ThreeCSGNodeView: 'views/NodeViews/ThreeCSG',
         StringView: 'views/NodeViews/StringView',
         BooleanView: 'views/NodeViews/BooleanView',
+        ListView: 'views/NodeViews/List',
 
         OrbitControls: 'lib/OrbitControls',
         Viewport: 'lib/Viewport',
