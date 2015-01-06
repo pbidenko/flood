@@ -39,6 +39,13 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
     var commands = {
         addNode: function (data) {
             var commands = [instantiateCommand(data)];
+            if(data.extra && data.extra.varInputs && data.extra.varInputs.length)
+            {
+                for(var j = 0; j < data.extra.varInputs.length - 1; j++)
+                {
+                    commands.push(new ModelEventCommand({}, {_id: data._id, eventName: 'AddInPort'}));
+                }
+            }
             Array.prototype.push.apply(commands, UpdateModelValueCommand.syncProperties({ full: true }, data));
             return createMessage.call(this, commands);
         },

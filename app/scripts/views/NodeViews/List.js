@@ -94,6 +94,14 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
             type.removeInput();
 
             this.updatePorts();
+        },
+
+        colorPorts: function() {
+            BaseNodeView.prototype.colorPorts.apply(this, arguments);
+
+            this.model.trigger('change:position');
+
+            return this;
         }
 
     });
