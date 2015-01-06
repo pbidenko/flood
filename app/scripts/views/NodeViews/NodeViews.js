@@ -4,7 +4,8 @@ define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'ThreeCSGNodeView', 'For
   CodeBlockView, OutputView, InputView, CustomNodeView, StringView, BooleanView){
 
   var nodeViewTypes = {
-      'Code Block': CodeBlockView
+      'Code Block': CodeBlockView,
+      'Watch': WatchNodeView
   };
 
   nodeViewTypes.Base = ThreeCSGNodeView;

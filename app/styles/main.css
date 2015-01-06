@@ -1258,10 +1258,10 @@ input[type="button"].btn-block {
     box-shadow: none;
 }
 
-    .currentValue:-moz-placeholder,
-    .currentValue:focus {
-        box-shadow: none !important;
-    }
+.currentValue:-moz-placeholder,
+.currentValue:focus {
+    box-shadow: none !important;
+}
 
 .node-evaluating {
     color: #444;
@@ -1288,10 +1288,10 @@ input[type="button"].btn-block {
     padding: 5px 10px 14px 5px;
 }
 
-    .node-data-container input {
-        font-family: monospace;
-        font-weight: normal;
-    }
+.node-data-container input {
+    font-family: monospace;
+    font-weight: normal;
+}
 
 .watch-data-container {
     max-width: 300px;
@@ -1305,11 +1305,16 @@ input[type="button"].btn-block {
     border: 1px solid #BBB;
 }
 
-    .watch-data-container pre {
-        padding: 0;
-        margin: 0;
-        text-align: left;
-    }
+.watch-data-container pre {
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    -webkit-tab-size: 4;
+    -ms-tab-size: 4;
+    tab-size: 4;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
 
 .num-data-container input {
     width: 60px;

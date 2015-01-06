@@ -14,7 +14,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
     renderNode: function(){
 
-    	var pretty = this.model.get('lastValue') != undefined ? JSON.stringify(this.model.get('lastValue'), this.prettyPrint, 2) : this.model.get('lastValue');
+    	var pretty = this.model.get('lastValue') != undefined ? JSON.parse(JSON.stringify(this.model.get('lastValue'), this.prettyPrint, 2)) : this.model.get('lastValue');
     	this.model.set('prettyValue', pretty );
 
     	return BaseNodeView.prototype.renderNode.apply(this, arguments);
@@ -28,7 +28,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
     	}
 
     	if (typeof val === "string"){
-    		return val.replace(new RegExp("\t", 'g'), "").replace(new RegExp("\n", 'g'), "<br>")
+    		return val.replace(new RegExp("\t", 'g'), "&#09;").replace(new RegExp("\n", 'g'), "<br>");
     	}
 
     	return val;
