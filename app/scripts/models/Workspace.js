@@ -97,7 +97,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       // this should not be throttled
       this.on('change:isCustomizer', function(){ this.sync('update', this); }, this);
-      this.set('tabName', this.get('name'));      if ( this.get('isCustomNode') ) this.initializeCustomNode();
+      this.set('tabName', this.get('name'));      
+      
+      if ( this.get('isCustomNode') ) this.initializeCustomNode();
 
       this.resolver = new WorkspaceResolver(null, { app : this.app, workspace : this });
       this.resolver.resolveAll();

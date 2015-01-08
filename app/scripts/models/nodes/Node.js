@@ -14,6 +14,8 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
           , inputConnections: []
           , outputConnections: []
           , selected: true
+          , isArray: false
+          , arrayItems: null
           , lastValue: null
           , failureMessage: null
           , visible: true
@@ -130,7 +132,20 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
     updateValue: function (values) {
 
       if (values.data) {
-        this.set('lastValue', values.data);
+        this.set('isArray', values.isArray);
+        if (values.isArray) {
+            var items = JSON.parse(values.data);
+            this.set('arrayItems', items);
+            if (items.length) {
+                this.set('lastValue', 'List');
+            }
+            else {
+                this.set('lastValue', 'Empty list');
+            }
+        }
+        else {
+            this.set('lastValue', values.data);
+        }
       }
 
       if (values.state === 'Error' || values.state === 'Warning') {

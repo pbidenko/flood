@@ -310,7 +310,18 @@
 <script type="text/template" id="node-template">
 
     <div class="node-last-value-container">
-        <div class="node-last-value"><%- preview %></div>
+        <div class="node-last-value"><%- preview %>
+            <ul class="array-items">
+                <% _.each(arrayItems, function(ele, index) { %>
+                <li class="array-item" data-index=" <%= index %> ">
+                    <span class="array-item-name"><%= ele %></span>
+                </li>
+                <% }); %>
+                <li class="array-item dots-item">
+                    <span class="array-item-name">...</span>
+                </li>
+            </ul>
+        </div>
         <div class="node-failure-message"><%- failureMessage %></div>
     </div>
 
@@ -401,8 +412,15 @@
               <input class="name-input" value="<%= name %>">
             </li>
 
-          </ul>
-        </div>
+            <li class="dropdown-header shown-items hidden">Shown array items</li>
+
+            <li class="node-dropown-menu-item shown-items hidden">
+                <input type="number" class="shown-items" min="1" max="10" value="10" step="1">
+                <span class="shown-items" style="padding-left: 5px">of 1 is shown</span>
+            </li>
+
+        </ul>
+    </div>
 
 </script>
 

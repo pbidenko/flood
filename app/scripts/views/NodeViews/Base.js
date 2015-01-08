@@ -1,5 +1,61 @@
 define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbone, jqueryuidraggable, bootstrap, Hammer) {
 
+  var itemsToShow = 10, minItemsNumber = 1, maxItemsNumber = 1;
+  function changeItemsNumber (e) {
+      itemsToShow = parseInt(this.$el.find('input.shown-items').val());
+      this.$el.find('li.array-item').filter(function () {
+          return  parseInt($(this).attr("data-index")) >= itemsToShow;
+      }).addClass('hidden');
+
+      this.$el.find('li.array-item').filter(function () {
+          return  parseInt($(this).attr("data-index")) < itemsToShow;
+      }).removeClass('hidden');
+
+      var dotsItem = this.$el.find('li.dots-item');
+      if (this.model.get('arrayItems').length > itemsToShow) {
+          dotsItem.removeClass('hidden');
+      }
+      else {
+          dotsItem.addClass('hidden');
+      }
+
+      this.$el.find('span.shown-items').html('of ' + maxItemsNumber +
+          (itemsToShow > 1 ? ' are' : ' is') + ' shown');
+
+      e && e.stopPropagation();
+  }
+
+  function keyDown (e) {
+      console.log(e.keyCode);
+      var zeroCode = 48, nineCode = 57,
+          rightSidedZeroCode = 96, rightSidedNineCode = 105;
+      // backspace, shift, ctrl, 4 arrows, delete
+      var allowedKeyCodes = [8, 16, 17, 37, 38, 39, 40, 46];
+      // only numbers and allowedKeyCodes are allowed
+      if ((e.keyCode >= zeroCode && e.keyCode <= nineCode) ||
+          (e.keyCode >= rightSidedZeroCode && e.keyCode <= rightSidedNineCode)
+          || allowedKeyCodes.indexOf(e.keyCode) > -1)
+          return true;
+
+      return false;
+  }
+
+  function keyUp(e) {
+      var $input = this.$el.find('input.shown-items');
+      var value = parseInt($input.val());
+      if (isNaN(value) || value < minItemsNumber) {
+          $input.val(minItemsNumber);
+      }
+      else if (value > maxItemsNumber) {
+          $input.val(maxItemsNumber);
+      }
+      else if (value.toString() !== $input.val()) {
+          $input.val(value);
+      }
+
+      changeItemsNumber.call(this, e);
+  }
+
   return Backbone.View.extend({
 
     tagName: 'div',
@@ -50,6 +106,9 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       this.$workspace_canvas = $('#workspace_canvas');
       this.position = this.model.get('position');
 
+      this.$el.on('click', 'input.shown-items', changeItemsNumber.bind(this));
+      this.$el.on('keydown', 'input.shown-items', keyDown);
+      this.$el.on('keyup', 'input.shown-items', keyUp.bind(this));
     },
 
     updateName: function(e){
@@ -280,7 +339,29 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
       this.$el.html( this.template( json ) );
 
-      if (this.getCustomContents) {
+      var arrayItems = this.model.get('arrayItems');
+      var $input;
+      // if node's value is not empty array
+      // configure its view and settings area
+      if (arrayItems && arrayItems.length) {
+          maxItemsNumber = arrayItems.length;
+          this.$el.find('.shown-items').removeClass('hidden');
+          $input = this.$el.find('input.shown-items');
+          $input.attr('max', maxItemsNumber);
+
+          if (maxItemsNumber < itemsToShow) {
+              itemsToShow = maxItemsNumber;
+          }
+
+          $input.attr('value', itemsToShow);
+
+          changeItemsNumber.call(this);
+      }
+      else {
+          this.$el.find('.shown-items').addClass('hidden');
+      }
+
+      if (this.getCustomContents){
         this.$el.find('.node-data-container').html( this.getCustomContents() );
       }
 

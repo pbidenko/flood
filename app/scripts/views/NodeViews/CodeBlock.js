@@ -21,7 +21,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
             this.$el.on('mouseup', adjustElements.bind(this));
             this.$el.on('mousemove', adjustElements.bind(this));
 
-            this.$el.draggable({ cancel: '.code-block-input' });
+            this.$el.draggable({ cancel: '.code-block-input, input.shown-items' });
         },
 
         getCustomContents: function () {
