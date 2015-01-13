@@ -49,6 +49,9 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
 
             if (ws.get('nodes').length)
                 app.trigger('ws-data-loaded');
+
+            // make the loaded ws appear in workspace browser
+            app.trigger('request-workspace-browser-refresh');
         }
 
         return Backbone.Model.extend({

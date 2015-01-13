@@ -7,6 +7,7 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'SaveUplo
                 this.socket = new SocketConnection({ app: this });
                 this.on('libraryItemsList-received:event', this.mapLibraryItems, this);
                 this.saveUploader = new SaveUploader({ app: this });
+                this.listenTo(this.saveUploader, 'request-workspace-browser-refresh', this.refreshWorkspaceBrowser);
                 App.prototype.initialize.call(this);
             },
 
@@ -26,6 +27,12 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'SaveUplo
                 }
 
                 this.options = options;
+            },
+
+            refreshWorkspaceBrowser: function() {
+                if (this.workspaceBrowser) {
+                    this.workspaceBrowser.refresh();
+                }
             },
 
             mapLibraryItems: function (param) {
