@@ -38,13 +38,13 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
 
             BaseNodeView.prototype.renderNode.apply(this, arguments);
 
-            this.$el.find('.add-input').click(function (e) {
+            this.$el.find('.add-input').one( 'click', function (e) {
                 this.addInput.call(this);
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
             }.bind(this));
-            this.$el.find('.remove-input').click(function (e) {
+            this.$el.find('.remove-input').one( 'click', function (e) {
                 this.removeInput.call(this);
                 e.preventDefault();
                 e.stopPropagation();
