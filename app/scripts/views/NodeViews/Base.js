@@ -284,8 +284,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
         this.$el.find('.node-data-container').html( this.getCustomContents() );
       }
 
-      this.$el.find('.node-port-output').tooltip({title: "Click & drag to create a connection", placement: "right", delay:  { show: 400 }});
-
       return this;
 
     },
