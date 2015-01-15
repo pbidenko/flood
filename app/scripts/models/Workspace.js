@@ -509,6 +509,14 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.runInternalCommand( multipleCmd );
       this.addToUndoAndClearRedo( multipleCmd );
 
+      for (var id in nodes){
+        var cpnode = cb.nodes[id];
+        var functionId = cpnode.extra.functionId;
+        if ( cpnode.typeName === "CustomNode" ){
+          this.syncCustomNodesWithWorkspace( functionId );
+        }
+      }
+
     },
 
     addNodeByNameAndPosition: function(name, position){
