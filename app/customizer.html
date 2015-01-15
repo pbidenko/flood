@@ -275,6 +275,20 @@
 
       </script>
 
+      <script type="text/template" id="widget-code-block-template">
+
+          <span class="name">
+            <% if ( !name || name === "DefaultNodeName" || name === "") { %>
+              <%= typeName %>
+            <% } else { %>
+              <%= name %>
+            <% } %>
+          </span>
+
+          <code class="language-designScript widget-code-block-input" contenteditable><%= extra.code %></code>
+
+      </script>
+
       <script>
 
         function checkWebGL() { 

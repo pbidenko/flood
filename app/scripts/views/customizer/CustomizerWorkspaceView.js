@@ -1,5 +1,5 @@
-define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView'], 
-  function(Backbone, BaseWidgetView, GeometryWidgetView, NumberWidgetView) {
+define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView', 'CodeBlockWidgetView'], 
+  function(Backbone, BaseWidgetView, GeometryWidgetView, NumberWidgetView, CodeBlockWidgetView) {
 
   return Backbone.View.extend({
 
@@ -14,7 +14,8 @@ define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView'],
     },
 
     map: {
-      "Number" : NumberWidgetView
+      "Number" : NumberWidgetView,
+      'Code Block': CodeBlockWidgetView
     },
 
     hasWidgets: false,
@@ -25,13 +26,13 @@ define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView'],
 
       var widgetView = GeometryWidgetView;
 
-      if (x.get('type').typeName in this.map){
-        widgetView = this.map[x.get('type').typeName];
+      if (x.get('typeName') in this.map){
+        widgetView = this.map[x.get('typeName')];
       }
 
       var widget = new widgetView({model: x});
 
-      if (x.get('type').typeName in this.map){
+      if (x.get('typeName') in this.map){
         this.$el.append( widget.render().$el );
         this.hasWidgets = true;
       }
