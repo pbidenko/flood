@@ -10,15 +10,14 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
     initialize: function(args) {
 
-      BaseNodeView.prototype.initialize.apply(this, arguments);
+        BaseNodeView.prototype.initialize.apply(this, arguments);
 
-      this.model.on('change:selected', this.colorSelected, this);
-      this.model.on('change:visible', this.changeVisibility, this);
-      this.model.on('remove', this.onRemove, this);
-      this.model.workspace.on('change:current', this.changeVisibility, this);
-      this.listenTo( this.model, 'change:prettyLastValue', this.onEvalComplete);
-      this.onEvalComplete();
-
+        this.listenTo(this.model, 'change:selected', this.colorSelected);
+        this.listenTo(this.model, 'change:visible', this.changeVisibility);
+        this.listenTo(this.model, 'remove', this.onRemove);
+        this.listenTo(this.model.workspace, 'change:current', this.changeVisibility);
+        this.listenTo(this.model, 'change:prettyLastValue', this.onEvalComplete);
+        this.onEvalComplete();
     },
 
     setMaterials: function(partMat, meshMat, lineMat){
@@ -112,11 +111,11 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
     },
 
     // 3D move to node subclass
-    onRemove: function(){
-      this.model.workspace.off('change:current', this.changeVisibility, this);
-      scene.remove(this.threeGeom); 
-      render();
-    }, 
+    onRemove: function() {
+        this.stopListening(this.model.workspace, 'change:current', this.changeVisibility);
+        scene.remove(this.threeGeom);
+        render();
+    },
 
     evaluated: false,
 

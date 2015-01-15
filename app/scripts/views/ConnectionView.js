@@ -8,18 +8,18 @@ define(['backbone'], function(Backbone) {
 
     initialize: function( args ) {
 
-      this.model = args.model;
+        this.model = args.model;
 
-      if (args.isProxy ){
-        this.isProxy = true;
-      }
+        if (args.isProxy) {
+            this.isProxy = true;
+        }
 
-      this.workspace = args.workspace;
-      this.workspaceView = args.workspaceView;
+        this.workspace = args.workspace;
+        this.workspaceView = args.workspaceView;
 
-      if (this.model.startNode){
-        this.model.startNode.on('change:ignoreDefaults', this.render, this);
-      }
+        if (this.model.startNode){
+            this.listenTo(this.model.startNode, 'change:ignoreDefaults', this.render);
+        }
 
     },
 

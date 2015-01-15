@@ -26,7 +26,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
     },
 
     initialize: function(args, options){
-      this.on('change:currentWorkspace', this.updateCurrentWorkspace, this);
+      this.listenTo(this, 'change:currentWorkspace', this.updateCurrentWorkspace);
       this.updateCurrentWorkspace();
 
       this.login = new Login({}, { app: this });
@@ -37,7 +37,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       this.context = new Storage({ baseUrl: settings.storageUrl });
 
-      this.get('workspaces').on('remove', this.workspaceRemoved, this);
+      // workspaceRemoved: no such method this.listenTo(this.get('workspaces'), 'remove', this.workspaceRemoved);
       this.listenTo(this, 'code-block-node-updated:event', this.updateCodeBlockNode);
     },
 
@@ -90,13 +90,23 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         return helpers.guid();
     },
 
-    enableAutosave: function(){
+    enableAutosave: function() {
 
-      this.get('workspaces').on('add remove', function(){ this.sync("update", this); }, this );
-      this.on('change:currentWorkspace', function(){ this.sync("update", this); }, this);
-      this.on('change:isFirstExperience', function(){ this.sync("update", this); }, this);
-      this.on('change:backgroundWorkspaces', function(){ this.sync("update", this); }, this);
+        this.listenTo(this.get('workspaces'), 'add remove', function () {
+            this.sync("update", this);
+        });
 
+        this.listenTo(this, 'change:currentWorkspace', function () {
+            this.sync("update", this);
+        });
+
+        this.listenTo(this, 'change:isFirstExperience', function () {
+            this.sync("update", this);
+        });
+
+        this.listenTo(this, 'change:backgroundWorkspaces', function () {
+            this.sync("update", this);
+        });
     },
 
     newNodePosition: [0,0],
