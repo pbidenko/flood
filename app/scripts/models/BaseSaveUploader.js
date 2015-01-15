@@ -1,8 +1,10 @@
 /**
  * Created by Masha on 11/26/2014.
  */
-define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspaceMessage', 'staticHelpers'],
-    function(Backbone, SaveFileMessage, SetModelPositionMessage, ClearWorkspaceMessage, helpers) {
+define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage',
+        'ClearWorkspaceMessage', 'staticHelpers', 'FileSaver'],
+    function(Backbone, SaveFileMessage, SetModelPositionMessage,
+             ClearWorkspaceMessage, helpers, FileSaver) {
 
         var data = null;
 
@@ -143,13 +145,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                 var byteArray = helpers.getByteArray(param.fileContent);
 
                 var blob = new Blob([byteArray], { type : 'application/octet-stream' });
-                var url = window.URL || window.webkitURL;
-                var downloadUrl = url.createObjectURL(blob);
-                var downloadElement = document.createElement('a');
-                downloadElement.style = 'display: none;';
-                downloadElement.href = downloadUrl;
-                downloadElement.download = param.fileName;
-                downloadElement.click();
+                FileSaver( blob, param.fileName );
             },
 
             createWorkspaceWithData: function (params) {
