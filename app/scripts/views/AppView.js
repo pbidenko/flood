@@ -38,6 +38,7 @@ define([  'backbone',
 
       this.model.get('workspaces').on('add', this.addWorkspaceTab, this);
       this.model.get('workspaces').on('remove', this.removeWorkspaceTab, this);
+      this.model.get('workspaces').on('hide', this.hideWorkspaceTab, this);
       this.model.on('change:showingSettings', this.viewSettings, this);
       this.model.on('change:showingFeedback', this.viewFeedback, this);
       this.model.on('change:showingShare', this.viewShare, this);
@@ -369,26 +370,37 @@ define([  'backbone',
       }
     },
 
-    removeWorkspaceTab: function(workspace){
-      var workspaceId = workspace.get('_id');
+    removeWorkspaceTab: function(workspace) {
+        this.hideWorkspaceTab(workspace);
 
-      // The Workspace can no longer be current
-      workspace.set('current', false);
+        var workspaceId = workspace.get('_id');
+        this.workspaceViews[workspaceId].$el.remove();
+        delete this.workspaceViews[workspaceId];
+        this.model.removeWorkspaceFromBackground(workspaceId);
+        workspace.dispose();
+    },
 
-       // check if the removed workspace is the current one
-      if (workspaceId == this.model.get('currentWorkspace') ){
+    hideWorkspaceTab: function(workspace) {
+        var workspaceId = workspace.get('_id');
 
-        // are there any more workspaces?
-        if ( this.model.get('workspaces').length != 0 ) {
-            this.model.set('currentWorkspace', this.model.get('workspaces').first().get('_id'));
+        // The Workspace can no longer be current
+        workspace.set('current', false);
+
+        // check if the removed workspace is the current one
+        if (workspaceId === this.model.get('currentWorkspace')) {
+            // are there any more workspaces?
+            var visibleWorkspaces = this.model.get('workspaces').filter(function (ws) {
+                return !this.isBackgroundWorkspace(ws.get('_id'));
+            }.bind(this.model));
+
+            if (visibleWorkspaces.length) {
+                this.model.set('currentWorkspace', visibleWorkspaces[0].get('_id'));
+            }
         }
-      }
-      
-      this.workspaceTabViews[workspaceId].$el.remove();
-      delete this.workspaceTabViews[workspaceId];
-      this.workspaceViews[workspaceId].$el.remove();
-      delete this.workspaceViews[workspaceId];
-      workspace.dispose();
+
+        this.workspaceTabViews[workspaceId].$el.remove();
+        delete this.workspaceTabViews[workspaceId];
+        this.model.setWorkspaceToBackground(workspaceId);
     },
 
     getCurrentWorkspaceCenter: function(){

@@ -1,5 +1,11 @@
 define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, WorkspaceBrowserElementView) {
 
+  var itemsToClick = {
+      project: 'project',
+      customNode: 'custom node'
+  };
+  var lastClickedItem = itemsToClick.project;
+
   return Backbone.View.extend({
 
     el: '#workspace-browser',
@@ -34,6 +40,9 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
 
       this.projects = this.$el.find('#workspace-browser-projects');
       this.projects.empty();
+
+      if (lastClickedItem === itemsToClick.customNode)
+          this.customNodeHeaderClick();
     },
 
     refreshClick: function(e){
@@ -47,7 +56,7 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
       this.customNodes.show();
 
       $('#workspace-browser-header-custom-nodes').css('bottom','').css('top','40px');
-
+      lastClickedItem = itemsToClick.customNode;
     },
 
     projectHeaderClick: function(e){
@@ -56,7 +65,7 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
       this.projects.show();
 
       $('#workspace-browser-header-custom-nodes').css('bottom','0').css('top','');
-
+      lastClickedItem = itemsToClick.project;
     },
 
     addWorkspaceElement: function(x){

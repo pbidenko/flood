@@ -87,7 +87,7 @@
 
         send: function (obj) {
             if (this.socket.readyState === 1) {
-                console.log('Sending: ' + obj);
+                // console.log('Sending: ' + obj);
                 this.socket.send(obj);
             } else {
                 //Push message to the queue

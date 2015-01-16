@@ -259,25 +259,22 @@
         <div id="help" class="col">
 
         </div>
-          <div id="feedback" class="modal row col">
+
+        <div id="feedback" class="modal row col">
             
-          </div>
-
-          <div id="share" class="modal row col">
-            
-          </div>
-
-          <div id="workspace-browser" class="col">
-            
-          </div>
-
-          <div id="viewer" class="row blur"></div>
-
-        <div id="workspace-browser" class="col">
-
         </div>
 
-        <div id="viewer" class="row blur"></div>
+        <div id="share" class="modal row col">
+            
+        </div>
+
+        <div id="workspace-browser" class="col">
+            
+        </div>
+
+        <div id="viewer" class="row blur">
+
+        </div>
 
         <div id="app-fail" style="display: none">
 
@@ -356,15 +353,15 @@
         <% }); %>
     </ul>
 
-        <div class="node-data-container" >
-            <span class="name searchfield">
-                <% if ( !name || name === "DefaultNodeName" || name === "") { %>
-                <%= typeName != "CustomNode" ? displayName : type.functionName  %>
-                <% } else { %>
-                <%= name %>
-                <% } %>
-            </span>
-        </div>
+    <div class="node-data-container" >
+        <span class="name searchfield">
+            <% if ( !name || name === "DefaultNodeName" || name === "") { %>
+            <%= typeName != "CustomNode" ? displayName : type.functionName  %>
+            <% } else { %>
+            <%= name %>
+            <% } %>
+        </span>
+    </div>
 
     <ul class="node-outputs">
         <% _.each(type.outputs, function(ele, index) { %>

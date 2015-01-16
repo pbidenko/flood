@@ -7,28 +7,44 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'SaveUplo
                 this.socket = new SocketConnection({ app: this });
                 this.on('libraryItemsList-received:event', this.mapLibraryItems, this);
                 this.saveUploader = new SaveUploader({ app: this });
+                this.listenTo(this.saveUploader, 'request-workspace-browser-refresh', this.refreshWorkspaceBrowser);
                 App.prototype.initialize.call(this);
             },
 
             fetch: function (options) {
-
-                if(this.login.get('showing')) {
-                    this.login.fetch();
-
-                    this.context.fetchWorkspaces()
-                    .done(function (response) {
-                        var result = this.parse(response);
-                        this.set(result, options);
-                    }.bind(this))
-                    .fail(function (response) {
-                        options.error(response);
-                    });
+                if( this.login.get('showing') ) {
+                    this.fetchCore(options);
                 }
 
-                this.options = options;
+                this.fetchOptions = options;
+            },
+
+            fetchCore : function fetchCore(options) {
+                this.login.fetch();
+
+                this.context.fetchWorkspaces()
+                    .done(function (response) {
+                        var result = this.parse(response);
+                        this.set(result, this.options);
+                        if (options.success){
+                            options.success(response);
+                        }
+                    }.bind(this))
+                    .fail(function (response) {
+                      if (options.error){
+                            options.error(response);
+                        }
+                    });
+            },
+
+            refreshWorkspaceBrowser: function() {
+                if (this.workspaceBrowser) {
+                    this.workspaceBrowser.refresh();
+                }
             },
 
             mapLibraryItems: function (param) {
+
                 //Add elements to collection not via add method to avoid multiple 'add' events trigger
                 this.SearchElements.models = param.libraryItems.map(function (item) {
                     return new SearchElement({
@@ -39,19 +55,11 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'SaveUplo
                     });
                     //Concatenate with already existing SearchElements
                 }).concat(this.SearchElements.models);
+
                 //Trigger 'add' event after all elements are added
                 this.SearchElements.trigger('add');
 
-                this.login.fetch();
-
-                this.context.fetchWorkspaces()
-                    .done(function (response) {
-                        var result = this.parse(response);
-                        this.set(result, this.options);
-                    }.bind(this))
-                    .fail(function (response) {
-                        options.error(response);
-                    });
+                this.fetchCore(this.fetchOptions);
             }
 
         });
