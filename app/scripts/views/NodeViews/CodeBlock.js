@@ -272,6 +272,11 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
                 }
             }
 
+            var lock = ex.lock || false;
+            this.lockInput = this.$el.find('.lock-input');
+            this.lockInput.val( lock );
+            this.lockInput.change( function(e){ this.lockChanged.call(this, e); e.stopPropagation(); }.bind(this));
+
             this.trigger('after-render');
 
             Prism.highlightAll();
@@ -287,6 +292,14 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
             }
 
             return this;
+        },
+
+        lockChanged: function(e){
+            var ex = JSON.parse(JSON.stringify(this.model.get('extra')));
+
+            ex.lock = this.lockInput.is(':checked');
+
+            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
         }
     });
 

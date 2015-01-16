@@ -401,6 +401,14 @@
               <input class="name-input" value="<%= name %>">
             </li>
 
+            <% if (typeof(showLockCheckbox)!== "undefined" && showLockCheckbox) { %>
+
+                <li class="dropdown-header">
+                  Hide in customizer <input type="checkbox" style="margin-left: 10px" <%= extra.lock ? "checked" : ""%> class="lock-input">
+                </li>
+
+            <% } %>
+
           </ul>
         </div>
 
