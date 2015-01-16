@@ -200,6 +200,7 @@ require.config({
         BaseWidgetView: 'views/customizer/widgets/Base',
         GeometryWidgetView: 'views/customizer/widgets/Geometry',
         NumberWidgetView: 'views/customizer/widgets/Number',
+        CodeBlockWidgetView: 'views/customizer/widgets/CodeBlock',
 
         CustomizerAppView: 'views/customizer/CustomizerAppView',
         CustomizerHeaderView: 'views/customizer/CustomizerHeaderView',

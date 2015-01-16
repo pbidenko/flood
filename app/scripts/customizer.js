@@ -1,6 +1,6 @@
 require(["config"], function() {
 
-  require(['backbone', 'CustomizerApp', 'CustomizerAppView', 'Three', 'FLOODCSG', 'bootstrap' ], function (Backbone, CustomizerApp, CustomizerAppView, THREE) {
+  require(['backbone', 'CustomizerApp', 'CustomizerAppView', 'Three', 'FLOODCSG', 'bootstrap', 'augment' ], function (Backbone, CustomizerApp, CustomizerAppView, THREE) {
 
     var app = new CustomizerApp();
 

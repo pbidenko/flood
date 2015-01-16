@@ -32,6 +32,7 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
             this.set('creationName', 'Code Block');
             this.set('displayName', 'Code Block');
             this.set('lastValue', '');
+            this.set('showLockCheckbox', true);
             if (!this.get('failureMessage'))
                 this.set('failureMessage', '');
             if (!this.get('extra'))
