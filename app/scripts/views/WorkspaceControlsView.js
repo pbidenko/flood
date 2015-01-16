@@ -70,6 +70,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       $('#help-button').tooltip({title: "Help", placement: "left"});
       $('#feedback-button').tooltip({title: "Feedback", placement: "left"});
+      $('#share-button').tooltip({title: "Share", placement: "left"});
 
     },
 

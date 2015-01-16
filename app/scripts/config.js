@@ -120,6 +120,11 @@ require.config({
         WorkspaceBrowserElements: 'collections/WorkspaceBrowserElements',
 
         // backbone models
+
+        // Customizer
+        CustomizerApp: 'models/customizer/CustomizerApp',
+
+        //Editor
         //Use DynamoApp class in case of websocket connection, otherwise use App
         App: 'models/DynamoApp', // 'models/App'
         Connection: 'models/Connection',
@@ -143,10 +148,10 @@ require.config({
         SaveUploader: 'models/BaseSaveUploader', //'models/NWKSaveUploader',
 
         GeometryExport: 'models/GeometryExport',
-        WorkspaceResolver: 'models/WorkspaceResolver',
         WorkspaceBrowserElement: 'models/WorkspaceBrowserElement',
         WorkspaceBrowser: 'models/WorkspaceBrowser',
         SocketConnection: 'models/SocketConnection',
+        WorkspaceResolver: 'models/WorkspaceResolver',
 
         CreateNodeCommand: 'models/commands/CreateNodeCommand',
         CreateProxyNodeCommand: 'models/commands/CreateProxyNodeCommand',
@@ -190,6 +195,18 @@ require.config({
         settings: 'helpers/Settings',
 
         // backbone views
+
+        // customizer
+        BaseWidgetView: 'views/customizer/widgets/Base',
+        GeometryWidgetView: 'views/customizer/widgets/Geometry',
+        NumberWidgetView: 'views/customizer/widgets/Number',
+
+        CustomizerAppView: 'views/customizer/CustomizerAppView',
+        CustomizerHeaderView: 'views/customizer/CustomizerHeaderView',
+        CustomizerViewerView: 'views/customizer/CustomizerViewerView',
+        CustomizerWorkspaceView: 'views/customizer/CustomizerWorkspaceView',
+
+        // editor
         AppView: 'views/DynamoAppView', //'views/AppView',
         ConnectionView: 'views/ConnectionView',
         MarqueeView: 'views/MarqueeView',
@@ -200,6 +217,8 @@ require.config({
         WorkspaceTabView: 'views/WorkspaceTabView',
         HelpView: 'views/HelpView',
         FeedbackView: 'views/FeedbackView',
+        ShareView: 'views/ShareView',
+        Share: 'models/Share',
         LoginView: 'views/LoginView',
         WorkspaceBrowserElementView: 'views/WorkspaceBrowserElementView',
         WorkspaceBrowserView: 'views/WorkspaceBrowserView',
@@ -228,7 +247,7 @@ require.config({
         FLOOD: 'lib/flood/flood',
         CSG: 'lib/flood/csg',
         scheme: 'lib/flood/scheme',
-        
+
         // bower
         Prism: '../bower_components/prism/prism',
         Hammer: '../bower_components/hammerjs/hammer',

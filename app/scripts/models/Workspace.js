@@ -29,6 +29,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       // for custom nodes
       workspaceDependencyIds: [],
       isCustomNode: false,
+      isCustomizer: false,
       guid: null,
       notNotifyServer: false
     },
@@ -94,6 +95,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.on('change:workspaceDependencyIds', throttledSync, this);
       this.on('requestRun', this.run, this);
 
+      // this should not be throttled
+      this.on('change:isCustomizer', function(){ this.sync('update', this); }, this);
       this.set('tabName', this.get('name'));
 
       // if initCustomNodeLater is set to true it means
@@ -108,6 +111,16 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       this.app.trigger('workspaceLoaded', this);
 
+    },
+
+    getCustomizerUrl: function(){
+
+      // if (!this.get('isCustomizer')){
+      //   return "none";
+      // }
+
+      var domain = document.URL.match(/:\/\/(.[^/]+)/)[1];
+      return domain + "/customize-" + this.id;
     },
 
     exportSTL: function(){
@@ -502,6 +515,14 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       this.runInternalCommand( multipleCmd );
       this.addToUndoAndClearRedo( multipleCmd );
+
+      for (var id in nodes){
+        var cpnode = cb.nodes[id];
+        var functionId = cpnode.extra.functionId;
+        if ( cpnode.typeName === "CustomNode" ){
+          this.syncCustomNodesWithWorkspace( functionId );
+        }
+      }
 
     },
 
