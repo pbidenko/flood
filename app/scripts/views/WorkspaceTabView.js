@@ -98,7 +98,7 @@ define(['backbone'], function(Backbone) {
                 app.trigger('closing-request', this.model);
             }
             else {
-                app.get('workspaces').remove(this.model);
+                app.get('workspaces').trigger('hide', this.model);
             }
         }
         else {

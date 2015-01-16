@@ -1,5 +1,6 @@
 define(['backbone', 'staticHelpers'], function (Backbone, staticHelpers) {
     var inputNodeNames = ['Number', 'String', 'Boolean'];
+    var inputOutputNodesNames = ['Input', 'Output'];
 
     function mapNode (node) {
         var returnValue = {
@@ -11,6 +12,9 @@ define(['backbone', 'staticHelpers'], function (Backbone, staticHelpers) {
 
         if (inputNodeNames.indexOf(node.creationName) > -1) {
             returnValue.extra = { value: node.value };
+        }
+        else if (inputOutputNodesNames.indexOf(node.creationName) > -1) {
+            returnValue.extra = { name: node.value };
         }
         else if (node.value){
             var data = JSON.parse(node.value);
