@@ -8,7 +8,9 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
 
         postMessage: function (data, quiet) {
             if (commands.hasOwnProperty(data.kind)) {
-                this.app.socket.send(commands[data.kind].call(this, data));
+                var messages = commands[data.kind].call(this, data);
+                if (messages)
+                    this.app.socket.send(messages);
             }
 
             AbstractRunner.prototype.postMessage.call(this, data, quiet);
