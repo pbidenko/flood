@@ -62,7 +62,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
             if (type.inputs.length === 26)
                 return;
 
-            this.model.workspace.runner.post({ kind: "modelEvent", _id: this.model.get('_id'), eventName: 'AddInPort' });
+            this.model.trigger('addInPort', this.model);
 
             type.addInput('index' + type.inputs.length, 'Item Index #' + type.inputs.length);
 
@@ -79,7 +79,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
             if (type.inputs.length === 1)
                 return;
 
-            this.model.workspace.runner.post({ kind: "modelEvent", _id: this.model.get('_id'), eventName: 'RemoveInPort' });
+            this.model.trigger('removeInPort', this.model);
 
             inputConnections = this.model.get('inputConnections');
             connection = inputConnections[type.inputs.length - 1];
