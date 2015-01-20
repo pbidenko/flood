@@ -21,6 +21,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
             this.$el.on('mouseup', adjustElements.bind(this));
             this.$el.on('mousemove', adjustElements.bind(this));
 
+            // Get a value of the cancel option before it is set to avoid losing previous value
             var cancelOption = this.$el.draggable( 'option', 'cancel' );
             if(!cancelOption.match(/.code-block-input/i))
                 this.$el.draggable( 'option', 'cancel', cancelOption + ',.code-block-input' );
