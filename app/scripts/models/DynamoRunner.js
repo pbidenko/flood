@@ -1,5 +1,5 @@
-define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'CreateProxyNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand'],
-    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, CreateProxyNodeCommand, MakeConnectionCommand, UpdateModelValueCommand) {
+define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNodeCommand', 'CreateProxyNodeCommand', 'MakeConnectionCommand', 'UpdateModelValueCommand', 'ModelEventCommand'],
+    function (AbstractRunner, commandsMap, RecordableCommandsMessage, CreateNodeCommand, CreateProxyNodeCommand, MakeConnectionCommand, UpdateModelValueCommand, ModelEventCommand) {
 
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
@@ -41,6 +41,13 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
     var commands = {
         addNode: function (data) {
             var commands = [instantiateCommand(data)];
+            if(data.extra && data.extra.varInputs && data.extra.varInputs.length)
+            {
+                for(var j = 0; j < data.extra.varInputs.length - 1; j++)
+                {
+                    commands.push(new ModelEventCommand({}, {_id: data._id, eventName: 'AddInPort'}));
+                }
+            }
             Array.prototype.push.apply(commands, UpdateModelValueCommand.syncProperties({ full: true }, data));
             return createMessage.call(this, commands);
         },
@@ -69,6 +76,13 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
                 }
                 else {
                     commands.push(new CreateNodeCommand({}, data.nodes[i]));
+                    if(data.nodes[i].extra && data.nodes[i].extra.varInputs && data.nodes[i].extra.varInputs.length)
+                    {
+                        for(var j = 0; j < data.nodes[i].extra.varInputs.length - 1; j++)
+                        {
+                            commands.push(new ModelEventCommand({}, {_id: data.nodes[i]._id, eventName: 'AddInPort'}));
+                        }
+                    }
                 }
 
                 Array.prototype.push.apply(commands, UpdateModelValueCommand.syncProperties({full: true}, data.nodes[i]));
@@ -91,6 +105,9 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
                 data.name = this.workspace.get('name');
                 return createMessage.call(this, instantiateCommand(data));
             }
+        },
+        modelEvent: function(data){
+            return createMessage.call(this, instantiateCommand(data));
         }
     },
     instantiateCommand = function(data){

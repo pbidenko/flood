@@ -1,5 +1,5 @@
-define( ['CreateNodeCommand', 'CreateProxyNodeCommand', 'DeleteModelCommand', 'MakeConnectionCommand', 'RunCancelCommand', 'CreateCustomNodeCommand'],
-    function ( CreateNodeCommand, CreateProxyNodeCommand, DeleteModelCommand, MakeConnectionCommand, RunCancelCommand, CreateCustomNodeCommand ) {
+define( ['CreateNodeCommand', 'CreateProxyNodeCommand', 'DeleteModelCommand', 'MakeConnectionCommand', 'RunCancelCommand', 'CreateCustomNodeCommand', 'ModelEventCommand'],
+    function ( CreateNodeCommand, CreateProxyNodeCommand, DeleteModelCommand, MakeConnectionCommand, RunCancelCommand, CreateCustomNodeCommand, ModelEventCommand ) {
         return {
             //Key should correspond to the name of command inside flood_runner.js
             addNode: CreateNodeCommand,
@@ -8,6 +8,7 @@ define( ['CreateNodeCommand', 'CreateProxyNodeCommand', 'DeleteModelCommand', 'M
             removeConnection: MakeConnectionCommand,
             addConnection: MakeConnectionCommand,
             run: RunCancelCommand,
-            addWorkspace: CreateCustomNodeCommand
+            addWorkspace: CreateCustomNodeCommand,
+            modelEvent: ModelEventCommand
         };
     });
