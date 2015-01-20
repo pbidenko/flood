@@ -23,7 +23,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       'change .use-default-checkbox': 'useDefaultClick',
       'blur .name-input': 'updateName',
       'click .toggle-vis': 'toggleGeomVis',
-      'click .rep-type': 'replicationClick'
+      'click .rep-type': 'replicationClick',
+      'click .name-input': 'nameInputClick'
     },
 
     initialize: function(args) {
@@ -93,10 +94,14 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
     },
 
+    nameInputClick: function(e){
+      e.stopPropagation();
+    },
+
     // should be part of nodeView subclass
     toggleGeomVis: function(e) {
       this.model.set('visible', !this.model.get('visible') );
-      e.stopPropagation()
+      e.stopPropagation();
     },
 
     makeDraggable: function() {
