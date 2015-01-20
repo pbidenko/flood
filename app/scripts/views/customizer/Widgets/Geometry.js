@@ -1,4 +1,4 @@
-define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone, _, $, BaseWidgetView) {
+define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'staticHelpers'], function(Backbone, _, $, BaseWidgetView, helpers) {
 
   return BaseWidgetView.extend({
 
@@ -85,7 +85,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
 
       for ( var i = 0; i < rawGeom.faces.length; i++ ) {
         var f = rawGeom.faces[i];
-        face = new THREE.Face3( f[0], f[1], f[2], new THREE.Vector3( f[3][0], f[3][1], f[3][2] ) );
+        face = helpers.createFace(f);
+
         threeGeom.faces.push( face );
       }
       

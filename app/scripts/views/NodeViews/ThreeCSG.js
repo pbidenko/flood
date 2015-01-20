@@ -1,4 +1,4 @@
-define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, _, $, BaseNodeView) {
+define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'staticHelpers'], function(Backbone, _, $, BaseNodeView, helpers) {
 
     var colors = {
         selected: 0x00FFFF,
@@ -147,11 +147,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       for ( var i = 0; i < rawGeom.faces.length; i++ ) {
         var f = rawGeom.faces[i];
-        face = new THREE.Face3( f[0], f[1], f[2],
-          [ new THREE.Vector3( f[3][0], f[3][1], f[3][2] ),
-            new THREE.Vector3( f[3][3], f[3][4], f[3][5] ),
-            new THREE.Vector3( f[3][6], f[3][7], f[3][8] )
-          ]);
+        face = helpers.createFace(f);
+
         threeGeom.faces.push( face );
       }
       
