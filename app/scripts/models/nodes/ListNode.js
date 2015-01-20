@@ -28,10 +28,6 @@ define(['Node', 'FLOOD'], function (Node, FLOOD) {
                 this.set('displayName', '');
 
             this.initAttrs(attrs, vals);
-        },
-
-        updateValue: function () {
-
         }
     });
 });

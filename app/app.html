@@ -430,7 +430,11 @@
     <a href="#" class="add-input"> + </a>
     <a href="#" class="remove-input" style="padding-left: 10px; padding-right: 10px"> - </a>
     <span class="name searchfield">
+        <% if ( !name || name === "DefaultNodeName" || name === "") { %>
         <%= displayName %>
+        <% } else { %>
+        <%= name %>
+        <% } %>
     </span>
 
 </script>

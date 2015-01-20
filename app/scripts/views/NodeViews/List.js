@@ -2,6 +2,11 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
 
     return BaseNodeView.extend({
 
+        events: _.extend(BaseNodeView.prototype.events, {
+            'click .add-input': 'addInput',
+            'click .remove-input': 'removeInput'
+        }),
+
         initialize: function (args) {
             BaseNodeView.prototype.initialize.apply(this, arguments);
         },
@@ -34,30 +39,12 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
             this.model.workspace.run();
         },
 
-        renderNode: function () {
+        addInput: function (e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-            BaseNodeView.prototype.renderNode.apply(this, arguments);
-
-            this.$el.find('.add-input').one( 'click', function (e) {
-                this.addInput.call(this);
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }.bind(this));
-            this.$el.find('.remove-input').one( 'click', function (e) {
-                this.removeInput.call(this);
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }.bind(this));
-
-            return this;
-
-        },
-
-        addInput: function () {
-            var type = this.model.get('type');
-            var inputConnections = this.model.get('inputConnections');
+            var type = this.model.get('type'),
+                inputConnections = this.model.get('inputConnections');
 
             if (type.inputs.length === 26)
                 return;
@@ -71,7 +58,10 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
             this.updatePorts();
         },
 
-        removeInput: function () {
+        removeInput: function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
             var type = this.model.get('type'),
                 inputConnections,
                 connection;
