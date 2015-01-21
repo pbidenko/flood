@@ -1,4 +1,4 @@
-define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'staticHelpers'], function(Backbone, _, $, BaseNodeView, helpers) {
+define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], function(Backbone, _, $, BaseNodeView, helpers) {
 
     var colors = {
         selected: 0x00FFFF,

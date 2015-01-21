@@ -1,4 +1,4 @@
-define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'staticHelpers'], function(Backbone, _, $, BaseWidgetView, helpers) {
+define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], function(Backbone, _, $, BaseWidgetView, helpers) {
 
   return BaseWidgetView.extend({
 
