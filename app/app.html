@@ -398,6 +398,14 @@
               <input class="name-input" value="<%= name %>">
             </li>
 
+            <% if (typeof(showLockCheckbox)!== "undefined" && showLockCheckbox) { %>
+
+                <li class="dropdown-header">
+                  Hide in customizer <input type="checkbox" style="margin-left: 10px" <%= extra.lock ? "checked" : ""%> class="lock-input">
+                </li>
+
+            <% } %>
+
           </ul>
         </div>
 
@@ -414,6 +422,20 @@
     <a href="#" class="add-input"> + </a>
     <a href="#" class="remove-input" style="padding-left: 10px; padding-right: 10px"> - </a>
     <input type="text" class="formula-text-input" placeholder="Custom formula" value="<%= extra.script %>">
+
+</script>
+
+<script type="text/template" id="node-list-template">
+
+    <a href="#" class="add-input"> + </a>
+    <a href="#" class="remove-input" style="padding-left: 10px; padding-right: 10px"> - </a>
+    <span class="name searchfield">
+        <% if ( !name || name === "DefaultNodeName" || name === "") { %>
+        <%= displayName %>
+        <% } else { %>
+        <%= name %>
+        <% } %>
+    </span>
 
 </script>
 
@@ -685,9 +707,6 @@
 
     </div>
 
-          <div id="export-button" class="workspace-search-button workspace-search-button-active">
-            <i class="fa fa-lg fa-fw dim-button fa-download white-icon"></i>
-          </div>
 </script>
 
 <script type="text/template" id="workspace-runner-status-template">

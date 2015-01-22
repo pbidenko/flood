@@ -30,6 +30,9 @@ define(['backbone'], function (Backbone) {
 
             this.listenTo(this.workspace.get('nodes'), 'add', this.addNode);
             this.listenTo(this.workspace.get('nodes'), 'remove', this.removeNode);
+            this.listenTo(this.workspace.get('nodes'), 'addInPort', this.addInPort);
+            this.listenTo(this.workspace.get('nodes'), 'removeInPort', this.removeInPort);
+
         },
 
         postMessage: function(data, quiet) {
@@ -150,6 +153,28 @@ define(['backbone'], function (Backbone) {
 
 		},
 
+		addInPort: function(node){
+
+			var data = { kind: 'modelEvent', 
+						_id: node.get('_id'),
+						eventName: 'AddInPort'
+			};
+
+			this.post( data );
+
+		},
+
+		removeInPort: function(node){
+
+			var data = { kind: 'modelEvent', 
+						_id: node.get('_id'),
+						eventName: 'RemoveInPort'
+			};
+
+			this.post( data );
+
+		},
+
 		addConnection: function(connection, workspace){
 
 			var c = connection.toJSON();
@@ -163,8 +188,8 @@ define(['backbone'], function (Backbone) {
 
 		removeConnection: function(connection){
 
-                        if (connection.silentRemove)
-                             return;
+			if (connection.silentRemove)
+				return;
 			var c = connection.toJSON();
 			c.kind = "removeConnection";
 			c.id = connection.get('endNodeId');
