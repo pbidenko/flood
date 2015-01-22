@@ -1,11 +1,12 @@
-define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'ThreeCSGNodeView', 'FormulaView',
-'CodeBlockView', 'OutputView', 'InputView', 'CustomNodeView', 'StringView', 'BooleanView', 'ListView'], 
-  function(BaseNodeView, WatchNodeView, NumNodeView, ThreeCSGNodeView, FormulaView,
-  CodeBlockView, OutputView, InputView, CustomNodeView, StringView, BooleanView, ListView){
+define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'ThreeCSGNodeView', 'FormulaView', 'PythonScriptView',
+'CodeBlockView', 'OutputView', 'InputView', 'CustomNodeView', 'StringView', 'BooleanView', 'ListCreateView'], 
+  function(BaseNodeView, WatchNodeView, NumNodeView, ThreeCSGNodeView, FormulaView, PythonScriptView,
+  CodeBlockView, OutputView, InputView, CustomNodeView, StringView, BooleanView, ListCreateView){
 
   var nodeViewTypes = {
       'Code Block': CodeBlockView,
-      'List.Create': ListView
+      'List.Create': ListCreateView,
+      'Python Script': PythonScriptView
   };
 
   nodeViewTypes.Base = ThreeCSGNodeView;

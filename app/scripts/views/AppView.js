@@ -18,10 +18,12 @@ define([  'backbone',
           'ShareView',
           'Share',
           'fastclick',
-          'SaveUploaderView' ],
+          'SaveUploaderView',
+          'PythonEditorView' ],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback, ShareView, Share, fastclick, SaveUploaderView ) {
+            Help, LoginView, Login, FeedbackView, Feedback, ShareView, Share, fastclick, SaveUploaderView,
+            PythonEditorView ) {
 
   return Backbone.View.extend({
 
@@ -47,6 +49,7 @@ define([  'backbone',
       this.model.on('hide-search', this.hideSearch, this);
       this.model.on('show-progress', this.showProgress, this);
       this.model.on('hide-progress', this.hideProgress, this);
+      this.listenTo(this.model, 'showPythonEditor', this.viewPythonEditor);
 
       this.model.login.on('change:isLoggedIn', this.initBrowserView, this);
       this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
@@ -243,6 +246,16 @@ define([  'backbone',
       } else {
         this.shareView.$el.fadeOut();
       }
+    },
+
+    viewPythonEditor: function(e){
+      if (!this.pythonView){
+        this.pythonView = new PythonEditorView();
+      }
+
+        this.pythonView.render(e);
+        this.pythonView.$el.fadeIn();  
+
     },
 
     toggleHelp: function(){

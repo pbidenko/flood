@@ -42,7 +42,8 @@ define(['RecordableCommand', 'staticHelpers'], function (RecordableCommand, help
     var typeMap = {
         'Input': { param: 'name', value: 'InputSymbol' },
         'Output': { param: 'name', value: 'Symbol' },
-        'Code Block': { param: 'code', value: 'Code' }
+        'Code Block': { param: 'code', value: 'Code' },
+        'Python Script': { param: 'script', value: 'ScriptContent' }
     };
 
     var getInstance = function (id, name, value) {

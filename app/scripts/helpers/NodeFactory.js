@@ -1,11 +1,12 @@
-define(['Node', 'NumberNode', 'CodeBlockNode', 'StringNode', 'BooleanNode', 'ListNode'], 
-function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode, ListNode) {
+define(['Node', 'NumberNode', 'CodeBlockNode', 'StringNode', 'BooleanNode', 'VariableInputNode', 'PythonScriptNode'], 
+function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode, VariableInputNode, PythonScriptNode) {
     var map = {
         'Code Block': CodeBlockNode,
         'Number': NumberNode,
         'String' : StringNode,
         'Boolean' : BooleanNode,
-        'List.Create': ListNode
+        'List.Create': VariableInputNode,
+        'Python Script': PythonScriptNode
     };
 
     return {

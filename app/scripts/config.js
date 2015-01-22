@@ -134,7 +134,8 @@ require.config({
         StringNode: 'models/nodes/StringNode',
         BooleanNode: 'models/nodes/BooleanNode',
         CodeBlockNode: 'models/nodes/CodeBlockNode',
-        ListNode: 'models/nodes/ListNode',
+        VariableInputNode: 'models/nodes/VariableInputNode',
+        PythonScriptNode: 'models/nodes/PythonScriptNode',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
@@ -228,6 +229,7 @@ require.config({
         SearchCategoryView: 'views/SearchCategoryView',
         UnsavedChangesHandlerView: 'views/UnsavedChangesHandlerView',
         SaveUploaderView: 'views/BaseSaveUploaderView', //'views/NWKSaveUploaderView',
+        PythonEditorView: 'views/PythonEditorView',
 
         // node backbone views
         NodeViewTypes: 'views/NodeViews/NodeViews',
@@ -242,7 +244,9 @@ require.config({
         ThreeCSGNodeView: 'views/NodeViews/ThreeCSG',
         StringView: 'views/NodeViews/StringView',
         BooleanView: 'views/NodeViews/BooleanView',
-        ListView: 'views/NodeViews/List',
+        VariableInputView: 'views/NodeViews/VariableInput',
+        ListCreateView: 'views/NodeViews/ListCreate',
+        PythonScriptView: 'views/NodeViews/PythonScript',
 
         OrbitControls: 'lib/OrbitControls',
         Viewport: 'lib/Viewport',
@@ -253,6 +257,7 @@ require.config({
 
         // bower
         Prism: '../bower_components/prism/prism',
+        PrismPython: '../bower_components/prism/components/prism-python',
         Hammer: '../bower_components/hammerjs/hammer',
         almond: '../bower_components/almond/almond',
         bootstrap: '../bower_components/bootstrap/dist/js/bootstrap',
@@ -272,6 +277,3 @@ require.config({
         FileSaver: '../bower_components/FileSaver/FileSaver'
     }
 });
-
-
-

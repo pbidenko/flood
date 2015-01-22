@@ -739,12 +739,12 @@ input[type="button"].btn-block {
     box-shadow: 1px 1px 10px #444;
 }
 
-    .help-section span {
-        color: grey;
-        font-size: 13px;
-        display: block;
-        padding-bottom: 8px;
-    }
+.help-section span {
+    color: grey;
+    font-size: 13px;
+    display: block;
+    padding-bottom: 8px;
+}
 
 .exit-help-section {
     display: inline-block;
@@ -824,6 +824,50 @@ input[type="button"].btn-block {
 	position: absolute;
 	right: 10px;
 	top: 10px;
+}
+
+#pythonEditor .label {
+    font-weight: bold;
+    color: grey;
+    font-size: 14px;
+}
+
+#pythonEditor .modal-box {
+    background: whitesmoke;
+    border: 1px solid #AAA;
+    position: relative;
+    padding: 18px;
+    top: 70px;
+    width: 640px;
+    height: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: auto;
+}
+
+#pythonEditor button {
+    position: relative;
+    left: 420px;
+    top: 410px;
+}
+
+.python-input {
+    -moz-appearance: textfield-multiline;
+    -webkit-appearance: textarea;
+    -webkit-border-radius:0px;
+    border-radius:0px;
+    font-size: 14px;
+    line-height: 25px;
+    text-align: left;
+    white-space: pre;
+    overflow: auto;
+    color: black;
+    border: 1px solid gray;
+    background: #f5f2f0;
+    width: 600px;
+    height: 400px;
+    position: absolute;
+    top: 40px;
 }
 
 .modal {

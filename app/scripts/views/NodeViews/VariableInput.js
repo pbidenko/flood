@@ -7,11 +7,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
             'click .remove-input': 'removeInput'
         }),
 
-        initialize: function (args) {
-            BaseNodeView.prototype.initialize.apply(this, arguments);
-        },
-
-        innerTemplate: _.template($('#node-list-template').html()),
+        innerTemplate: _.template($('#variable-input-template').html()),
 
         getCustomContents: function () {
             var json = this.model.toJSON();
@@ -51,7 +47,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
 
             this.model.trigger('addInPort', this.model);
 
-            type.addInput('index' + type.inputs.length, 'Item Index #' + type.inputs.length);
+            type.addInput(this.getPortName(type.inputs.length), this.getPortDescription(type.inputs.length));
 
             inputConnections.push([]);
 
@@ -86,12 +82,12 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
             this.updatePorts();
         },
 
-        colorPorts: function() {
-            BaseNodeView.prototype.colorPorts.apply(this, arguments);
+        getPortName: function(data){
+            return data;
+        },
 
-            this.model.trigger('change:position');
-
-            return this;
+        getPortDescription: function(data){
+            return data;
         }
 
     });

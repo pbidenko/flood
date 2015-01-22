@@ -268,6 +268,10 @@
             
         </div>
 
+        <div id="pythonEditor" class="modal row col">
+            
+        </div>
+
         <div id="workspace-browser" class="col">
             
         </div>
@@ -425,7 +429,7 @@
 
 </script>
 
-<script type="text/template" id="node-list-template">
+<script type="text/template" id="variable-input-template">
 
     <a href="#" class="add-input"> + </a>
     <a href="#" class="remove-input" style="padding-left: 10px; padding-right: 10px"> - </a>
@@ -858,6 +862,25 @@
         <p><%= text %></p>
         <div class="exit-help-section" data-target-id="<%= targetId %>">Ok, got it!</div>
         <div class="exit-help" data-target-id="<%= targetId %>">Exit all</div>
+    </div>
+
+</script>
+
+<script type="text/template" id="python-template">
+
+    <div id="python-box" class="modal-box">
+
+        <div class="inner-box">
+           <span class="label">Edit Python Script...</span>
+        </div>
+
+        <div class="inner-box">
+            <code id="python-script" class="language-python python-input" contenteditable><%= script %></code>
+
+            <button id="save-python">Accept Changes</button>
+            <button id="exit-python">Cancel</button>
+        </div>
+
     </div>
 
 </script>

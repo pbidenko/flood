@@ -24,6 +24,10 @@ define(['backbone', 'staticHelpers'], function (Backbone, staticHelpers) {
                 returnValue.extra.code = data.Code;
             }
 
+            if (data.Script) {
+                returnValue.extra.script = data.Script;
+            }
+
             returnValue.extra.inputs = data.InPorts;
             returnValue.extra.outputs = data.OutPorts;
 
