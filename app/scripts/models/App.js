@@ -37,7 +37,6 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       this.context = new Storage({ baseUrl: settings.storageUrl });
 
-      // workspaceRemoved: no such method this.listenTo(this.get('workspaces'), 'remove', this.workspaceRemoved);
       this.listenTo(this, 'code-block-node-updated:event', this.updateCodeBlockNode);
     },
 
