@@ -488,6 +488,26 @@
         <% }); %>
     </ul>
 
+    <div class="dropdown keep-open node-settings" style="position:absolute">
+
+        <a href="#" data-toggle="dropdown" href="#">
+            <span style="color:black; padding: 1px">...</span>
+        </a>
+
+        <ul class="dropdown-menu node-dropdown-menu" role="menu" style="color: black" aria-labelledby="dLabel">
+
+            <li class="dropdown-header">Name</li>
+            <li class="node-dropown-menu-item">
+              <input class="name-input" value="<%= name %>">
+            </li>
+            
+            <li class="dropdown-header">
+              Hide in customizer <input type="checkbox" style="margin-left: 10px" <%= extra.lock ? "checked" : ""%> class="lock-input">
+            </li>
+
+        </ul>
+    </div>
+
 </script>
 
 <script type="text/template" id="node-output-template">
