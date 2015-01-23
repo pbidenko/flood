@@ -28,8 +28,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'FLOOD'], function(B
       }
 
     	this.render();
-    	this.model.trigger('updateRunner');
-		  this.model.workspace.run();
+    	this.model.trigger('update-node');
+        this.model.trigger('requestRun');
     },
 
     setNumInputConnections: function(num){
@@ -52,7 +52,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'FLOOD'], function(B
           var conn = this.model.getConnectionAtIndex(inputConns.length - 1);
 
           if (conn != null){
-            this.model.workspace.removeConnection(conn);
+              this.model.trigger('request-remove-conn-from-collection').remove(conn);
           }
 
           inputConns.pop();
@@ -83,7 +83,12 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'FLOOD'], function(B
 
       	ex.script = that.input.val();
 
-      	that.model.workspace.setNodeProperty({property: "extra", _id: that.model.get('_id'), newValue: ex });
+      	var cmd = { property: "extra",
+            _id: that.model.get('_id'),
+            newValue: ex
+        };
+
+        this.model.trigger('request-set-node-prop', cmd);
       	that.selectable = true; 
       });
 
@@ -94,14 +99,20 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'FLOOD'], function(B
 
     },
 
-    setNumInputsProperty: function(numInputs){
-      if (numInputs === undefined) return;
+    setNumInputsProperty: function(numInputs) {
+        if (numInputs === undefined) return;
 
-      var ex = this.model.get('extra');
-      var exCopy = JSON.parse( JSON.stringify( ex ) );
-      
-      exCopy.numInputs = numInputs;
-      this.model.workspace.setNodeProperty({property: "extra", _id: this.model.get('_id'), newValue: exCopy, oldValue: ex });
+        var ex = this.model.get('extra');
+        var exCopy = JSON.parse(JSON.stringify(ex));
+
+        exCopy.numInputs = numInputs;
+        var cmd = { property: "extra",
+            _id: this.model.get('_id'),
+            newValue: exCopy,
+            oldValue: ex
+        };
+
+        this.model.trigger('request-set-node-prop', cmd);
     },
 
     addInput: function(){

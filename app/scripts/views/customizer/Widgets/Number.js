@@ -15,8 +15,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'jqueryuislider'],
 
         this.silentSyncUI( ex );
 
-        this.model.trigger('updateRunner'); 
-        this.model.workspace.trigger('requestRun');
+        this.model.trigger('update-node');
+        this.model.trigger('requestRun');
 
       }, this);
 
@@ -149,13 +149,20 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'jqueryuislider'],
 
     inputSet: function(e,ui) {
 
-      if ( this.silent ) return;
+        if (this.silent) return;
 
-      var newValue = {   value: this.slider.slider("option", "value"), min: this.slider.slider("option", "min"), 
-        step: this.slider.slider("option", "step"), max: this.slider.slider("option", "max") };
+        var newValue = { value: this.slider.slider("option", "value"),
+            min: this.slider.slider("option", "min"),
+            step: this.slider.slider("option", "step"),
+            max: this.slider.slider("option", "max")
+        };
 
-      this.model.workspace.setNodeProperty({property: 'extra', _id: this.model.get('_id'), newValue: newValue });      
+        var cmd = { property: 'extra',
+            _id: this.model.get('_id'),
+            newValue: newValue
+        };
 
+        this.model.trigger('request-set-node-prop', cmd);
     }
 
   });

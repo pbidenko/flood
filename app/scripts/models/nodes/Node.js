@@ -38,7 +38,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 this.set('creationName', attrs.extra.creationName);
                 this.set('displayName', attrs.extra.displayName);
             } else {
-                elems = vals.workspace.app.SearchElements.where({ creationName: attrs.typeName });
+                elems = vals.searchElements.where({ creationName: attrs.typeName });
                 if (elems.length === 0) {
                     if (attrs.ignoreDefaults) {
                         inPort = staticHelpers.generatePortNames(attrs.ignoreDefaults.length);
@@ -332,7 +332,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         index = 0;
         connection = port[0];
         isOutput = false;
-        this.workspace.get('connections').remove(connection);
+        this.trigger('request-remove-conn-from-collection', connection);
       }
 
       if (index === -1)
@@ -361,19 +361,14 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
     },
 
-    onDisconnectPort: function( portIndex, isOutput, connection ){
-      
-      if (isOutput){
-        return;
-      }
+    onDisconnectPort: function( portIndex, isOutput, connection ) {
 
-      if (!isOutput){
+        if (isOutput) {
+            return;
+        }
+
         this.get('type').inputs[portIndex].disconnect();
-      }
-
-      if (this.workspace)
-        this.workspace.run();
-
+        this.trigger('requestRun');
     },
 
     updateNodeGeometry: function(param) {
@@ -395,8 +390,8 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         this.set('prettyLastValue', geometries);
         },
 
-        clearGeometry: function() {
-            this.set('prettyLastValue', {});
+    clearGeometry: function() {
+        this.set('prettyLastValue', {});
     },
 
     addPoints: function (graphicData, geometries) {

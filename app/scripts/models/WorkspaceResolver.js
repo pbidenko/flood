@@ -191,7 +191,7 @@ define(['backbone', 'FLOOD'],
               var inConn = x.getConnectionAtIndex(inputConns.length - 1);
 
               if (inConn != null){
-                x.workspace.removeConnection(inConn);
+                this.workspace.removeConnection(inConn);
               }
 
               inputConns.pop();
@@ -217,8 +217,10 @@ define(['backbone', 'FLOOD'],
               var ocs = x.get('outputConnections')
                 .last();
 
-              if (ocs){
-                ocs.slice(0).forEach(function(outConn){ x.workspace.removeConnection(outConn); })
+              if (ocs) {
+                  ocs.slice(0).forEach(function (outConn) {
+                      this.workspace.removeConnection(outConn);
+                  }.bind(this))
               }
 
               outputConns.pop();
@@ -281,9 +283,9 @@ define(['backbone', 'FLOOD'],
         x.trigger('requestRender');
 
         // update runner
-        x.trigger('updateRunner');
+        x.trigger('update-node');
 
-      });
+      }.bind(this));
 
       if (directlyAffectedCustomNodes.length > 0) this.workspace.sync('update', this.workspace);
 
@@ -294,7 +296,7 @@ define(['backbone', 'FLOOD'],
       var indirectlyAffectedNodes = this.getIndirectlyAffectedCustomNodes( workspace.id );
 
       indirectlyAffectedNodes.forEach(function(x){
-        x.trigger('updateRunner');
+        x.trigger('update-node');
       });
 
       if (indirectlyAffectedNodes.length > 0) this.workspace.sync('update', this.workspace );

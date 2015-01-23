@@ -20,7 +20,7 @@ define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView', 
 
     hasWidgets: false,
 
-    buildWidget: function(x){
+    buildWidget: function(x) {
 
       if (x.get('extra') != undefined && x.get('extra').lock) return;
 
@@ -31,6 +31,10 @@ define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView', 
       }
 
       var widget = new widgetView({model: x});
+      if (widget.changeVisibility) {
+          widget.listenTo(this.model, 'change:current', widget.changeVisibility.bind(widget, this.model));
+          widget.listenTo(widget.model, 'change:visible', widget.changeVisibility.bind(widget, this.model));
+      }
 
       if (x.get('typeName') in this.map){
         this.$el.append( widget.render().$el );

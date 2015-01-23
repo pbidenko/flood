@@ -125,7 +125,6 @@ define(['backbone'], function (Backbone) {
 			var n = node.serialize();
 
 			n.kind = "updateNode";
-			n.workspace_id = node.workspace.id;
 
 			this.post( n );
 
@@ -135,7 +134,6 @@ define(['backbone'], function (Backbone) {
 
 			var n = node.serialize();
 			n.kind = "addNode";
-			n.workspace_id = node.workspace.id;
 
 			this.watchNodeEvents( node );
 
@@ -180,7 +178,6 @@ define(['backbone'], function (Backbone) {
 			var c = connection.toJSON();
 			c.kind = "addConnection";
 			c.id = connection.get('_id');
-			c.workspace_id = connection.workspace.id;
 
 			this.post(c);
 
@@ -195,7 +192,6 @@ define(['backbone'], function (Backbone) {
 			c.id = connection.get('endNodeId');
 			c.portIndex = connection.get('endPortIndex');
 			c.startPortIndex = -1;
-			c.workspace_id = connection.workspace.id;
 
 			this.post( c );
 
@@ -214,7 +210,6 @@ define(['backbone'], function (Backbone) {
 
 			var c = workspace.toJSON();
 			c.kind = "addDefinition";
-			c.workspace_id = c._id;
 
 			var that = this;
 			workspace.get('nodes').each(function(x){

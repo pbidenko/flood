@@ -13,7 +13,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
         var name = ex != undefined ? ex.name : "";
         
         this.silentSyncUI( name );
-        this.model.trigger('updateRunner'); 
+        this.model.trigger('update-node');
 
       }, this);
 
@@ -39,7 +39,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
     nameChanged: function(){
       this.inputSet();
-      this.model.workspace.trigger('updateRunner');
+      this.model.trigger('updateRunner');
     },
 
     silentSyncUI: function(name){
@@ -49,10 +49,15 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
     },
 
     inputSet: function(e,ui) {
-      if ( this.silent ) return;
+        if (this.silent) return;
 
-      var newValue = { name: this.inputText.val() };
-      this.model.workspace.setNodeProperty({property: 'extra', _id: this.model.get('_id'), newValue: newValue });      
+        var newValue = { name: this.inputText.val() };
+        var cmd = { property: 'extra',
+            _id: this.model.get('_id'),
+            newValue: newValue
+        };
+
+        this.model.trigger('request-set-node-prop', cmd);
     }
 
   });

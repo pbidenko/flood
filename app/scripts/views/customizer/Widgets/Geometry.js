@@ -4,16 +4,13 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
 
     initialize: function(args) {
 
-      BaseWidgetView.prototype.initialize.apply(this, arguments);
+        BaseWidgetView.prototype.initialize.apply(this, arguments);
 
-      this.model.on('change:selected', this.colorSelected, this);
-      this.model.on('change:visible', this.changeVisibility, this);
-      this.model.on('remove', this.onRemove, this);
-      this.model.on('change:prettyLastValue', this.onEvalComplete, this );
-      this.model.workspace.on('change:current', this.changeVisibility, this);
-
-      this.onEvalComplete();
-
+        this.listenTo(this.model, 'change:selected', this.colorSelected);
+        this.listenTo(this.model, 'remove', this.onRemove);
+        this.listenTo(this.model, 'change:prettyLastValue', this.onEvalComplete);
+        
+        this.onEvalComplete();
     },
 
     setMaterials: function(partMat, meshMat, lineMat){
@@ -57,10 +54,10 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
     }, 
 
     // 3D move to node subclass
-    onRemove: function(){
-      this.model.workspace.off('change:current', this.changeVisibility, this);
-      scene.remove(this.threeGeom); 
-    }, 
+    onRemove: function() {
+        this.stopListening();
+        scene.remove(this.threeGeom);
+    },
 
     evaluated: false,
 
@@ -147,7 +144,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
 
         this.threeGeom = threeTemp;
         scene.add( this.threeGeom );
-        this.changeVisibility();
+        this.model.trigger('change:visible');
 
       }, this );
 
@@ -196,13 +193,13 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
 
     },
 
-    changeVisibility: function(){
+    changeVisibility: function(workspace){
 
       if ( !this.threeGeom ){
         return;
       }
-        
-      if (!this.model.get('visible') || !this.model.workspace.get('current') )
+
+      if (!this.model.get('visible') || !workspace.get('current') )
       {
         this.threeGeom.traverse(function(e) { e.visible = false; });
       } else if ( this.model.get('visible') )
@@ -234,7 +231,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
 
       return this;
 
-    },
+    }
 
   });
 

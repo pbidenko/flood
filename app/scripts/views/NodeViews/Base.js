@@ -28,9 +28,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
     initialize: function(args) {
 
-      this.workspace = args.workspace;
-      this.workspaceView = args.workspaceView;
-
       this.listenTo(this.model, 'requestRender', this.render );
       this.listenTo(this.model, 'change:position', this.move );
       this.listenTo(this.model, 'change:lastValue', this.renderLastValue );
@@ -46,18 +43,22 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       this.model.on('evalFailed', this.onEvalFailed, this );
       this.model.on('evalBegin', this.onEvalBegin, this );
 
-      this.makeDraggable();
       this.$workspace_canvas = $('#workspace_canvas');
       this.position = this.model.get('position');
 
     },
 
-    updateName: function(e){
-      var val = this.$el.find('.name-input').val();
-      if (this.model.get('name') === val) return;
-      
-      var cmd = { property: 'name', _id: this.model.get('_id'), newValue : val };
-      this.model.workspace.setNodeProperty(cmd);
+    updateName: function(e) {
+        var val = this.$el.find('.name-input').val();
+        if (this.model.get('name') === val)
+            return;
+
+        var cmd = { property: 'name',
+            _id: this.model.get('_id'),
+            newValue: val
+        };
+
+        this.model.trigger('request-set-node-prop', cmd);
     },
 
     onEvalFailed: function(exception){
@@ -79,8 +80,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       var cmd = { property: 'ignoreDefaults', _id: this.model.get('_id'), 
             newValue : ign };
 
-      this.model.workspace.setNodeProperty(cmd);
-      this.model.workspace.run();
+      this.model.trigger('request-set-node-prop', cmd);
+      this.model.trigger('requestRun');
 
     },
 
@@ -88,8 +89,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
       var cmd = { property: 'replication', _id: this.model.get('_id'), 
             newValue : $(e.target).attr('data-rep-type') };
-      this.model.workspace.setNodeProperty(cmd);
-      this.model.workspace.run();
+        this.model.trigger('request-set-node-prop', cmd);
+        this.model.trigger('requestRun');
 
     },
 
@@ -97,53 +98,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
     toggleGeomVis: function(e) {
       this.model.set('visible', !this.model.get('visible') );
       e.stopPropagation()
-    },
-
-    makeDraggable: function() {
-
-      var that = this;
-      this.initPos = [];
-      this.$el.draggable( {
-        drag : function(e, ui) {
-          var zoom = 1 / that.workspace.get('zoom');
-
-          ui.position.left = zoom * ui.position.left;
-          ui.position.top = zoom * ui.position.top;
-
-          that.workspace.get('nodes').moveSelected([ ui.position.left - that.initPos[0], ui.position.top - that.initPos[1]], that);
-
-          that.model.set('position', [ ui.position.left, ui.position.top ]);
-
-        },
-        start : function(startEvent) {
-
-          if ( !that.model.get('selected') ){
-            that.model.workspace.get('nodes').deselectAll();
-          }
-
-          that.model.set('selected', true );
-          that.workspace.get('nodes').startDragging(that);
-
-          var zoom = 1 / that.model.workspace.get('zoom');
-          var pos = that.model.get('position');
-
-          that.initPos = [ pos[0], pos[1] ];
-
-        },
-        stop : function() {
-
-          var start = [ that.initPos[0], that.initPos[1] ];
-          var pos = that.model.get('position');
-          var end = [ pos[0], pos[1] ];
-
-          var cmd = { property: 'position', _id: that.model.get('_id'), 
-            oldValue: start, newValue : end };
-          that.model.workspace.setNodeProperty( cmd );
-
-        }
-      });
-      this.$el.css('position', 'absolute');
-
     },
 
     beginPortDisconnection: function(e){
@@ -156,27 +110,28 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
         , connection = inputConnections[index][0]
         , oppos = connection.getOpposite( this.model );
 
-      this.workspace.startProxyConnection( oppos.node.get('_id'), oppos.portIndex, this.getPortPosition(index, false));
-      this.workspace.removeConnection( connection.toJSON() );
+        var startNodeId = oppos.node.get('_id'),
+            nodePort = oppos.portIndex,
+            startPosition = this.getPortPosition(index, false);
+
+        this.model.trigger('start-proxy-conn', startNodeId, nodePort, startPosition);
+        this.model.trigger('request-remove-conn', connection.toJSON());
 
       e.stopPropagation();
     },
 
-    beginPortConnection: function(e){
-      var index = parseInt( $(e.currentTarget).attr('data-index') );
-      this.workspace.startProxyConnection(this.model.get('_id'), index, this.getPortPosition(index, true));
-      e.stopPropagation();
+    beginPortConnection: function(e) {
+        var index = parseInt($(e.currentTarget).attr('data-index'));
+        var startNodeId = this.model.get('_id'),
+            nodePort = index,
+            startPosition = this.getPortPosition(index, true);
+
+        this.model.trigger('start-proxy-conn', startNodeId, nodePort, startPosition);
+        e.stopPropagation();
     },
 
-    endPortConnection: function(e){
-
-      if ( !this.workspace.draggingProxy )
-        return;
-
-      var index = parseInt( $(e.currentTarget).attr('data-index') );
-      this.workspace.completeProxyConnection(this.model.get('_id'), index );
-      e.stopPropagation();
-
+    endPortConnection: function(e) {
+        this.trigger('end-port-conn', e, this.model.get('_id'));
     },
 
     // touch-specific handlers
@@ -189,11 +144,10 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       if ( !this.model.isPortConnected(index, false) )
         return;
 
-      var inputConnections = this.model.get('inputConnections')
-        , connection = inputConnections[index][0]
-        , oppos = connection.getOpposite( this.model );
+        var inputConnections = this.model.get('inputConnections')
+            , connection = inputConnections[index][0];
 
-      this.workspace.removeConnection( connection.toJSON() );
+        this.model.trigger('request-remove-conn', connection.toJSON());
 
       e.stopPropagation();
       e.preventDefault();
@@ -213,12 +167,13 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
         if (!elem.attr('data-index')) return;
 
-        this.workspace.draggingProxy = true;
+        this.model.trigger('request-set-draggingproxy', true);
 
         var e = $.Event( "mouseup" );
         elem.trigger(e);
 
-        this.workspace.draggingProxy = false;
+        this.model.trigger('request-set-draggingproxy', false);
+        //this.workspace.draggingProxy = false;
 
       }.bind( this ));
 
@@ -247,15 +202,18 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
     selectThis: function(event) {
 
-      if (!this.selectable) return;
+        if (!this.selectable) return;
 
-      if ( !this.model.get('selected') ){
-        if (!event.shiftKey)
-          this.workspace.get('nodes').deselectAll();
-        this.model.set('selected', true );
-      } else {
-        this.workspace.get('nodes').deselectAll();
-      }
+        if (!this.model.get('selected')) {
+            if (!event.shiftKey) {
+                this.model.trigger('deselect-all-nodes');
+            }
+
+            this.model.set('selected', true);
+        }
+        else {
+            this.model.trigger('deselect-all-nodes');
+        }
 
     },
 

@@ -10,7 +10,8 @@ define(['underscore', 'jquery', 'ThreeCSGNodeView'], function(_, $, ThreeCSGNode
 
       // open the parent workspace on double click
       this.$el.bind('dblclick', function(){
-        this.model.workspace.app.openWorkspace( this.model.get('type').functionId );
+          this.trigger('request-open-definition', this.model.get('type').functionId);
+
       }.bind(this) );
 
       var js = this.model.toJSON() ;

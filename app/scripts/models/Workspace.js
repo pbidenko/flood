@@ -75,7 +75,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         startProxyPosition: [0, 0],
         endProxyPosition: [0, 0],
         hidden: true
-      }, { workspace: this });
+      });
 
       this.marquee = new Marquee({
         _id: -1,
@@ -167,10 +167,14 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
                   node.extra.functionId = id;
               }
           }
-        this.get('nodes').add(nodeFactory.create({
-          config: node,
-          workspace: this 
-        }));
+        nodeModel = nodeFactory.create({
+            config: node,
+            searchElements: this.app.SearchElements
+        });
+
+        this.subscribeOnNodeEvents(nodeModel);
+        this.get('nodes').add(nodeModel);
+
         // if this custom node is not proxy and dependency haven't been added yet
         if (id && this.get('workspaceDependencyIds').indexOf(id) === -1) {
             if (workspaces.length)
@@ -193,14 +197,34 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       }
     },
 
+    subscribeOnNodeEvents: function(nodeModel) {
+        this.listenTo(nodeModel, 'request-set-node-prop', this.setNodeProperty);
+        //notify all listeners of the workspace
+        this.listenTo(nodeModel, 'requestRun', function(){ this.trigger('requestRun'); });
+        this.listenTo(nodeModel, 'updateRunner', function(){ this.trigger('updateRunner'); });
+	
+        this.listenTo(nodeModel, 'start-proxy-conn', this.startProxyConnection);
+        this.listenTo(nodeModel, 'request-remove-conn', this.removeConnection);
+        this.listenTo(nodeModel, 'request-remove-node', this.removeNodeById);
+        this.listenTo(nodeModel, 'request-remove-conn-from-collection', this.removeConnectionFromCollection);
+        this.listenTo(nodeModel, 'deselect-all-nodes', this.deselectAllNodes);
+        this.listenTo(nodeModel, 'request-set-draggingproxy', this.setDraggingProxy);
+    },
+
+    setDraggingProxy: function(newValue) {
+        this.draggingProxy = newValue;
+    },
+
     createConnections: function(data){
 
-      this.set('connections', new Connections(data.connections, { workspace: this }));
+      this.set('connections', new Connections(data.connections));
 
       // tell all nodes about connections
       _.each(this.get('connections').where({ startProxy: false, endProxy: false }), function (ele) {
-        this.get('nodes').get(ele.get('startNodeId')).connectPort(ele.get('startPortIndex'), true, ele);
-        this.get('nodes').get(ele.get('endNodeId')).connectPort(ele.get('endPortIndex'), false, ele);
+        ele.startNode = this.get('nodes').get(ele.get('startNodeId'));
+        ele.endNode = this.get('nodes').get(ele.get('endNodeId'));
+        ele.startNode.connectPort(ele.get('startPortIndex'), true, ele);
+        ele.endNode.connectPort(ele.get('endPortIndex'), false, ele);
       }, this);
     },
 
@@ -215,6 +239,10 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.trigger('change:nodes');
         this.trigger('requestRun');
       }.bind(this));
+
+        this.listenTo(this.get('nodes'), 'remove', function (node) {
+            this.stopListening(node);
+        });
     },
 
     customNode : null,
@@ -470,7 +498,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       });
 
-      if (nodeCount > 0) this.get('nodes').deselectAll();
+      if (nodeCount > 0) this.deselectAllNodes();
 
       var connections = {};
 
@@ -565,9 +593,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       return _.union.apply(null, allDependencyLists );
     },
 
+    deselectAllNodes: function () {
+        this.get('nodes').deselectAll();
+    },
+
     addNode: function(data){
 
-      this.get('nodes').deselectAll();
+      this.deselectAllNodes();
 
       if ( data.typeName === "CustomNode" ){
         var id = data.extra.functionId;
@@ -715,7 +747,11 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.runInternalCommand(datac);
       this.addToUndoAndClearRedo( datac );
 
-    }, 
+    },
+
+    removeConnectionFromCollection: function(connection){
+        this.get('connections').remove(connection);
+    },
 
     setNodeProperty: function(data){
 
@@ -748,7 +784,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       addNode: function (data) {
 
-        var node = nodeFactory.create({ config: data, workspace: this });
+        var node = nodeFactory.create({ config: data, searchElements: this.app.SearchElements });
+        this.subscribeOnNodeEvents(node);
         this.get('nodes').add( node );
 
       },
@@ -763,12 +800,16 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       addConnection: function(data){
 
         var nodes = this.get('nodes');
-        if ( !nodes.get( data.startNodeId ) || !nodes.get( data.endNodeId ) ) return;
+        var options = {};
+        options.startNode = nodes.get( data.startNodeId );
+        options.endNode = nodes.get( data.endNodeId );
+        if ( !options.startNode || !options.endNode )
+            return;
 
-        var conn = new Connection(data, { workspace: this });
+        var conn = new Connection(data, options);
         this.get('connections').add( conn );
-        this.get('nodes').get(conn.get('startNodeId')).connectPort( conn.get('startPortIndex'), true, conn);
-        this.get('nodes').get(conn.get('endNodeId')).connectPort(conn.get('endPortIndex'), false, conn);
+        nodes.get(conn.get('startNodeId')).connectPort( conn.get('startPortIndex'), true, conn);
+        nodes.get(conn.get('endNodeId')).connectPort(conn.get('endPortIndex'), false, conn);
 
       }, 
 

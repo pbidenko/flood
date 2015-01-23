@@ -13,9 +13,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
       BaseNodeView.prototype.initialize.apply(this, arguments);
 
       this.model.on('change:selected', this.colorSelected, this);
-      this.model.on('change:visible', this.changeVisibility, this);
       this.model.on('remove', this.onRemove, this);
-      this.model.workspace.on('change:current', this.changeVisibility, this);
       this.listenTo( this.model, 'change:prettyLastValue', this.onEvalComplete);
       this.onEvalComplete();
 
@@ -112,11 +110,11 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
     },
 
     // 3D move to node subclass
-    onRemove: function(){
-      this.model.workspace.off('change:current', this.changeVisibility, this);
-      scene.remove(this.threeGeom); 
-      render();
-    }, 
+    onRemove: function() {
+        this.stopListening();
+        scene.remove(this.threeGeom);
+        render();
+    },
 
     evaluated: false,
 
@@ -214,7 +212,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
         this.threeGeom = threeTemp;
         scene.add( this.threeGeom );
-        this.changeVisibility();
+        this.model.trigger('change:visible');
 
       }, this );
 
@@ -271,13 +269,13 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
     },
 
-    changeVisibility: function(){
+    changeVisibility: function(workspace){
 
       if ( !this.threeGeom ){
         return;
       }
         
-      if (!this.model.get('visible') || !this.model.workspace.get('current') )
+      if (!this.model.get('visible') || !workspace.get('current') )
       {
         scene.remove(this.threeGeom);
       } else if ( this.model.get('visible') )

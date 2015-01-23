@@ -14,7 +14,6 @@ define(['backbone'], function(Backbone) {
         this.isProxy = true;
       }
 
-      this.workspace = args.workspace;
       this.workspaceView = args.workspaceView;
 
       if (this.model.startNode){
@@ -25,23 +24,22 @@ define(['backbone'], function(Backbone) {
 
     delegateEvents: function() {
 
-      Backbone.View.prototype.delegateEvents.apply(this, arguments);
+        Backbone.View.prototype.delegateEvents.apply(this, arguments);
 
-      if (!this.isProxy ){
-        this.startId = this.model.get('startNodeId');
-        this.endId = this.model.get('endNodeId');
-        var nodes = this.workspace.get('nodes');
+        if (!this.isProxy) {
+            this.startId = this.model.get('startNodeId');
+            this.endId = this.model.get('endNodeId');
 
-        if (nodes.get(this.endId) != undefined ){
-          this.listenTo( nodes.get(this.endId), 'change:position', this.render);
+            if (this.model.endNode) {
+                this.listenTo(this.model.endNode, 'change:position', this.render);
+            }
+
+            if (this.model.startNode) {
+                this.listenTo(this.model.startNode, 'change:position', this.render);
+            }
         }
-        
-        if (nodes.get(this.startId) != undefined ){
-          this.listenTo( nodes.get(this.startId), 'change:position', this.render);
-        }
-      }
-      
-      this.listenTo(this.model, 'change', this.render);
+
+        this.listenTo(this.model, 'change', this.render);
 
     },
 
@@ -105,6 +103,7 @@ define(['backbone'], function(Backbone) {
     // construct the control points for a bezier curve
     getControlPoints: function() {
 
+      var startPos, endPos;
       if (!this.model.get('startProxy') || !this.model.get('endProxy')) {
 
         var nodeViews = this.workspaceView.nodeViews
@@ -115,12 +114,12 @@ define(['backbone'], function(Backbone) {
       }    
 
       if (!this.model.get('startProxy')) {
-        if (!this.workspaceView.nodeViews[startId] ){
-          startId = this.model.workspace.get('proxyStartId');
-          startPortIndex = this.model.workspace.get('proxyStartPortIndex');
+        if (!nodeViews[startId] ){
+          startId = this.workspaceView.model.get('proxyStartId');
+          startPortIndex = this.workspaceView.model.get('proxyStartPortIndex');
         }
 
-        startPos = this.workspaceView.nodeViews[startId].getPortPosition(startPortIndex, true);
+        startPos = nodeViews[startId].getPortPosition(startPortIndex, true);
       } else {
         startPos = this.model.get('startProxyPosition');
       }

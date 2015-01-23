@@ -17,7 +17,7 @@ function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode, ListNode) {
                 ctr = Node;
             }
 
-            return new ctr(settings.config, { workspace: settings.workspace });
+            return new ctr(settings.config, { searchElements: settings.searchElements });
         }
     }
 });

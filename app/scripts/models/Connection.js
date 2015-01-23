@@ -16,24 +16,16 @@ define(['backbone'], function(Backbone) {
       , hidden: false
     },
 
-    workspace : null,
     startNode: null,
     endNode: null,
 
-    initialize: function(args, options){
+    initialize: function(args, options) {
 
-      this.workspace = options.workspace;
-
-      // proxyconnections bind to the proxyMove event on the workspace
-      if ( args.startProxy || args.endProxy ) {
-        this.workspace.bind('proxyMove', this.proxyMove, this);
-      } else {
-
-        // bind to end nodes
-        this.startNode = this.workspace.get('nodes').get(args.startNodeId);
-        this.endNode = this.workspace.get('nodes').get(args.endNodeId);
-      }
-
+        if (!args.startProxy && !args.endProxy) {
+            // bind to end nodes
+            this.startNode = options.startNode;
+            this.endNode = options.endNode;
+        }
     },
 
     getOpposite: function(startNode){
