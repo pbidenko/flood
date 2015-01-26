@@ -17,10 +17,22 @@ define(['backbone'], function(Backbone) {
       this.workspace = args.workspace;
       this.workspaceView = args.workspaceView;
 
-      if (this.model.startNode){
-        this.model.startNode.on('change:ignoreDefaults', this.render, this);
+      var startNode = this.model.startNode;
+      if (startNode){
+        startNode.on('change:ignoreDefaults', this.render, this);
+        this.listenTo(startNode, 'connection', this.redrawIfNeed);
+        this.listenTo(startNode, 'disconnection', this.redrawIfNeed);
       }
 
+    },
+
+    redrawIfNeed: function (index, isOutput) {
+        // if an output port was connected/disconnected
+        // it doesn't affect other output connectors
+        if (isOutput)
+            return;
+
+        this.updateColor();
     },
 
     delegateEvents: function() {
