@@ -75,12 +75,10 @@ define(['backbone', 'Three', 'OrbitControls'], function(Backbone) {
 
 			controls = new THREE.OrbitControls(camera, container);
 
-			var that = this;
-
 			animate = function(){
 				requestAnimationFrame( animate );
-				that.renderView();
-			};
+				this.renderView();
+			}.bind(this);
 
 			requestAnimationFrame(animate);
 

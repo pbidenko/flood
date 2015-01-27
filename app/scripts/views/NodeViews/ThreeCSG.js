@@ -213,17 +213,17 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], fun
         scene.add( this.threeGeom );
         this.changeVisibility();
 
-      }, this );
+      } );
 
     }, 
 
     // creating this data may be quite slow, we'll need to be careful
-    drawChunked: function(geom, list, callback, that){
+    drawChunked: function(geom, list, callback){
 
       var i = 0;
       var tick = function() {
         var color, colorLine;
-        if (that.model.get('selected')){
+        if (this.model.get('selected')){
           color = colorLine = colors.selected;
         }
         else {
@@ -237,9 +237,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], fun
         var start = new Date().getTime();
         for (; i < list.length && (new Date().getTime()) - start < 50; i++) {
         
-          var g3  = that.toThreeGeom( list[i] );
-
-
+          var g3  = this.toThreeGeom( list[i] );
 
           switch (g3._floodType) {
             case 0:
@@ -259,10 +257,10 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], fun
           setTimeout(tick, 25);
         }
         else {
-          callback.call(that);
+          callback.call(this);
         }
 
-      };
+      }.bind(this);
 
       setTimeout(tick, 0);
 

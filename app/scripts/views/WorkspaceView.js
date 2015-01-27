@@ -33,20 +33,18 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       this.$workspace.append( this.$workspace_back );
       this.$workspace.append( this.$workspace_canvas );
 
-      var that = this;
-
       this.listenTo(this.model, 'change:connections', function() {
-        that.cleanup().renderConnections();
+          this.cleanup().renderConnections();
       });
       this.listenTo(this.model, 'update-connections', function () {
-          that.cleanup().updateConnections();
+          this.cleanup().updateConnections();
       });
       this.model.on('change:zoom', this.updateZoom, this );
       this.model.on('change:offset', this.updateOffset, this );
       this.model.on('change:isRunning', this.renderRunnerStatus, this);
 
       this.listenTo(this.model, 'change:nodes', function() {
-        that.cleanup().renderNodes();
+          this.cleanup().renderNodes();
       });
 
       this.listenTo(this.model, 'change:current', this.onChangeCurrent );

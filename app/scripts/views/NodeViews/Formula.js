@@ -68,27 +68,25 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'FLOOD'], function(B
 
       this.input = this.$el.find('.formula-text-input');
 
-      var that = this;
-
       this.input.focus(function(e){ 
-      	that.selectable = false;
-      	that.model.set('selected', false);
+      	this.selectable = false;
+      	this.model.set('selected', false);
       	e.stopPropagation();
-      });
+      }.bind(this));
 
       this.input.blur(function(){ 
 
-      	var ex = JSON.parse( JSON.stringify( that.model.get('extra') ) );
-      	if ( ex.script === that.input.val() ) return;
+      	var ex = JSON.parse( JSON.stringify( this.model.get('extra') ) );
+      	if ( ex.script === this.input.val() ) return;
 
-      	ex.script = that.input.val();
+      	ex.script = this.input.val();
 
-      	that.model.workspace.setNodeProperty({property: "extra", _id: that.model.get('_id'), newValue: ex });
-      	that.selectable = true; 
-      });
+      	this.model.workspace.setNodeProperty({property: "extra", _id: this.model.get('_id'), newValue: ex });
+      	this.selectable = true; 
+      }.bind(this));
 
-      this.$el.find('.add-input').click(function(){ that.addInput.call(that); });
-      this.$el.find('.remove-input').click(function(){ that.removeInput.call(that); });
+      this.$el.find('.add-input').click(function () { this.addInput(); }.bind(this));
+      this.$el.find('.remove-input').click(function () { this.removeInput(); }.bind(this));
 
       return this;
 

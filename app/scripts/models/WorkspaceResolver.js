@@ -30,12 +30,13 @@ define(['backbone', 'FLOOD'],
 
       console.log(this.workspace.get('name') + " has dependencies: " + JSON.stringify( depIds) );
 
-      var that = this;
-      this.app.get('workspaces').on('add', function(ws){ that.resolveDependency.call(that, ws); }, this);
+      this.app.get('workspaces').on('add', function(ws) {
+          this.resolveDependency(ws);
+      }.bind(this), this);
 
       depIds.forEach(function(x){
-        that.awaitOrResolveDependency.call(that, x);
-      });
+          this.awaitOrResolveDependency(x);
+      }.bind(this));
     },
 
     cleanupDependencies: function(){
@@ -128,11 +129,9 @@ define(['backbone', 'FLOOD'],
       if ( this.watchedDependencies[ customNodeWorkspace.id ] ) return;
       this.watchedDependencies[ customNodeWorkspace.id ] = true;
 
-      var that = this;
-
-      var sync = function(){ that.syncCustomNodesWithWorkspace.call(that, customNodeWorkspace) }
-        , syncAndRequestRun = function(){ that.syncCustomNodesWithWorkspace.call(that, customNodeWorkspace); that.workspace.trigger('requestRun'); }
-        , syncAndUpdateRunner = function(){ that.syncCustomNodesWithWorkspace.call(that, customNodeWorkspace); that.workspace.trigger('updateRunner'); };
+      var sync = function () { this.syncCustomNodesWithWorkspace(customNodeWorkspace); }.bind(this)
+        , syncAndRequestRun = function () { this.syncCustomNodesWithWorkspace(customNodeWorkspace); this.workspace.trigger('requestRun'); }.bind(this)
+        , syncAndUpdateRunner = function () { this.syncCustomNodesWithWorkspace(customNodeWorkspace); this.workspace.trigger('updateRunner'); }.bind(this);
 
       customNodeWorkspace.on('change:name', sync, this);
       customNodeWorkspace.on('change:workspaceDependencyIds', sync, this);

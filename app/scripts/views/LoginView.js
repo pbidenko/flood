@@ -20,8 +20,7 @@ define(['backbone'], function(Backbone) {
       this.model.on('change:failed', this.render, this);
       this.model.on('change:failureMessage', this.render, this);
 
-      var that = this;
-      $('#login-button').click(function(){ that.tabClick.call(that); });
+      $('#login-button').click(function () { this.tabClick(); }.bind(this));
     },
 
     rendered : false,

@@ -101,15 +101,13 @@ define([  'backbone',
 
     showHelpOnFirstExperience: function(){
 
-      var that = this;
-
       setTimeout(function(){
-        if (that.model.login.get('isLoggedIn') && that.model.get('isFirstExperience')){
-          that.model.set( 'showingHelp', true);
+        if (this.model.login.get('isLoggedIn') && this.model.get('isFirstExperience')){
+          this.model.set( 'showingHelp', true);
         } else {
-          that.model.set( 'showingHelp', false);
+          this.model.set( 'showingHelp', false);
         }
-      }, 800);
+      }.bind(this), 800);
 
     },
 

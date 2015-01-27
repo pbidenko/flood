@@ -106,46 +106,45 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
     makeDraggable: function() {
 
-      var that = this;
       this.initPos = [];
       this.$el.draggable( {
         drag : function(e, ui) {
-          var zoom = 1 / that.workspace.get('zoom');
+          var zoom = 1 / this.workspace.get('zoom');
 
           ui.position.left = zoom * ui.position.left;
           ui.position.top = zoom * ui.position.top;
 
-          that.workspace.get('nodes').moveSelected([ ui.position.left - that.initPos[0], ui.position.top - that.initPos[1]], that);
+          this.workspace.get('nodes').moveSelected([ ui.position.left - this.initPos[0], ui.position.top - this.initPos[1]], this);
 
-          that.model.set('position', [ ui.position.left, ui.position.top ]);
+          this.model.set('position', [ ui.position.left, ui.position.top ]);
 
-        },
+        }.bind(this),
         start : function(startEvent) {
 
-          if ( !that.model.get('selected') ){
-            that.model.workspace.get('nodes').deselectAll();
+          if ( !this.model.get('selected') ){
+            this.model.workspace.get('nodes').deselectAll();
           }
 
-          that.model.set('selected', true );
-          that.workspace.get('nodes').startDragging(that);
+          this.model.set('selected', true );
+          this.workspace.get('nodes').startDragging(this);
 
-          var zoom = 1 / that.model.workspace.get('zoom');
-          var pos = that.model.get('position');
+          var zoom = 1 / this.model.workspace.get('zoom');
+          var pos = this.model.get('position');
 
-          that.initPos = [ pos[0], pos[1] ];
+          this.initPos = [ pos[0], pos[1] ];
 
-        },
+        }.bind(this),
         stop : function() {
 
-          var start = [ that.initPos[0], that.initPos[1] ];
-          var pos = that.model.get('position');
+          var start = [ this.initPos[0], this.initPos[1] ];
+          var pos = this.model.get('position');
           var end = [ pos[0], pos[1] ];
 
-          var cmd = { property: 'position', _id: that.model.get('_id'), 
+          var cmd = { property: 'position', _id: this.model.get('_id'), 
             oldValue: start, newValue : end };
-          that.model.workspace.setNodeProperty( cmd );
+          this.model.workspace.setNodeProperty( cmd );
 
-        }
+        }.bind(this)
       });
       this.$el.css('position', 'absolute');
 
@@ -319,10 +318,9 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
     formatPreview: function( value ){
 
-      var that = this;
       return JSON.stringify(this.truncatePreview(value), function (k, v) {
-        return that.prettyPrint.call(that, k, v);
-      });
+        return this.prettyPrint(k, v);
+      }.bind(this));
 
     },
 
@@ -408,16 +406,15 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
     colorPorts: function() {
 
       // update port colors
-      var that = this;
       var isPartial = false;
 
       this.inputPorts.forEach(function(ele, ind){
 
         ele.setAttribute('stroke','black');
 
-        if (that.model.isPortConnected(ind, false) ){
+        if (this.model.isPortConnected(ind, false) ){
           ele.setAttribute('fill','black');
-        } else if (that.model.isInputPortUsingDefault(ind)){
+        } else if (this.model.isInputPortUsingDefault(ind)){
           ele.setAttribute('fill','white');
         } else {
           isPartial = true;
@@ -425,13 +422,13 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
           ele.setAttribute('stroke','white');
         }
           
-      });
+      }.bind(this));
 
       this.outputPorts.forEach(function(ele, ind){
 
         ele.setAttribute('stroke','black');
 
-        if (that.model.isPortConnected(ind, true)){
+        if (this.model.isPortConnected(ind, true)){
           ele.setAttribute('fill','black');
         } else if (isPartial) {
           ele.setAttribute('fill','grey');
@@ -440,7 +437,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
           ele.setAttribute('fill','white');
         }
           
-      });
+      }.bind(this));
 
       return this;
 
@@ -491,7 +488,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       this.outputPorts = [];
 
       // draw the circles
-      var that = this;
       var inIndex = 0;
       var outIndex = 0;
       var ex = this.model.get('extra') || {};
@@ -517,23 +513,23 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
         // position input ports on left side, output ports on right side
         if ( $(ele).hasClass('node-port-input') ) {
           nodeCircle.setAttribute('cx', 0);
-          nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * $(ele).position().top ); 
-          that.inputPorts.push(nodeCircle);
+          nodeCircle.setAttribute('cy', this.portHeight / 2 + 1/zoom * $(ele).position().top ); 
+          this.inputPorts.push(nodeCircle);
           inIndex++;
         } else {
           if(ex.lineIndices && ex.lineIndices.length > outIndex)
             portIndex = outIndex > 0 ? ex.lineIndices[outIndex] - ex.lineIndices[outIndex - 1] - 1 : ex.lineIndices[outIndex];
-          nodeCircle.setAttribute('cx', that.$el.width() + 2.5 );
+          nodeCircle.setAttribute('cx', this.$el.width() + 2.5 );
           // that.portHeight is equal to 29, but actual height of port is 25
-          nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * ($(ele).position().top + portIndex * 25) );
-          that.outputPorts.push(nodeCircle);
+          nodeCircle.setAttribute('cy', this.portHeight / 2 + 1/zoom * ($(ele).position().top + portIndex * 25) );
+          this.outputPorts.push(nodeCircle);
           outIndex++;
         }
         
         // append 
-        that.portGroup.appendChild(nodeCircle);
+        this.portGroup.appendChild(nodeCircle);
 
-      });
+      }.bind(this));
 
       this.colorPorts();
 
