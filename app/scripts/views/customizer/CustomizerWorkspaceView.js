@@ -1,5 +1,5 @@
-define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView', 'CodeBlockWidgetView'], 
-  function(Backbone, BaseWidgetView, GeometryWidgetView, NumberWidgetView, CodeBlockWidgetView) {
+define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView', 'CodeBlockWidgetView', 'BooleanWidgetView'], 
+  function(Backbone, BaseWidgetView, GeometryWidgetView, NumberWidgetView, CodeBlockWidgetView, BooleanWidgetView) {
 
   return Backbone.View.extend({
 
@@ -15,7 +15,8 @@ define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView', 
 
     map: {
       "Number" : NumberWidgetView,
-      'Code Block': CodeBlockWidgetView
+      'Code Block': CodeBlockWidgetView,
+      'Boolean': BooleanWidgetView
     },
 
     hasWidgets: false,
