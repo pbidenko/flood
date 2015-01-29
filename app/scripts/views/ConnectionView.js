@@ -8,19 +8,31 @@ define(['backbone'], function(Backbone) {
 
     initialize: function( args ) {
 
-      this.model = args.model;
+        this.model = args.model;
 
-      if (args.isProxy ){
-        this.isProxy = true;
+        if (args.isProxy) {
+            this.isProxy = true;
+        }
+
+        this.workspace = args.workspace;
+        this.workspaceView = args.workspaceView;
+
+      var startNode = this.model.startNode;
+      if (startNode){
+        this.listenTo(this.model.startNode, 'change:ignoreDefaults', this.render);
+        this.listenTo(startNode, 'connection', this.redrawIfNeed);
+        this.listenTo(startNode, 'disconnection', this.redrawIfNeed);
       }
 
-      this.workspace = args.workspace;
-      this.workspaceView = args.workspaceView;
+    },
 
-      if (this.model.startNode){
-        this.model.startNode.on('change:ignoreDefaults', this.render, this);
-      }
+    redrawIfNeed: function (index, isOutput) {
+        // if an output port was connected/disconnected
+        // it doesn't affect other output connectors
+        if (isOutput)
+            return;
 
+        this.updateColor();
     },
 
     delegateEvents: function() {

@@ -50,9 +50,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       atts = atts || {};
 
       // if offset is not defined
-      if (!atts.offset || isNaN( atts.offset[0] ) || isNaN( atts.offset[1] )){
+        if (!atts.offset || isNaN(atts.offset[0]) || isNaN(atts.offset[1])) {
         atts.offset = this.defaults.offset;
-        this.set( 'offset', this.defaults.offset );
+            this.set('offset', this.defaults.offset);
       }
 
       this.app = arr.app;
@@ -65,8 +65,8 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
           this.set('notNotifyServer', true);
       }
 
-      // the proxy connection is what is drawn when the user is 
-      // in the process of creating a new connection - it is not 
+        // the proxy connection is what is drawn when the user is
+        // in the process of creating a new connection - it is not
       // persisted.
       this.proxyConnection = new Connection({
         _id: -1,
@@ -87,25 +87,29 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.sync = _.throttle(this.sync, 2000);
 
       // save on every change
-      var throttledSync = _.throttle(function(){ this.sync('update', this); }, 1000);
-      this.on('runCommand', throttledSync, this);
-      this.on('change:name', throttledSync, this);
-      this.on('change:zoom', throttledSync, this);
-      this.on('change:offset', throttledSync, this);
-      this.on('change:workspaceDependencyIds', throttledSync, this);
-      this.on('requestRun', this.run, this);
+        var throttledSync = _.throttle(function () {
+            this.sync('update', this);
+        }, 1000);
+
+        this.listenTo(this, 'runCommand', throttledSync);
+        this.listenTo(this, 'change:name', throttledSync);
+        this.listenTo(this, 'change:zoom', throttledSync);
+        this.listenTo(this, 'change:offset', throttledSync);
+        this.listenTo(this, 'change:workspaceDependencyIds', throttledSync);
+        this.listenTo(this, 'requestRun', this.run);
 
       // this should not be throttled
-      this.on('change:isCustomizer', function(){ this.sync('update', this); }, this);
-      this.set('tabName', this.get('name'));      
-      
-      if ( this.get('isCustomNode') ) this.initializeCustomNode();
+        this.listenTo(this, 'change:isCustomizer', function () {
+            this.sync('update', this);
+        });
 
-      this.resolver = new WorkspaceResolver(null, { app : this.app, workspace : this });
+        this.set('tabName', this.get('name'));
+        if ( this.get('isCustomNode') ) this.initializeCustomNode();
+
+        this.resolver = new WorkspaceResolver(null, { app: this.app, workspace: this });
       this.resolver.resolveAll();
 
       this.app.trigger('workspaceLoaded', this);
-
     },
 
     getCustomizerUrl: function(){
@@ -206,24 +210,24 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       }, this);
     },
 
-    subscribeOnNodesConnectionsChanges: function(){
+    subscribeOnNodesConnectionsChanges: function() {
 
-      this.get('connections').on('add remove', function () {
+        this.listenTo(this.get('connections'), 'add remove', function () {
         this.trigger('change:connections');
         this.trigger('requestRun');
-      }.bind(this));
+        });
 
-      this.get('nodes').on('add remove', function () {
+        this.listenTo(this.get('nodes'), 'add remove', function () {
         this.trigger('change:nodes');
         this.trigger('requestRun');
-      }.bind(this));
+        });
     },
 
     customNode : null,
 
-    initializeCustomNode: function(){
+    initializeCustomNode: function() {
 
-      this.customNode = new FLOOD.internalNodeTypes.CustomNode( this.get('name'), this.get('_id'), this.get('guid') );
+        this.customNode = new FLOOD.internalNodeTypes.CustomNode(this.get('name'), this.get('_id'), this.get('guid'));
 
       var ni = this.get('nodes').where({typeName: "Input"}).length;
       var no = this.get('nodes').where({typeName: "Output"}).length;
@@ -233,16 +237,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       this.customNode.searchTags = [this.get('name').toLowerCase()];
 
-      this.app.SearchElements.addCustomNode( this.customNode );
+        this.app.SearchElements.addCustomNode(this.customNode);
 
-      var that = this;
-
-      this.on('change:name', function(){
-        that.customNode.functionName = that.get('name');
-        that.customNode.searchTags = [that.get('name').toLowerCase()];
-        that.app.SearchElements.addCustomNode( that.customNode );
-      }, this);
-
+        this.listenTo(this, 'change:name', function () {
+            this.customNode.functionName = that.get('name');
+            this.customNode.searchTags = [that.get('name').toLowerCase()];
+            this.app.SearchElements.addCustomNode(that.customNode);
+        });
     },
 
     toJSON : function() {
@@ -267,15 +268,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         return json;
     },
 
-    initializeRunner: function(){
+    initializeRunner: function() {
 
-      this.runner = new Runner({id : this.get('_id') }, { workspace: this, app: this.app });
+        this.runner = new Runner({id: this.get('_id') }, { workspace: this, app: this.app });
 
-      var that = this;
-      this.runner.on('change:isRunning', function(v){
-        that.set('isRunning', v.get('isRunning'));
+        this.listenTo(this.runner, 'change:isRunning', function (v) {
+            this.set('isRunning', v.get('isRunning'));
       });
-
     },
 
     dispose: function () {
@@ -510,6 +509,14 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       this.runInternalCommand( multipleCmd );
       this.addToUndoAndClearRedo( multipleCmd );
+
+      for (var id in nodes){
+        var cpnode = cb.nodes[id];
+        var functionId = cpnode.extra.functionId;
+        if ( cpnode.typeName === "CustomNode" ){
+          this.syncCustomNodesWithWorkspace( functionId );
+        }
+      }
 
     },
 

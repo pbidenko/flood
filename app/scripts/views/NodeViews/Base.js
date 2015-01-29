@@ -79,7 +79,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       'change .use-default-checkbox': 'useDefaultClick',
       'blur .name-input': 'updateName',
       'click .toggle-vis': 'toggleGeomVis',
-      'click .rep-type': 'replicationClick'
+      'click .rep-type': 'replicationClick',
+      'click .name-input': 'nameInputClick'
     },
 
     initialize: function(args) {
@@ -99,8 +100,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       this.listenTo(this.model, 'change:visible', this.render);
       this.listenTo(this.model, 'change:isEvaluating', this.colorEvaluating);
 
-      this.model.on('evalFailed', this.onEvalFailed, this );
-      this.model.on('evalBegin', this.onEvalBegin, this );
+      this.listenTo(this.model, 'evalFailed', this.onEvalFailed);
+      this.listenTo(this.model, 'evalBegin', this.onEvalBegin);
 
       this.makeDraggable();
       this.$workspace_canvas = $('#workspace_canvas');
@@ -152,10 +153,14 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
     },
 
+    nameInputClick: function(e){
+      e.stopPropagation();
+    },
+
     // should be part of nodeView subclass
     toggleGeomVis: function(e) {
       this.model.set('visible', !this.model.get('visible') );
-      e.stopPropagation()
+      e.stopPropagation();
     },
 
     makeDraggable: function() {
@@ -364,8 +369,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       if (this.getCustomContents){
         this.$el.find('.node-data-container').html( this.getCustomContents() );
       }
-
-      this.$el.find('.node-port-output').tooltip({title: "Click & drag to create a connection", placement: "right", delay:  { show: 400 }});
 
       return this;
 

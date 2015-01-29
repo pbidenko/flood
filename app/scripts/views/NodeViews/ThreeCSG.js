@@ -1,4 +1,4 @@
-define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, _, $, BaseNodeView) {
+define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], function(Backbone, _, $, BaseNodeView, helpers) {
 
     var colors = {
         selected: 0x00FFFF,
@@ -10,15 +10,14 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
     initialize: function(args) {
 
-      BaseNodeView.prototype.initialize.apply(this, arguments);
+        BaseNodeView.prototype.initialize.apply(this, arguments);
 
-      this.model.on('change:selected', this.colorSelected, this);
-      this.model.on('change:visible', this.changeVisibility, this);
-      this.model.on('remove', this.onRemove, this);
-      this.model.workspace.on('change:current', this.changeVisibility, this);
-      this.listenTo( this.model, 'change:prettyLastValue', this.onEvalComplete);
-      this.onEvalComplete();
-
+        this.listenTo(this.model, 'change:selected', this.colorSelected);
+        this.listenTo(this.model, 'change:visible', this.changeVisibility);
+        this.listenTo(this.model, 'remove', this.onRemove);
+        this.listenTo(this.model.workspace, 'change:current', this.changeVisibility);
+        this.listenTo(this.model, 'change:prettyLastValue', this.onEvalComplete);
+        this.onEvalComplete();
     },
 
     setMaterials: function(partMat, meshMat, lineMat){
@@ -112,11 +111,11 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
     },
 
     // 3D move to node subclass
-    onRemove: function(){
-      this.model.workspace.off('change:current', this.changeVisibility, this);
-      scene.remove(this.threeGeom); 
-      render();
-    }, 
+    onRemove: function() {
+        this.stopListening(this.model.workspace, 'change:current', this.changeVisibility);
+        scene.remove(this.threeGeom);
+        render();
+    },
 
     evaluated: false,
 
@@ -147,11 +146,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       for ( var i = 0; i < rawGeom.faces.length; i++ ) {
         var f = rawGeom.faces[i];
-        face = new THREE.Face3( f[0], f[1], f[2],
-          [ new THREE.Vector3( f[3][0], f[3][1], f[3][2] ),
-            new THREE.Vector3( f[3][3], f[3][4], f[3][5] ),
-            new THREE.Vector3( f[3][6], f[3][7], f[3][8] )
-          ]);
+        face = helpers.createFace(f);
+
         threeGeom.faces.push( face );
       }
       

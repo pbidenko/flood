@@ -8,9 +8,9 @@ define(['backbone', 'SearchElement', 'SearchElementView', 'CategorySearchView', 
         initialize: function (attrs, arr) {
             this.app = arr.app;
             this.appView = arr.appView;
-            this.on('add-element', this.elementClick);
+            this.listenTo(this, 'add-element', this.elementClick);
 
-            this.app.SearchElements.on('add remove', this.render, this);
+            this.listenTo(this.app.SearchElements, 'add remove', this.render);
         },
 
         template: _.template($('#search-template').html()),

@@ -1,18 +1,24 @@
 define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, WorkspaceBrowserElementView) {
 
+  var itemsToClick = {
+      project: 'project',
+      customNode: 'custom node'
+  };
+  var lastClickedItem = itemsToClick.project;
+
   return Backbone.View.extend({
 
     el: '#workspace-browser',
 
     initialize: function(atts, arr) {
-      this.app = arr.app;
+        this.app = arr.app;
 
-      this.model.get('workspaces').on('reset', this.render, this );
-      this.model.get('workspaces').on('add', this.addWorkspaceElement, this );
-      this.model.get('workspaces').on('remove', this.removeWorkspaceElement, this );
+        this.listenTo(this.model.get('workspaces'), 'reset', this.render);
+        this.listenTo(this.model.get('workspaces'), 'add', this.addWorkspaceElement);
+        this.listenTo(this.model.get('workspaces'), 'remove', this.removeWorkspaceElement);
 
-      this.model.fetch();
-      this.render();
+        this.model.fetch();
+        this.render();
     },
 
     template: _.template( $('#workspace-browser-template').html() ),
@@ -34,6 +40,9 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
 
       this.projects = this.$el.find('#workspace-browser-projects');
       this.projects.empty();
+
+      if (lastClickedItem === itemsToClick.customNode)
+          this.customNodeHeaderClick();
     },
 
     refreshClick: function(e){
@@ -47,7 +56,7 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
       this.customNodes.show();
 
       $('#workspace-browser-header-custom-nodes').css('bottom','').css('top','40px');
-
+      lastClickedItem = itemsToClick.customNode;
     },
 
     projectHeaderClick: function(e){
@@ -56,7 +65,7 @@ define(['backbone', 'WorkspaceBrowserElementView'], function(Backbone, Workspace
       this.projects.show();
 
       $('#workspace-browser-header-custom-nodes').css('bottom','0').css('top','');
-
+      lastClickedItem = itemsToClick.project;
     },
 
     addWorkspaceElement: function(x){

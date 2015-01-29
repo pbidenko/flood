@@ -812,8 +812,7 @@ define('FLOOD', function() {
     FLOOD.nodeTypes.ServerNode = function (inPort, outPort) {
 
         var inPorts = [],
-            outPorts = [],
-            that = this;
+            outPorts = [];
 
         if (!inPort) {
             inPorts.push(new FLOOD.baseTypes.InputPort('A', [AnyType], 0));
@@ -853,13 +852,13 @@ define('FLOOD', function() {
                     this.inputs[i].name = name;
                 }
                 else {
-                    addInput(name);
+                    this.addInput(name);
                 }
             }
 
             if (thisLength > length) {
                 for (i = 0; i < thisLength - length; i++) {
-                    removeInput();
+                    this.removeInput();
                 }
             }
         };
@@ -876,43 +875,43 @@ define('FLOOD', function() {
                     this.outputs[i].name = name;
                 }
                 else {
-                    addOutput(name);
+                    this.addOutput(name);
                 }
             }
 
             if (thisLength > length) {
                 for (i = 0; i < thisLength - length; i++) {
-                    removeOutput();
+                    this.removeOutput();
                 }
             }
-        };
+        },
+
+        this.addInput = function (name, type) {
+            var port = new FLOOD.baseTypes.InputPort(name, [type ? {floodTypeName : type} : AnyType]);
+            port.parentNode = this;
+            port.parentIndex = this.inputs.length;
+            this.inputs.push(port);
+        },
+
+        this.removeInput = function () {
+            if (this.inputs.length === 0) return;
+            this.inputs.pop();
+        },
+
+        this.addOutput = function (name) {
+            var port = new FLOOD.baseTypes.OutputPort(name, [AnyType]);
+            port.parentNode = this;
+            port.parentIndex = this.outputs.length;
+            this.outputs.push(port);
+        },
+
+        this.removeOutput = function () {
+            if (this.outputs.length === 0) return;
+            this.outputs.pop();
+        },
 
         this.eval = function () {
             return 1;
-        };
-
-        var addInput = function (name) {
-            var port = new FLOOD.baseTypes.InputPort(name, [Number], 0);
-            port.parentNode = that;
-            port.parentIndex = that.inputs.length;
-            that.inputs.push(port);
-        };
-
-        var removeInput = function () {
-            if (that.inputs.length === 0) return;
-            that.inputs.pop();
-        };
-
-        var addOutput = function (name) {
-            var port = new FLOOD.baseTypes.OutputPort(name, [Number]);
-            port.parentNode = that;
-            port.parentIndex = that.outputs.length;
-            that.outputs.push(port);
-        };
-
-        var removeOutput = function () {
-            if (that.outputs.length === 0) return;
-            that.outputs.pop();
         };
 
     }.inherits(FLOOD.baseTypes.NodeType);

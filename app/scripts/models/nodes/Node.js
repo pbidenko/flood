@@ -89,12 +89,12 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
             this.set('ignoreDefaults', attrs.ignoreDefaults);
 
-            this.on('connection', this.onConnectPort);
+            this.listenTo(this, 'connection', this.onConnectPort);
 
-            this.on('disconnection', this.onDisconnectPort);
+            this.listenTo(this, 'disconnection', this.onDisconnectPort);
             this.workspace = vals.workspace;
 
-            this.on('remove', this.onRemove);
+            this.listenTo(this, 'remove', this.onRemove);
 
             this.initializePorts();
         },
