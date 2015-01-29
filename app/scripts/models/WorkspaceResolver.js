@@ -30,12 +30,10 @@ define(['backbone', 'FLOOD'],
 
       console.log(this.workspace.get('name') + " has dependencies: " + JSON.stringify( depIds) );
 
-      this.app.get('workspaces').on('add', function(ws) {
-          this.resolveDependency(ws);
-      }.bind(this), this);
+      this.listenTo(this.app.get('workspaces'), 'add', this.resolveDependency);
 
       depIds.forEach(function(x){
-          this.awaitOrResolveDependency(x);
+        this.awaitOrResolveDependency(x);
       }.bind(this));
     },
 
@@ -120,24 +118,31 @@ define(['backbone', 'FLOOD'],
 
     watchedDependencies: {},
 
-    watchOneDependency: function( customNodeWorkspace ){
+    watchOneDependency: function( customNodeWorkspace ) {
 
-      if ( !customNodeWorkspace.id ){
-        customNodeWorkspace = this.app.getLoadedWorkspace( customNodeWorkspace );
-      } 
+        if (!customNodeWorkspace.id) {
+            customNodeWorkspace = this.app.getLoadedWorkspace(customNodeWorkspace);
+        }
 
-      if ( this.watchedDependencies[ customNodeWorkspace.id ] ) return;
-      this.watchedDependencies[ customNodeWorkspace.id ] = true;
+        if (this.watchedDependencies[ customNodeWorkspace.id ]) return;
+        this.watchedDependencies[ customNodeWorkspace.id ] = true;
 
-      var sync = function () { this.syncCustomNodesWithWorkspace(customNodeWorkspace); }.bind(this)
-        , syncAndRequestRun = function () { this.syncCustomNodesWithWorkspace(customNodeWorkspace); this.workspace.trigger('requestRun'); }.bind(this)
-        , syncAndUpdateRunner = function () { this.syncCustomNodesWithWorkspace(customNodeWorkspace); this.workspace.trigger('updateRunner'); }.bind(this);
+        var sync = function () {
+                this.syncCustomNodesWithWorkspace(customNodeWorkspace)
+            }.bind(this)
+            , syncAndRequestRun = function () {
+                this.syncCustomNodesWithWorkspace(customNodeWorkspace);
+                this.workspace.trigger('requestRun');
+            }.bind(this)
+            , syncAndUpdateRunner = function () {
+                this.syncCustomNodesWithWorkspace(customNodeWorkspace);
+                this.workspace.trigger('updateRunner');
+            }.bind(this);
 
-      customNodeWorkspace.on('change:name', sync, this);
-      customNodeWorkspace.on('change:workspaceDependencyIds', sync, this);
-      customNodeWorkspace.on('requestRun', syncAndRequestRun, this );
-      customNodeWorkspace.on('updateRunner', syncAndUpdateRunner, this );
-
+        this.listenTo(customNodeWorkspace, 'change:name', sync);
+        this.listenTo(customNodeWorkspace, 'change:workspaceDependencyIds', sync);
+        this.listenTo(customNodeWorkspace, 'requestRun', syncAndRequestRun);
+        this.listenTo(customNodeWorkspace, 'updateRunner', syncAndUpdateRunner);
     },
 
     syncCustomNodesWithWorkspace: function(workspace){

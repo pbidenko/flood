@@ -297,6 +297,36 @@
 
       </script>
 
+      <script type="text/template" id="widget-boolean-template">
+
+        <span class="name">
+          <% if ( !name || name === "DefaultNodeName" || name === "") { %>
+            <%= typeName %>
+          <% } else { %>
+            <%= name %>
+          <% } %>
+        </span>
+
+        <input type="radio" class="true-flag" name=<%= "radio" +_id %> <%= extra.value ? 'checked' : '' %> />
+        <label style="padding-right: 5px">True</label>
+        <input type="radio" class="false-flag" name=<%= "radio" +_id %> <%= extra.value ? '' : 'checked' %> />
+        <label>False</label>
+
+	  </script>
+      <script type="text/template" id="widget-string-template">
+
+          <span class="name">
+            <% if ( !name || name === "DefaultNodeName" || name === "") { %>
+              <%= typeName %>
+            <% } else { %>
+              <%= name %>
+            <% } %>
+          </span>
+
+          <textarea class="widget-string-input"><%= extra.value %></textarea>
+
+      </script>
+
       <script>
 
         function checkWebGL() { 
