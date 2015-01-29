@@ -99,10 +99,10 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       this.on('change:isCustomizer', function(){ this.sync('update', this); }, this);
       this.set('tabName', this.get('name'));
 
-      // if initCustomNodeLater is set to true it means
+      // if lazyInit  is set to true it means
       // the workspace hasn't right now all proper data
       // for correct initialization (name, guid, nodes, etc)
-      if ( this.get('isCustomNode') && !arr.initCustomNodeLater ) {
+      if ( this.get('isCustomNode') && !arr.lazyInit  ) {
           this.initializeCustomNode();
       }
 
