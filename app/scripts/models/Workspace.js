@@ -240,9 +240,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.app.SearchElements.addCustomNode(this.customNode);
 
         this.listenTo(this, 'change:name', function () {
-            this.customNode.functionName = that.get('name');
-            this.customNode.searchTags = [that.get('name').toLowerCase()];
-            this.app.SearchElements.addCustomNode(that.customNode);
+            this.customNode.functionName = this.get('name');
+            this.customNode.searchTags = [this.get('name').toLowerCase()];
+            this.app.SearchElements.addCustomNode(this.customNode);
         });
     },
 
@@ -1012,6 +1012,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
                     node.clearGeometry();
                 }
             }
+        }
+    },
+
+    appendArrayItems: function (param) {
+        var node = this.get('nodes').get(param.nodeId);
+        if (node) {
+            node.appendArrayItems(param);
         }
     },
 

@@ -38,7 +38,6 @@ define([  'backbone',
         this.listenTo(this.model.get('workspaces'), 'add', this.addWorkspaceTab);
         this.listenTo(this.model.get('workspaces'), 'remove', this.removeWorkspaceTab);
         this.listenTo(this.model.get('workspaces'), 'hide', this.hideWorkspaceTab);
-        //viewSettings: no such method this.model.on('change:showingSettings', this.viewSettings, this);
         this.listenTo(this.model, 'change:showingFeedback', this.viewFeedback);
         this.listenTo(this.model, 'change:showingShare', this.viewShare);
         this.listenTo(this.model, 'change:showingHelp', this.viewHelp);

@@ -1,32 +1,53 @@
-define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbone, jqueryuidraggable, bootstrap, Hammer) {
+define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMessage'],
+    function(Backbone, jqueryuidraggable, bootstrap, Hammer, GetArrayItemsMessage) {
 
-  var itemsToShow = 10, minItemsNumber = 1, maxItemsNumber = 1;
+  var minItemsNumber = 1;
   function changeItemsNumber (e) {
-      itemsToShow = parseInt(this.$el.find('input.shown-items').val());
-      this.$el.find('li.array-item').filter(function () {
-          return  parseInt($(this).attr("data-index")) >= itemsToShow;
-      }).addClass('hidden');
+      var newNum = parseInt(this.$el.find('input.shown-items').val());
 
-      this.$el.find('li.array-item').filter(function () {
-          return  parseInt($(this).attr("data-index")) < itemsToShow;
-      }).removeClass('hidden');
+      if (newNum === this.itemsToShow)
+          return;
 
-      var dotsItem = this.$el.find('li.dots-item');
-      if (this.model.get('arrayItems').length > itemsToShow) {
-          dotsItem.removeClass('hidden');
-      }
-      else {
-          dotsItem.addClass('hidden');
-      }
+      this.itemsToShow = newNum;
 
-      this.$el.find('span.shown-items').html('of ' + maxItemsNumber +
-          (itemsToShow > 1 ? ' are' : ' is') + ' shown');
+      setItemNumbers.call(this, newNum);
 
       e && e.stopPropagation();
   }
 
+  function setItemNumbers() {
+      // if we have nodes enough to show
+      if (this.itemsToShow <= this.model.get('arrayItems').length) {
+          var itemsToShow = this.itemsToShow;
+          this.$el.find('li.array-item').filter(function () {
+              return  parseInt($(this).attr("data-index")) >= itemsToShow;
+          }).addClass('hidden');
+
+          this.$el.find('li.array-item').filter(function () {
+              return  parseInt($(this).attr("data-index")) < itemsToShow;
+          }).removeClass('hidden');
+
+          var dotsItem = this.$el.find('li.dots-item');
+          if (this.maxItemsNumber > this.itemsToShow) {
+              dotsItem.removeClass('hidden');
+          }
+          else {
+              dotsItem.addClass('hidden');
+          }
+      }
+      else {
+          var lastRequestedItem = Math.max(this.requestData.indexFrom + this.requestData.numberToRequest, this.model.get('arrayItems').length);
+
+          if (lastRequestedItem < this.itemsToShow) {
+              this.requestData.indexFrom = lastRequestedItem;
+              this.requestData.numberToRequest = this.itemsToShow - lastRequestedItem;
+              this.requestData.nodeId = this.model.get('_id');
+              this.trigger('send-array-message', new GetArrayItemsMessage(this.requestData));
+          }
+      }
+  }
+
   function keyDown (e) {
-      console.log(e.keyCode);
       var zeroCode = 48, nineCode = 57,
           rightSidedZeroCode = 96, rightSidedNineCode = 105;
       // backspace, shift, ctrl, 4 arrows, delete
@@ -46,14 +67,12 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       if (isNaN(value) || value < minItemsNumber) {
           $input.val(minItemsNumber);
       }
-      else if (value > maxItemsNumber) {
-          $input.val(maxItemsNumber);
+      else if (value > this.maxItemsNumber) {
+          $input.val(this.maxItemsNumber);
       }
       else if (value.toString() !== $input.val()) {
           $input.val(value);
       }
-
-      changeItemsNumber.call(this, e);
   }
 
   return Backbone.View.extend({
@@ -80,7 +99,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       'blur .name-input': 'updateName',
       'click .toggle-vis': 'toggleGeomVis',
       'click .rep-type': 'replicationClick',
-      'click .name-input': 'nameInputClick'
+      'click .name-input': 'nameInputClick',
+      'click input.shown-items': 'nameInputClick'
     },
 
     initialize: function(args) {
@@ -104,10 +124,15 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       this.listenTo(this.model, 'evalBegin', this.onEvalBegin);
 
       this.makeDraggable();
+      this.listenTo(this.model, 'array-reset', this.resetRequestData );
+      
       this.$workspace_canvas = $('#workspace_canvas');
       this.position = this.model.get('position');
 
-      this.$el.on('click', 'input.shown-items', changeItemsNumber.bind(this));
+      this.itemsToShow = 10;
+      this.requestData = { indexFrom: 0, numberToRequest: 0 };
+
+      this.$el.on('blur', 'input.shown-items', changeItemsNumber.bind(this));
       this.$el.on('keydown', 'input.shown-items', keyDown);
       this.$el.on('keyup', 'input.shown-items', keyUp.bind(this));
     },
@@ -336,6 +361,11 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
     },
 
+    resetRequestData: function() {
+        this.requestData.indexFrom = 0;
+        this.requestData.numberToRequest = 0;
+    },
+
     renderNode: function() {
 
       var json = this.model.toJSON();
@@ -344,23 +374,27 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
       this.$el.html( this.template( json ) );
 
-      var arrayItems = this.model.get('arrayItems');
+      // generally arrayItemsNumber is not equal to arrayItems.length
+      // arrayItemsNumber is number of all array items
+      // arrayItems is part of array items
+      var arrayItemsNumber = this.model.get('arrayItemsNumber');
       var $input;
       // if node's value is not empty array
       // configure its view and settings area
-      if (arrayItems && arrayItems.length) {
-          maxItemsNumber = arrayItems.length;
+      if (this.model.get('isArray') && arrayItemsNumber) {
+          this.maxItemsNumber = arrayItemsNumber;
           this.$el.find('.shown-items').removeClass('hidden');
           $input = this.$el.find('input.shown-items');
-          $input.attr('max', maxItemsNumber);
+          $input.attr('max', this.maxItemsNumber);
+          this.$el.find('span.shown-items').html('of ' + this.maxItemsNumber + ' to show');
 
-          if (maxItemsNumber < itemsToShow) {
-              itemsToShow = maxItemsNumber;
+          if (this.maxItemsNumber < this.itemsToShow) {
+              this.itemsToShow = this.maxItemsNumber;
           }
 
-          $input.attr('value', itemsToShow);
+          $input.attr('value', this.itemsToShow);
 
-          changeItemsNumber.call(this);
+          setItemNumbers.call(this, this.itemsToShow);
       }
       else {
           this.$el.find('.shown-items').addClass('hidden');
