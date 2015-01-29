@@ -136,7 +136,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newNodeWorkspace: function( callback, customNodeName, gotFromDynamo ) {
+    newNodeWorkspace: function( callback, customNodeName, lazyInit  ) {
       this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
@@ -145,9 +145,9 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
         var attr = { app : this };
         // if we need to not send it to the dynamo
-        if (gotFromDynamo) {
+        if (lazyInit ) {
             data.notNotifyServer = true;
-            attr.initCustomNodeLater = true;
+            attr.lazyInit  = true;
         }
         var ws = new Workspace(data, attr);
 
