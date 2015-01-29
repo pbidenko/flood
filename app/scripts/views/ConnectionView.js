@@ -8,18 +8,18 @@ define(['backbone'], function(Backbone) {
 
     initialize: function( args ) {
 
-      this.model = args.model;
+        this.model = args.model;
 
-      if (args.isProxy ){
-        this.isProxy = true;
-      }
+        if (args.isProxy) {
+            this.isProxy = true;
+        }
 
-      this.workspace = args.workspace;
-      this.workspaceView = args.workspaceView;
+        this.workspace = args.workspace;
+        this.workspaceView = args.workspaceView;
 
       var startNode = this.model.startNode;
       if (startNode){
-        startNode.on('change:ignoreDefaults', this.render, this);
+        this.listenTo(this.model.startNode, 'change:ignoreDefaults', this.render);
         this.listenTo(startNode, 'connection', this.redrawIfNeed);
         this.listenTo(startNode, 'disconnection', this.redrawIfNeed);
       }
