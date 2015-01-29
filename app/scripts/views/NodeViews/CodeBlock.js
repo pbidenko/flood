@@ -7,21 +7,25 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
         initialize: function (args) {
 
             ThreeCSGNodeView.prototype.initialize.apply(this, arguments);
-            this.model.on('change:extra', this.onChangedExtra, this);
-            this.model.on('connections-update', this.onConnectionsUpdate, this);
-            this.model.on('cbn-up-to-date', this.finishEvaluating, this);
+            this.listenTo(this.model, 'change:extra', this.onChangedExtra);
+            this.listenTo(this.model, 'connections-update', this.onConnectionsUpdate);
+            this.listenTo(this.model, 'cbn-up-to-date', this.finishEvaluating);
 
             //Get original element's size right after rendering of template
-            this.once('after-render', function () {
+            this.listenToOnce(this, 'after-render', function () {
                 var $textEl = this.$el.find('code');
                 $textEl.data('x', $textEl.outerWidth());
                 $textEl.data('y', $textEl.outerHeight());
-            }.bind(this));
+            });
 
             this.$el.on('mouseup', adjustElements.bind(this));
             this.$el.on('mousemove', adjustElements.bind(this));
 
-            this.$el.draggable({ cancel: '.code-block-input' });
+            // Get a value of the cancel option before it is set to avoid losing previous value
+            var cancelOption = this.$el.draggable( 'option', 'cancel' );
+            if(!cancelOption.match(/.code-block-input/i))
+                this.$el.draggable( 'option', 'cancel', cancelOption + ',.code-block-input' );
+            
         },
 
         getCustomContents: function () {
@@ -272,6 +276,11 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
                 }
             }
 
+            var lock = ex.lock || false;
+            this.lockInput = this.$el.find('.lock-input');
+            this.lockInput.val( lock );
+            this.lockInput.change( function(e){ this.lockChanged.call(this, e); e.stopPropagation(); }.bind(this));
+
             this.trigger('after-render');
 
             Prism.highlightAll();
@@ -287,6 +296,14 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
             }
 
             return this;
+        },
+
+        lockChanged: function(e){
+            var ex = JSON.parse(JSON.stringify(this.model.get('extra')));
+
+            ex.lock = this.lockInput.is(':checked');
+
+            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
         }
     });
 

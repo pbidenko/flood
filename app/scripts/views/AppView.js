@@ -17,50 +17,50 @@ define([  'backbone',
           'Feedback', 
           'ShareView',
           'Share',
-          'fastclick',
-          'SaveUploaderView' ],
+          'fastclick' ],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback, ShareView, Share, fastclick, SaveUploaderView ) {
+            Help, LoginView, Login, FeedbackView, Feedback, ShareView, Share, fastclick ) {
 
   return Backbone.View.extend({
 
     el: '#app',
 
-    initialize: function() { 
-      
-      var f = new fastclick(document.body);
+    initialize: function() {
 
-      this.listenTo(this.model, 'change', this.render, this);
-      this.listenTo(this.model, 'ws-data-loaded', this.zoomresetClick);
+        var f = new fastclick(document.body);
 
-      this.$workspace_tabs = this.$('#workspace-tabs');
+        this.listenTo(this.model, 'change', this.render, this);
+        this.listenTo(this.model, 'ws-data-loaded', this.zoomresetClick);
 
-      this.model.get('workspaces').on('add', this.addWorkspaceTab, this);
-      this.model.get('workspaces').on('remove', this.removeWorkspaceTab, this);
-      this.model.get('workspaces').on('hide', this.hideWorkspaceTab, this);
-      this.model.on('change:showingSettings', this.viewSettings, this);
-      this.model.on('change:showingFeedback', this.viewFeedback, this);
-      this.model.on('change:showingShare', this.viewShare, this);
-      this.model.on('change:showingHelp', this.viewHelp, this);
-      this.model.on('change:showingBrowser', this.viewBrowser, this);
-      this.model.on('hide-search', this.hideSearch, this);
-      this.model.on('show-progress', this.showProgress, this);
-      this.model.on('hide-progress', this.hideProgress, this);
+        this.$workspace_tabs = this.$('#workspace-tabs');
 
-      this.model.login.on('change:isLoggedIn', this.initBrowserView, this);
-      this.model.login.on('change:isLoggedIn', this.showHelpOnFirstExperience, this );
-      this.model.login.on('change:isFirstExperience', this.showHelpOnFirstExperience, this );
+        this.listenTo(this.model.get('workspaces'), 'add', this.addWorkspaceTab);
+        this.listenTo(this.model.get('workspaces'), 'remove', this.removeWorkspaceTab);
+        this.listenTo(this.model.get('workspaces'), 'hide', this.hideWorkspaceTab);
+        this.listenTo(this.model, 'change:showingFeedback', this.viewFeedback);
+        this.listenTo(this.model, 'change:showingShare', this.viewShare);
+        this.listenTo(this.model, 'change:showingHelp', this.viewHelp);
+        this.listenTo(this.model, 'change:showingBrowser', this.viewBrowser);
+        this.listenTo(this.model, 'hide-search', this.hideSearch);
+        this.listenTo(this.model, 'show-progress', this.showProgress);
+        this.listenTo(this.model, 'hide-progress', this.hideProgress);
 
-      $(document).bind('keydown', $.proxy( this.keydownHandler, this) );
+        this.listenTo(this.model.login, 'change:isLoggedIn', this.initBrowserView);
+        this.listenTo(this.model.login, 'change:isLoggedIn', this.showHelpOnFirstExperience);
+        this.listenTo(this.model.login, 'change:isFirstExperience', this.showHelpOnFirstExperience);
 
-      // deactivate the context menu
-      $(document).bind("contextmenu", function (e) { return false; });
+        $(document).bind('keydown', $.proxy(this.keydownHandler, this));
+
+        // deactivate the context menu
+        $(document).bind("contextmenu", function (e) {
+            return false;
+        });
 
         //Render application inside init method, because if App model doesn't use http service as storage,
         //we will never get to the render event, because model is already initialized and therefore it
         //won't generate 'change' event
-      this.render();
+        this.render();
     },
 
     events: {

@@ -24,8 +24,8 @@ define(['RecordableCommand'], function (RecordableCommand) {
             this.set('x', options.position[0]);
             this.set('y', options.position[1]);
             this.set('nickName', options.extra.functionName);
-            this.set('inputs', options.extra.inputs.length);
-            this.set('outputs', options.extra.outputs.length);
+            this.set('inputs', options.extra.numInputs);
+            this.set('outputs', options.extra.numOutputs);
         }
     });
 });

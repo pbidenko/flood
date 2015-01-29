@@ -20,7 +20,7 @@ require.config({
             exports: 'List'
         },
         Three: {
-            exports: 'Three'
+            exports: 'THREE'
         },
         CSG: {
             exports: 'CSG'
@@ -134,6 +134,7 @@ require.config({
         StringNode: 'models/nodes/StringNode',
         BooleanNode: 'models/nodes/BooleanNode',
         CodeBlockNode: 'models/nodes/CodeBlockNode',
+        ListNode: 'models/nodes/ListNode',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
@@ -189,6 +190,7 @@ require.config({
         commandsMap: 'helpers/CommandsMap',
         NodeFactory: 'helpers/NodeFactory',
         staticHelpers: 'helpers/StaticHelpers',
+        ThreeHelpers: 'helpers/ThreeHelpers',
         augment: 'helpers/augment',
         // Use BaseStorage if no actual data storage is required
         Storage: 'helpers/MongoStorage', //'helpers/BaseStorage',
@@ -200,6 +202,9 @@ require.config({
         BaseWidgetView: 'views/customizer/widgets/Base',
         GeometryWidgetView: 'views/customizer/widgets/Geometry',
         NumberWidgetView: 'views/customizer/widgets/Number',
+        CodeBlockWidgetView: 'views/customizer/widgets/CodeBlock',
+        BooleanWidgetView: 'views/customizer/widgets/Boolean',
+        StringWidgetView: 'views/customizer/widgets/String',
 
         CustomizerAppView: 'views/customizer/CustomizerAppView',
         CustomizerHeaderView: 'views/customizer/CustomizerHeaderView',
@@ -240,6 +245,7 @@ require.config({
         ThreeCSGNodeView: 'views/NodeViews/ThreeCSG',
         StringView: 'views/NodeViews/StringView',
         BooleanView: 'views/NodeViews/BooleanView',
+        ListView: 'views/NodeViews/List',
 
         OrbitControls: 'lib/OrbitControls',
         Viewport: 'lib/Viewport',
