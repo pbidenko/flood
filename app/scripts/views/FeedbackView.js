@@ -16,10 +16,10 @@ define(['backbone'], function(Backbone) {
     template: _.template( $('#feedback-template').html() ),
 
     initialize: function( args, atts ) {
-      this.app = atts.app;
+        this.app = atts.app;
 
-      this.model.on('change:failure', this.fail, this );
-      this.model.on('success', this.success, this );
+        this.listenTo(this.model, 'change:failure', this.fail);
+        this.listenTo(this.model, 'success', this.success);
     },
 
     render: function() {

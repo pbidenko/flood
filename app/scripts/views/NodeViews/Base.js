@@ -23,7 +23,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       'change .use-default-checkbox': 'useDefaultClick',
       'blur .name-input': 'updateName',
       'click .toggle-vis': 'toggleGeomVis',
-      'click .rep-type': 'replicationClick'
+      'click .rep-type': 'replicationClick',
+      'click .name-input': 'nameInputClick'
     },
 
     initialize: function(args) {
@@ -40,8 +41,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
       this.listenTo(this.model, 'change:visible', this.render);
       this.listenTo(this.model, 'change:isEvaluating', this.colorEvaluating);
 
-      this.model.on('evalFailed', this.onEvalFailed, this );
-      this.model.on('evalBegin', this.onEvalBegin, this );
+      this.listenTo(this.model, 'evalFailed', this.onEvalFailed);
+      this.listenTo(this.model, 'evalBegin', this.onEvalBegin);
 
       this.$workspace_canvas = $('#workspace_canvas');
       this.position = this.model.get('position');
@@ -94,10 +95,14 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
 
     },
 
+    nameInputClick: function(e){
+      e.stopPropagation();
+    },
+
     // should be part of nodeView subclass
     toggleGeomVis: function(e) {
       this.model.set('visible', !this.model.get('visible') );
-      e.stopPropagation()
+      e.stopPropagation();
     },
 
     beginPortDisconnection: function(e){
@@ -173,7 +178,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer'], function(Backbo
         elem.trigger(e);
 
         this.model.trigger('request-set-draggingproxy', false);
-        //this.workspace.draggingProxy = false;
 
       }.bind( this ));
 

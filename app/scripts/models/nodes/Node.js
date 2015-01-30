@@ -26,8 +26,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
         initialize: function (attrs, vals) {
             var inPort,
-                outPort,
-                elems;
+                outPort;
             // Need to know the type in order to create the node
             if (attrs.typeName && FLOOD.nodeTypes[attrs.typeName]) {
                 this.set('type', new FLOOD.nodeTypes[attrs.typeName]());
@@ -38,16 +37,15 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 this.set('creationName', attrs.extra.creationName);
                 this.set('displayName', attrs.extra.displayName);
             } else {
-                elems = vals.searchElements.where({ creationName: attrs.typeName });
-                if (elems.length === 0) {
+                if (!vals.searchElement) {
                     if (attrs.ignoreDefaults) {
                         inPort = staticHelpers.generatePortNames(attrs.ignoreDefaults.length);
                     }
                 } else {
-                    inPort = elems[0].get('inPort');
-                    outPort = elems[0].get('outPort');
-                    this.set('displayName', elems[0].get('displayName'));
-                    this.set('creationName', elems[0].get('creationName'));
+                    inPort = vals.searchElement.get('inPort');
+                    outPort = vals.searchElement.get('outPort');
+                    this.set('displayName', vals.searchElement.get('displayName'));
+                    this.set('creationName', vals.searchElement.get('creationName'));
                 }
 
                 this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort));
@@ -87,12 +85,12 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
             this.set('ignoreDefaults', attrs.ignoreDefaults);
 
-            this.on('connection', this.onConnectPort);
+            this.listenTo(this, 'connection', this.onConnectPort);
 
-            this.on('disconnection', this.onDisconnectPort);
+            this.listenTo(this, 'disconnection', this.onDisconnectPort);
             this.workspace = vals.workspace;
 
-            this.on('remove', this.onRemove);
+            this.listenTo(this, 'remove', this.onRemove);
 
             this.initializePorts();
         },

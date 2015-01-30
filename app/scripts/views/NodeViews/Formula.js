@@ -3,8 +3,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'FLOOD'], function(B
   return BaseNodeView.extend({
 
     initialize: function(args) {
-      BaseNodeView.prototype.initialize.apply(this, arguments);
-      this.model.on('change:extra', this.onChangedExtra, this);
+        BaseNodeView.prototype.initialize.apply(this, arguments);
+        this.listenTo(this.model, 'change:extra', this.onChangedExtra);
     },
 
     innerTemplate : _.template( $('#node-formula-template').html() ),

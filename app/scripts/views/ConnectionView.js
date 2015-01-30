@@ -8,18 +8,29 @@ define(['backbone'], function(Backbone) {
 
     initialize: function( args ) {
 
-      this.model = args.model;
+        this.model = args.model;
 
-      if (args.isProxy ){
-        this.isProxy = true;
-      }
+        if (args.isProxy) {
+            this.isProxy = true;
+        }
 
-      this.workspaceView = args.workspaceView;
+        this.workspaceView = args.workspaceView;
 
-      if (this.model.startNode){
-        this.model.startNode.on('change:ignoreDefaults', this.render, this);
-      }
+        var startNode = this.model.startNode;
+        if (startNode) {
+            this.listenTo(startNode, 'change:ignoreDefaults', this.render);
+            this.listenTo(startNode, 'connection', this.redrawIfNeed);
+            this.listenTo(startNode, 'disconnection', this.redrawIfNeed);
+        }
+    },
 
+    redrawIfNeed: function (index, isOutput) {
+        // if an output port was connected/disconnected
+        // it doesn't affect other output connectors
+        if (isOutput)
+            return;
+
+        this.updateColor();
     },
 
     delegateEvents: function() {
@@ -103,34 +114,36 @@ define(['backbone'], function(Backbone) {
     // construct the control points for a bezier curve
     getControlPoints: function() {
 
-      var startPos, endPos;
-      if (!this.model.get('startProxy') || !this.model.get('endProxy')) {
+        var startPos, endPos;
+        if (!this.model.get('startProxy') || !this.model.get('endProxy')) {
 
-        var nodeViews = this.workspaceView.nodeViews
-          , startId = this.model.get('startNodeId')
-          , endId = this.model.get('endNodeId')
-          , startPortIndex = this.model.get('startPortIndex')
-          , endPortIndex = this.model.get('endPortIndex')
-      }    
-
-      if (!this.model.get('startProxy')) {
-        if (!nodeViews[startId] ){
-          startId = this.workspaceView.model.get('proxyStartId');
-          startPortIndex = this.workspaceView.model.get('proxyStartPortIndex');
+            var nodeViews = this.workspaceView.nodeViews
+                , startId = this.model.get('startNodeId')
+                , endId = this.model.get('endNodeId')
+                , startPortIndex = this.model.get('startPortIndex')
+                , endPortIndex = this.model.get('endPortIndex')
         }
 
-        startPos = nodeViews[startId].getPortPosition(startPortIndex, true);
-      } else {
-        startPos = this.model.get('startProxyPosition');
-      }
+        if (!this.model.get('startProxy')) {
+            if (!nodeViews[startId]) {
+                startId = this.workspaceView.model.get('proxyStartId');
+                startPortIndex = this.workspaceView.model.get('proxyStartPortIndex');
+            }
 
-      if (!this.model.get('endProxy')) {
-        endPos = nodeViews[endId].getPortPosition(endPortIndex, false);
-      } else {
-        endPos = this.model.get('endProxyPosition');
-      }
+            startPos = nodeViews[startId].getPortPosition(startPortIndex, true);
+        }
+        else {
+            startPos = this.model.get('startProxyPosition');
+        }
 
-      var offset = 0.65 * Math.sqrt( Math.pow( endPos[0]-startPos[0], 2 ) + Math.pow( startPos[1]-endPos[1], 2 ) );
+        if (!this.model.get('endProxy')) {
+            endPos = nodeViews[endId].getPortPosition(endPortIndex, false);
+        }
+        else {
+            endPos = this.model.get('endProxyPosition');
+        }
+
+        var offset = 0.65 * Math.sqrt(Math.pow(endPos[0] - startPos[0], 2) + Math.pow(startPos[1] - endPos[1], 2));
 
       return {
           aX : startPos[0]

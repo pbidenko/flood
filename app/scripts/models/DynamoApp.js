@@ -5,7 +5,7 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'SaveUplo
 
             initialize: function () {
                 this.socket = new SocketConnection({ app: this });
-                this.on('libraryItemsList-received:event', this.mapLibraryItems, this);
+                this.listenTo(this, 'libraryItemsList-received:event', this.mapLibraryItems);
                 this.saveUploader = new SaveUploader({ app: this });
                 this.listenTo(this.saveUploader, 'request-workspace-browser-refresh', this.refreshWorkspaceBrowser);
                 App.prototype.initialize.call(this);

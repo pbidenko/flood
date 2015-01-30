@@ -68,13 +68,29 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
             },
 
             render : function () {
+                var ex = this.model.get('extra'),
+                    lock = ex.lock || false;
+
                 BaseNodeView.prototype.render.apply(this, arguments);
+
+                this.lockInput = this.$el.find('.lock-input');
+                this.lockInput.val( lock );
+                this.lockInput.change( function(e){ this.lockChanged.call(this, e); e.stopPropagation(); }.bind(this));
+
                 fitSize.call(this);
                 return this;
             },
 
             syncUI: function(value){
                 this.$el.find('.string-node-input').val(value);
+            },
+
+            lockChanged: function(e){
+                var ex = JSON.parse(JSON.stringify(this.model.get('extra')));
+
+                ex.lock = this.lockInput.is(':checked');
+
+                this.model.trigger('request-set-node-prop', { property: 'extra', _id: this.model.get('_id'), newValue: ex });
             }
         });
     });

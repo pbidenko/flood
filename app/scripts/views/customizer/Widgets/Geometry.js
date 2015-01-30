@@ -1,4 +1,4 @@
-define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone, _, $, BaseWidgetView) {
+define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], function(Backbone, _, $, BaseWidgetView, helpers) {
 
   return BaseWidgetView.extend({
 
@@ -35,13 +35,13 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
 
       if (this.model.get('selected')) {
 
-        var meshMat = new THREE.MeshPhongMaterial({color: 0x66d6ff });
+        var meshMat = new THREE.MeshPhongMaterial({color: 0x66d6ff, side : THREE.DoubleSide });
         var partMat = new THREE.ParticleBasicMaterial({color: 0x66d6ff, size: 5, sizeAttenuation: false});
         var lineMat = new THREE.LineBasicMaterial({ color: 0x66d6ff });
 
       } else {
 
-        var meshMat = new THREE.MeshPhongMaterial({color: 0x999999});
+        var meshMat = new THREE.MeshPhongMaterial({color: 0x999999, side : THREE.DoubleSide});
         var partMat = new THREE.ParticleBasicMaterial({color: 0x999999, size: 5, sizeAttenuation: false});
         var lineMat = new THREE.LineBasicMaterial({ color: 0x000000 });
 
@@ -82,7 +82,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
 
       for ( var i = 0; i < rawGeom.faces.length; i++ ) {
         var f = rawGeom.faces[i];
-        face = new THREE.Face3( f[0], f[1], f[2], new THREE.Vector3( f[3][0], f[3][1], f[3][2] ) );
+        face = helpers.createFace(f);
+
         threeGeom.faces.push( face );
       }
       
@@ -169,7 +170,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
 
           switch (g3._floodType) {
             case 0:
-              geom.add( new THREE.Mesh(g3, new THREE.MeshPhongMaterial({color: color})) );
+              geom.add( new THREE.Mesh(g3, new THREE.MeshPhongMaterial({color: color, side : THREE.DoubleSide})) );
               break;
             case 1:
               geom.add( new THREE.ParticleSystem(g3, new THREE.ParticleBasicMaterial({color: color, size: 5, sizeAttenuation: false}) ));
@@ -212,22 +213,6 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView'], function(Backbone
     renderNode: function() {
       
       BaseWidgetView.prototype.renderNode.apply(this, arguments);
-
-      // this.$toggleVis = this.$el.find('.toggle-vis');
-      // this.$toggleVis.show();
-
-      // var icon = this.$toggleVis.find('i');
-      // var label = this.$toggleVis.find('span');
-
-      // if (this.model.get('visible')){
-      //   icon.addClass('icon-eye-open');
-      //   icon.removeClass('icon-eye-close');
-      //   label.html('Hide geometry');
-      // } else {
-      //   icon.removeClass('icon-eye-open');
-      //   icon.addClass('icon-eye-close');
-      //   label.html('Show geometry');
-      // }
 
       return this;
 

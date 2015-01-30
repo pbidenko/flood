@@ -5,18 +5,16 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
     template: _.template( $('#node-input-template').html() ),
 
     initialize: function(args) {
-      BaseNodeView.prototype.initialize.apply(this, arguments);
+        BaseNodeView.prototype.initialize.apply(this, arguments);
 
-      this.model.on('change:extra', function() { 
-        
-        var ex = this.model.get('extra') ;
-        var name = ex != undefined ? ex.name : "";
-        
-        this.silentSyncUI( name );
+        this.listenTo(this.model, 'change:extra', function () {
+
+            var ex = this.model.get('extra');
+            var name = ex != undefined ? ex.name : "";
+
+            this.silentSyncUI(name);
             this.model.trigger('update-node');
-
-      }, this);
-
+        });
     },
 
     render: function(){

@@ -6,20 +6,18 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'jqueryuislider'], f
 
     initialize: function(args) {
 
-      BaseNodeView.prototype.initialize.apply(this, arguments);
-      this.rendered = false;
+        BaseNodeView.prototype.initialize.apply(this, arguments);
+        this.rendered = false;
 
-      this.model.on('change:extra', function() { 
-        
-        var ex = this.model.get('extra') ;
+        this.listenTo(this.model, 'change:extra', function () {
 
-        this.silentSyncUI( ex );
+            var ex = this.model.get('extra');
+
+            this.silentSyncUI(ex);
 
             this.model.trigger('update-node');
             this.model.trigger('requestRun');
-
-      }, this);
-
+        });
     },
  
     render: function() {
