@@ -33,6 +33,17 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
             this.$el.on('click', '.false-flag', clickFunc.bind(this, false));
         },
 
+        render: function(){
+            var ex = this.model.get('extra'),
+                lock = ex.lock || false;
+
+            BaseNodeView.prototype.render.apply(this, arguments);
+
+            this.lockInput = this.$el.find('.lock-input');
+            this.lockInput.val( lock );
+            this.lockInput.change( function(e){ this.lockChanged.call(this, e); e.stopPropagation(); }.bind(this));
+        },
+
         valueChanged: function(value) {
             var newValue = {
                 value: value
@@ -54,6 +65,14 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
             else {
                 this.$el.find('.false-flag').prop('checked', true);
             }
+        },
+
+        lockChanged: function(e){
+            var ex = JSON.parse(JSON.stringify(this.model.get('extra')));
+
+            ex.lock = this.lockInput.is(':checked');
+
+            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
         }
     });
 });

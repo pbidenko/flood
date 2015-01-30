@@ -20,7 +20,7 @@ require.config({
             exports: 'List'
         },
         Three: {
-            exports: 'Three'
+            exports: 'THREE'
         },
         CSG: {
             exports: 'CSG'
@@ -191,6 +191,7 @@ require.config({
         commandsMap: 'helpers/CommandsMap',
         NodeFactory: 'helpers/NodeFactory',
         staticHelpers: 'helpers/StaticHelpers',
+        ThreeHelpers: 'helpers/ThreeHelpers',
         augment: 'helpers/augment',
         // Use BaseStorage if no actual data storage is required
         Storage: 'helpers/MongoStorage', //'helpers/BaseStorage',
@@ -203,6 +204,8 @@ require.config({
         GeometryWidgetView: 'views/customizer/widgets/Geometry',
         NumberWidgetView: 'views/customizer/widgets/Number',
         CodeBlockWidgetView: 'views/customizer/widgets/CodeBlock',
+        BooleanWidgetView: 'views/customizer/widgets/Boolean',
+        StringWidgetView: 'views/customizer/widgets/String',
 
         CustomizerAppView: 'views/customizer/CustomizerAppView',
         CustomizerHeaderView: 'views/customizer/CustomizerHeaderView',

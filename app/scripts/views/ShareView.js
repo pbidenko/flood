@@ -14,9 +14,9 @@ define(['backbone'], function(Backbone) {
     template: _.template( $('#share-template').html() ),
 
     initialize: function( args, atts ) {
-      this.app = atts.app;
+        this.app = atts.app;
 
-      this.model.on('success', this.success, this );
+        this.listenTo(this.model, 'success', this.success);
     },
 
     stopPropagation: function(e){

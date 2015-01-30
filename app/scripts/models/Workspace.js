@@ -47,63 +47,69 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     initialize: function(atts, arr) {
 
-      atts = atts || {};
+        atts = atts || {};
 
-      // if offset is not defined
-      if (!atts.offset || isNaN( atts.offset[0] ) || isNaN( atts.offset[1] )){
-        atts.offset = this.defaults.offset;
-        this.set( 'offset', this.defaults.offset );
-      }
+        // if offset is not defined
+        if (!atts.offset || isNaN(atts.offset[0]) || isNaN(atts.offset[1])) {
+            atts.offset = this.defaults.offset;
+            this.set('offset', this.defaults.offset);
+        }
 
-      this.app = arr.app;
+        this.app = arr.app;
 
-      this.createNodes(atts);
-      this.createConnections(atts);
+        this.createNodes(atts);
+        this.createConnections(atts);
 
-      this.subscribeOnNodesConnectionsChanges();
-      if (atts.notNotifyServer) {
-          this.set('notNotifyServer', true);
-      }
+        this.subscribeOnNodesConnectionsChanges();
+        if (atts.notNotifyServer) {
+            this.set('notNotifyServer', true);
+        }
 
-      // the proxy connection is what is drawn when the user is 
-      // in the process of creating a new connection - it is not 
-      // persisted.
-      this.proxyConnection = new Connection({
-        _id: -1,
-        startProxy: true,
-        endProxy: true,
-        startProxyPosition: [0, 0],
-        endProxyPosition: [0, 0],
-        hidden: true
-      }, { workspace: this });
+        // the proxy connection is what is drawn when the user is
+        // in the process of creating a new connection - it is not
+        // persisted.
+        this.proxyConnection = new Connection({
+            _id: -1,
+            startProxy: true,
+            endProxy: true,
+            startProxyPosition: [0, 0],
+            endProxyPosition: [0, 0],
+            hidden: true
+        }, { workspace: this });
 
-      this.marquee = new Marquee({
-        _id: -1,
-        hidden: true
-      }, { workspace: this });
+        this.marquee = new Marquee({
+            _id: -1,
+            hidden: true
+        }, { workspace: this });
 
-      this.runAllowed = false;
+        this.runAllowed = false;
 
-      this.sync = _.throttle(this.sync, 2000);
+        this.sync = _.throttle(this.sync, 2000);
 
-      // save on every change
-      var throttledSync = _.throttle(function(){ this.sync('update', this); }, 1000);
-      this.on('runCommand', throttledSync, this);
-      this.on('change:name', throttledSync, this);
-      this.on('change:zoom', throttledSync, this);
-      this.on('change:offset', throttledSync, this);
-      this.on('change:workspaceDependencyIds', throttledSync, this);
-      this.on('requestRun', this.run, this);
+        // save on every change
+        var throttledSync = _.throttle(function () {
+            this.sync('update', this);
+        }, 1000);
 
-      // this should not be throttled
-      this.on('change:isCustomizer', function(){ this.sync('update', this); }, this);
-      this.set('tabName', this.get('name'));      if ( this.get('isCustomNode') ) this.initializeCustomNode();
+        this.listenTo(this, 'runCommand', throttledSync);
+        this.listenTo(this, 'change:name', throttledSync);
+        this.listenTo(this, 'change:zoom', throttledSync);
+        this.listenTo(this, 'change:offset', throttledSync);
+        this.listenTo(this, 'change:workspaceDependencyIds', throttledSync);
+        this.listenTo(this, 'requestRun', this.run);
 
-      this.resolver = new WorkspaceResolver(null, { app : this.app, workspace : this });
-      this.resolver.resolveAll();
+        // this should not be throttled
+        this.listenTo(this, 'change:isCustomizer', function () {
+            this.sync('update', this);
+        });
 
-      this.app.trigger('workspaceLoaded', this);
+        this.set('tabName', this.get('name'));
+        if ( this.get('isCustomNode') ) this.initializeCustomNode();
 
+        this.resolver = new WorkspaceResolver(null, { app: this.app, workspace: this });
+        this.resolver.resolveAll();
+
+        this.app.trigger('workspaceLoaded', this);
     },
 
     getCustomizerUrl: function(){
@@ -204,43 +210,40 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       }, this);
     },
 
-    subscribeOnNodesConnectionsChanges: function(){
+    subscribeOnNodesConnectionsChanges: function() {
 
-      this.get('connections').on('add remove', function () {
-        this.trigger('change:connections');
-        this.trigger('requestRun');
-      }.bind(this));
+        this.listenTo(this.get('connections'), 'add remove', function () {
+            this.trigger('change:connections');
+            this.trigger('requestRun');
+        });
 
-      this.get('nodes').on('add remove', function () {
-        this.trigger('change:nodes');
-        this.trigger('requestRun');
-      }.bind(this));
+        this.listenTo(this.get('nodes'), 'add remove', function () {
+            this.trigger('change:nodes');
+            this.trigger('requestRun');
+        });
     },
 
     customNode : null,
 
-    initializeCustomNode: function(){
+    initializeCustomNode: function() {
 
-      this.customNode = new FLOOD.internalNodeTypes.CustomNode( this.get('name'), this.get('_id'), this.get('guid') );
+        this.customNode = new FLOOD.internalNodeTypes.CustomNode(this.get('name'), this.get('_id'), this.get('guid'));
 
-      var ni = this.get('nodes').where({typeName: "Input"}).length;
-      var no = this.get('nodes').where({typeName: "Output"}).length;
+        var ni = this.get('nodes').where({typeName: "Input"}).length;
+        var no = this.get('nodes').where({typeName: "Output"}).length;
 
-      this.customNode.setNumInputs(ni);
-      this.customNode.setNumOutputs(no);
+        this.customNode.setNumInputs(ni);
+        this.customNode.setNumOutputs(no);
 
-      this.customNode.searchTags = [this.get('name').toLowerCase()];
+        this.customNode.searchTags = [this.get('name').toLowerCase()];
 
-      this.app.SearchElements.addCustomNode( this.customNode );
+        this.app.SearchElements.addCustomNode(this.customNode);
 
-      var that = this;
-
-      this.on('change:name', function(){
-        that.customNode.functionName = that.get('name');
-        that.customNode.searchTags = [that.get('name').toLowerCase()];
-        that.app.SearchElements.addCustomNode( that.customNode );
-      }, this);
-
+        this.listenTo(this, 'change:name', function () {
+            this.customNode.functionName = that.get('name');
+            this.customNode.searchTags = [that.get('name').toLowerCase()];
+            this.app.SearchElements.addCustomNode(that.customNode);
+        });
     },
 
     toJSON : function() {
@@ -265,15 +268,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         return json;
     },
 
-    initializeRunner: function(){
+    initializeRunner: function() {
 
-      this.runner = new Runner({id : this.get('_id') }, { workspace: this, app: this.app });
+        this.runner = new Runner({id: this.get('_id') }, { workspace: this, app: this.app });
 
-      var that = this;
-      this.runner.on('change:isRunning', function(v){
-        that.set('isRunning', v.get('isRunning'));
-      });
-
+        this.listenTo(this.runner, 'change:isRunning', function (v) {
+            this.set('isRunning', v.get('isRunning'));
+        });
     },
 
     dispose: function () {

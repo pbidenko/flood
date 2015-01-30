@@ -6,10 +6,9 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
     initialize: function(args) {
 
-      BaseNodeView.prototype.initialize.apply(this, arguments);
-      this.model.on( 'change:lastValue', this.renderNode, this );
-      this.model.on( 'disconnection', this.renderNode, this );
-
+        BaseNodeView.prototype.initialize.apply(this, arguments);
+        this.listenTo(this.model, 'change:lastValue', this.renderNode);
+        this.listenTo(this.model, 'disconnection', this.renderNode);
     },
 
     renderNode: function(){

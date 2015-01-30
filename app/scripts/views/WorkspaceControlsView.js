@@ -7,21 +7,20 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
     className: 'workspace-search',
 
     initialize: function(atts, arr) {
-      this.app = arr.app;
-      this.appView = arr.appView;
+        this.app = arr.app;
+        this.appView = arr.appView;
 
-      this.on('add-element', this.elementClick);
+        this.listenTo(this, 'add-element', this.elementClick);
 
-      //Bind to document's click event for hiding toolbox
-      //Unbind first to avoid duplicate bindings
-      $(window).off('click.models-view');
-      $(window).on('click.models-view', function(e){
-        if(e.target !== this.$input[0])
-          this.$list.hide();
-      }.bind(this));
+        //Bind to document's click event for hiding toolbox
+        //Unbind first to avoid duplicate bindings
+        $(window).off('click.models-view');
+        $(window).on('click.models-view', function (e) {
+            if (e.target !== this.$input[0])
+                this.$list.hide();
+        }.bind(this));
 
-      this.app.SearchElements.on('add remove', this.render, this);
-
+        this.listenTo(this.app.SearchElements, 'add remove', this.render);
     },
 
     template: _.template( $('#workspace-search-template').html() ),
@@ -62,7 +61,7 @@ define(['backbone', 'List', 'SearchElement', 'SearchElementView', 'bootstrap', '
 
       $('#zoomin-button').tooltip({title: "Zoom in", placement: "left"});
       $('#zoomout-button').tooltip({title: "Zoom out", placement: "left"});
-      $('#zoomreset-button').tooltip({title: "Zoom reset", placement: "left"});
+      $('#zoomreset-button').tooltip({title: "Zoom all", placement: "left"});
 
       this.$el.find('#export-button').tooltip({title: "Export as STL"});
 

@@ -1,6 +1,7 @@
 (function () {
 
 	function getCurrentUrl(){
+		if (typeof document != "object") return "127.0.0.1";
 	  var domain = document.URL.match(/:\/\/(.[^/:]+)/)[1];
       return domain;
 	}
