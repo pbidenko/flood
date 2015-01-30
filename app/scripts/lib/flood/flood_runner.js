@@ -396,16 +396,16 @@ post_nodeEvalBegin = function(node, isNew){
 
 };
 
-post_nodeEvalComplete = function(node, args, isNew, value, prettyValue ){
+post_nodeEvalComplete = function(node, args, isNew, value, geometry ){
 
 	if (typeof value === "function") {
 		value = value.toString();
-		prettyValue = value.toString();
+		geometry = value.toString();
 	}
 	
 	if ( isNew ){
 		// console.log('copying value', node.typeName );
-		return success({ kind: "nodeEvalComplete", isNew : isNew, _id: node.id, value : value, prettyValue: prettyValue  });
+		return success({ kind: "nodeEvalComplete", isNew : isNew, _id: node.id, value : value, geometry: geometry  });
 	} else {
 		// console.log('not copying value', node.typeName );
 		return success({ kind: "nodeEvalComplete", isNew : isNew, _id: node.id });

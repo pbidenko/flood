@@ -293,12 +293,12 @@ define('FLOOD', function() {
 								that.markClean();
 
 								if ( that.doPostProcess && that.postProcess ){
-									that.prettyValue = that.postProcess( that.value );
+									that.geometry = that.postProcess( that.value );
 								}
 							}
 
 							// tell listeners that the evalation is complete
-							that.evalComplete( that, arguments, dirty, that.value, that.prettyValue );
+							that.evalComplete( that, arguments, dirty, that.value, that.geometry );
 
 						} catch (e) {
 							that.evalFailed(that, e);

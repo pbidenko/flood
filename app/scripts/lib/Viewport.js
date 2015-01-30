@@ -1,244 +1,222 @@
-var container, $container;
+define(['backbone', 'Three', 'OrbitControls'], function (Backbone, THREE) {
 
-var camera, controls, scene, renderer;
+    var container, $container;
+    var camera, controls, renderer;
+    var windowHalfX = window.innerWidth / 2;
+    var windowHalfY = window.innerHeight / 2;
 
-var geometry, group;
+    function makeGrid() {
 
-var mouse = new THREE.Vector2(),
-offset = new THREE.Vector3(),
-INTERSECTED, SELECTED;
+        var l = 60;
+        var axisHelper = new THREE.AxisHelper(l);
+        this.scene.add(axisHelper);
 
-var objects = [], plane;
+        var geometry = new THREE.Geometry();
+        var geometryThick = new THREE.Geometry();
 
-var mouseX = 0, mouseY = 0;
+        var n = l;
+        var inc = 2 * l / n;
+        var rate = 10;
 
-var windowHalfX = window.innerWidth / 2;
-var windowHalfY = window.innerHeight / 2;
+        for (var i = 0; i < n + 1; i++) {
 
-init();
-render();
+            var v1 = new THREE.Vector3(-l, -l + i * inc, 0);
+            var v2 = new THREE.Vector3(l, -l + i * inc, 0);
 
-function init() {
+            geometry.vertices.push(v1);
+            geometry.vertices.push(v2);
 
-	container = document.getElementById("viewer");
-	$container = $(container);
+            if (i % rate == 0) {
+                geometryThick.vertices.push(v1);
+                geometryThick.vertices.push(v2);
+            }
+        }
 
-	camera = new THREE.PerspectiveCamera( 30, $container.width() / $container.height(), 1, 10000 );
+        for (var i = 0; i < n + 1; i++) {
+            var v1 = new THREE.Vector3(-l + i * inc, l, 0);
+            var v2 = new THREE.Vector3(-l + i * inc, -l, 0);
 
-	camera.position.set( 140, 140, 140 );
-	camera.up.set( 0, 0, 1 );
-	camera.lookAt( new THREE.Vector3(0,0,0) );
+            geometry.vertices.push(v1);
+            geometry.vertices.push(v2);
 
-	scene = new THREE.Scene();
+            if (i % rate == 0) {
+                geometryThick.vertices.push(v1);
+                geometryThick.vertices.push(v2);
+            }
+        }
 
-	renderer = new THREE.WebGLRenderer({antialias: true});
-	renderer.setClearColor( 0xffffff, 1 );
-	renderer.setSize( $container.width(), $container.height() );
-	renderer.sortObjects = false;
+        var material = new THREE.LineBasicMaterial({
+            color: 0xeeeeee,
+            linewidth: 0.1
+        });
 
-	container.appendChild( renderer.domElement );
-	renderer.domElement.setAttribute("id", "renderer_canvas");
+        var materialThick = new THREE.LineBasicMaterial({
+            color: 0xeeeeee,
+            linewidth: 2
+        });
 
-	// add subtle ambient lighting
-	var ambientLight = new THREE.AmbientLight(0x555555);
-	scene.add(ambientLight);
+        var line = new THREE.Line(geometry, material, THREE.LinePieces);
+        var lineThick = new THREE.Line(geometryThick, materialThick, THREE.LinePieces);
 
-	// add directional light source
-	var directionalLight = new THREE.DirectionalLight(0xbbbbbb);
-	directionalLight.position.set(50, 30, 50);
-	scene.add(directionalLight);
+        this.scene.add(line);
+        this.scene.add(lineThick);
+    };
 
-	var directionalLight = new THREE.DirectionalLight(0xaaaaaa);
-	directionalLight.position.set(-0.2, -0.8, 1).normalize();
-	scene.add(directionalLight);
+    function onWindowResize() {
 
-	makeGrid();
+        windowHalfX = $container.width() / 2;
+        windowHalfY = $container.height() / 2;
 
-	controls = new THREE.OrbitControls(camera, container);
+        camera.aspect = windowHalfX / windowHalfY;
+        camera.updateProjectionMatrix();
 
-	window.addEventListener( 'resize', onWindowResize, false );
+        renderer.setSize(2 * windowHalfX, 2 * windowHalfY);
 
-	// full screen blur
-	// composer = new THREE.EffectComposer( renderer );
-	// composer.addPass( new THREE.RenderPass( scene, camera ) );
+        this.render();
+    };
 
-	// hblur = new THREE.ShaderPass( THREE.HorizontalBlurShader );
-	// composer.addPass( hblur );
+    function animate() {
 
-	// vblur = new THREE.ShaderPass( THREE.VerticalBlurShader );
-	// // set this shader pass to render to screen so we can see the effects
-	// vblur.renderToScreen = true;
-	// composer.addPass( vblur );
+        requestAnimationFrame(animate.bind(this));
+        render.call(this);
+    };
 
 
-	animate();
+    function render() {
 
-}
+        controls.update();
+        renderer.render(this.scene, camera);
+    };
 
-function makeGrid(){
+    function getBounds(boundingSphere) {
+        return {
+            maxX: boundingSphere.center.x + boundingSphere.radius,
+            minX: boundingSphere.center.x - boundingSphere.radius,
+            maxY: boundingSphere.center.y + boundingSphere.radius,
+            minY: boundingSphere.center.y - boundingSphere.radius,
+            maxZ: boundingSphere.center.z + boundingSphere.radius,
+            minZ: boundingSphere.center.z - boundingSphere.radius
+        };
+    };   
 
-	var l = 60;
+    return function(){
 
-	var axisHelper = new THREE.AxisHelper( l );
-	scene.add( axisHelper );
+        this.scene = null;
 
-	var geometry = new THREE.Geometry();
-	var geometryThick = new THREE.Geometry();
+        this.init = function(){
 
-	var n = l;
-	var inc = 2 * l / n;
-	var rate = 10;
+            container = document.getElementById("viewer");
+            $container = $(container);
 
-	for (var i = 0; i < n + 1; i++){
+            camera = new THREE.PerspectiveCamera(30, $container.width() / $container.height(), 1, 10000);
 
-    	var v1 = new THREE.Vector3(-l, -l + i * inc, 0);
-		var v2 = new THREE.Vector3(l, -l + i * inc, 0);
+            camera.position.set(140, 140, 140);
+            camera.up.set(0, 0, 1);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    	geometry.vertices.push(v1);
-    	geometry.vertices.push(v2);
+            this.scene = new THREE.Scene();
 
-    	if (i % rate == 0){
-			geometryThick.vertices.push(v1);
-    		geometryThick.vertices.push(v2);
-    	}
-	}
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setClearColor(0xffffff, 1);
+            renderer.setSize($container.width(), $container.height());
+            renderer.sortObjects = false;
 
-	for (var i = 0; i < n + 1; i++){
-		var v1 = new THREE.Vector3(-l + i * inc, l, 0);
-		var v2 = new THREE.Vector3(-l + i * inc, -l, 0);
+            container.appendChild(renderer.domElement);
+            renderer.domElement.setAttribute("id", "renderer_canvas");
 
-		geometry.vertices.push(v1);
-    	geometry.vertices.push(v2);
+            // add subtle ambient lighting
+            var ambientLight = new THREE.AmbientLight(0x555555);
+            this.scene.add(ambientLight);
 
-    	if (i % rate == 0){
-			geometryThick.vertices.push(v1);
-    		geometryThick.vertices.push(v2);
-    	}
-	}
+            // add directional light source
+            var directionalLight = new THREE.DirectionalLight(0xbbbbbb);
+            directionalLight.position.set(50, 30, 50);
+            this.scene.add(directionalLight);
 
-	var material = new THREE.LineBasicMaterial({
-        color: 0xeeeeee,
-        linewidth: 0.1
-    });
+            var directionalLight = new THREE.DirectionalLight(0xaaaaaa);
+            directionalLight.position.set(-0.2, -0.8, 1).normalize();
+            this.scene.add(directionalLight);
 
-    var materialThick = new THREE.LineBasicMaterial({
-        color: 0xeeeeee,
-        linewidth: 2
-    });
+            makeGrid.call(this);
 
-    var line = new THREE.Line(geometry, material, THREE.LinePieces);
-    var lineThick = new THREE.Line(geometryThick, materialThick, THREE.LinePieces);
+            controls = new THREE.OrbitControls(camera, container);
 
-    scene.add(line);
-    scene.add(lineThick);
+            window.addEventListener('resize', onWindowResize, false);
 
-}
+            animate.call(this);
+        };
 
-function onWindowResize() {
+        this.zoomToFit = function() {
 
-	windowHalfX = $container.width() / 2;
-	windowHalfY = $container.height() / 2;
+            var objects3d = [];
 
-	camera.aspect = windowHalfX/ windowHalfY;
-	camera.updateProjectionMatrix();
+            for (var i = 0; i < this.scene.children.length; i++) {
+                if (Object.getPrototypeOf(this.scene.children[i]) === THREE.Object3D.prototype) {
+                    if (this.scene.children[i].children[0]) {
+                        this.scene.children[i].children[0].geometry.computeBoundingSphere();
+                        objects3d.push(this.scene.children[i].children[0].geometry.boundingSphere);
+                    }
+                }
+            }
 
-	renderer.setSize( 2*windowHalfX, 2*windowHalfY );
+            if (objects3d.length > 0) {
 
-	render();
+                var bounds = getBounds(objects3d[0]);
 
-}
+                for (var i = 1; i < objects3d.length; i++) {
+                    var innerBounds = getBounds(objects3d[i]);
 
-function animate() {
+                    if (innerBounds.maxX > bounds.maxX)
+                        bounds.maxX = innerBounds.maxX;
+                    if (innerBounds.minX < bounds.minX)
+                        bounds.minX = innerBounds.minX;
 
-	requestAnimationFrame( animate );
-	render();
+                    if (innerBounds.maxY > bounds.maxY)
+                        bounds.maxY = innerBounds.maxY;
+                    if (innerBounds.minY < bounds.minY)
+                        bounds.minY = innerBounds.minY;
 
-}
+                    if (innerBounds.maxZ > bounds.maxZ)
+                        bounds.maxZ = innerBounds.maxZ;
+                    if (innerBounds.minZ < bounds.minZ)
+                        bounds.minZ = innerBounds.minZ;
+                }
 
-var doBlur = true;
+                var radiusX = Math.abs(bounds.maxX - bounds.minX) / 2;
+                var radiusY = Math.abs(bounds.maxY - bounds.minY) / 2;
+                var radiusZ = Math.abs(bounds.maxZ - bounds.minZ) / 2;
 
-function render() {
+                var centerX = (bounds.maxX + bounds.minX) / 2;
+                var centerY = (bounds.maxY + bounds.minY) / 2;
+                var centerZ = (bounds.maxZ + bounds.minZ) / 2;
 
-	controls.update();
-	renderer.render( scene, camera );
-	
-	if (doBlur){
-		// composer.render();
-	}
+                var radius = Math.max.apply(Math, [radiusX, radiusY, radiusZ]);
+                if (radius < 1)
+                    radius = 1;
+                var distanceFactor = Math.abs(camera.aspect * radius / Math.sin(camera.fov / 2));
 
-}
+                controls.reset();
 
-function zoomToFit() {
+                var target = new THREE.Vector3(centerX, centerY, centerZ);
+                var vec = new THREE.Vector3();
+                vec.addVectors(new THREE.Vector3(distanceFactor, distanceFactor, distanceFactor), target);
+                controls.target = target;
+                controls.object.position = vec;
+                camera.updateProjectionMatrix();
+            }
+            else {
+                controls.reset();
+                camera.updateProjectionMatrix();
+            }
+        };
 
-	var objects3d = [];
+        this.dollyIn = function(){
+            controls.dollyIn();
+        };
 
-	for (var i = 0; i < scene.children.length; i ++) {
-		if(Object.getPrototypeOf(scene.children[i]) === THREE.Object3D.prototype) {
-			if(scene.children[i].children[0]) {
-				scene.children[i].children[0].geometry.computeBoundingSphere();
-				objects3d.push(scene.children[i].children[0].geometry.boundingSphere);
-			}
-		}
-	}
+        this.dollyOut = function(){
+            controls.dollyOut();
+        };
 
-	if(objects3d.length > 0) {
-
-		var bounds = getBounds(objects3d[0])
-
-		for (var i = 1; i < objects3d.length; i++ ) {
-			var innerBounds = getBounds(objects3d[i]);
-
-			if (innerBounds.maxX > bounds.maxX)
-				bounds.maxX = innerBounds.maxX;
-			if (innerBounds.minX < bounds.minX)
-				bounds.minX = innerBounds.minX;
-
-			if (innerBounds.maxY > bounds.maxY)
-				bounds.maxY = innerBounds.maxY;
-			if (innerBounds.minY < bounds.minY)
-				bounds.minY = innerBounds.minY;
-
-			if (innerBounds.maxZ > bounds.maxZ)
-				bounds.maxZ = innerBounds.maxZ;
-			if (innerBounds.minZ < bounds.minZ)
-				bounds.minZ = innerBounds.minZ;
-		}
-
-		var radiusX = Math.abs(bounds.maxX - bounds.minX) / 2;
-		var radiusY = Math.abs(bounds.maxY - bounds.minY) / 2;
-		var radiusZ = Math.abs(bounds.maxZ - bounds.minZ) / 2;
-
-		var centerX = (bounds.maxX + bounds.minX) / 2;
-		var centerY = (bounds.maxY + bounds.minY) / 2;
-		var centerZ = (bounds.maxZ + bounds.minZ) / 2;
-
-		var radius = Math.max.apply(Math, [radiusX, radiusY, radiusZ]);
-		if(radius < 1)
-			radius = 1;
-		var distanceFactor = Math.abs( camera.aspect * radius / Math.sin( camera.fov / 2 ));
-
-		controls.reset();
-
-		var target = new THREE.Vector3(centerX, centerY, centerZ);
-		var vec = new THREE.Vector3();
-		vec.addVectors( new THREE.Vector3( distanceFactor, distanceFactor, distanceFactor ), target );
-		controls.target = target;
-		controls.object.position = vec;
-		camera.updateProjectionMatrix();
-	}
-	else {
-		controls.reset();
-		camera.updateProjectionMatrix();
-	}
-}
-
-function getBounds(boundingSphere){
-	return {
-		maxX : boundingSphere.center.x + boundingSphere.radius,
-		minX : boundingSphere.center.x - boundingSphere.radius,
-		maxY : boundingSphere.center.y + boundingSphere.radius,
-		minY : boundingSphere.center.y - boundingSphere.radius,
-		maxZ : boundingSphere.center.z + boundingSphere.radius,
-		minZ : boundingSphere.center.z - boundingSphere.radius
-	};
-}
+    };
+});

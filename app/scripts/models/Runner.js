@@ -65,7 +65,7 @@ define(['backbone'], function (Backbone) {
 
             var node = this.workspace.get('nodes').get(data._id);
             if (node)
-                node.onEvalComplete(data.isNew, data.value, data.prettyValue);
+                node.onEvalComplete(data.isNew, data.value, data.geometry);
 
         },
 

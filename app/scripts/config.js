@@ -153,6 +153,7 @@ require.config({
         WorkspaceBrowser: 'models/WorkspaceBrowser',
         SocketConnection: 'models/SocketConnection',
         WorkspaceResolver: 'models/WorkspaceResolver',
+        ThreeViewer: 'models/ThreeViewer',
 
         CreateNodeCommand: 'models/commands/CreateNodeCommand',
         CreateProxyNodeCommand: 'models/commands/CreateProxyNodeCommand',
@@ -190,7 +191,6 @@ require.config({
         commandsMap: 'helpers/CommandsMap',
         NodeFactory: 'helpers/NodeFactory',
         staticHelpers: 'helpers/StaticHelpers',
-        ThreeHelpers: 'helpers/ThreeHelpers',
         augment: 'helpers/augment',
         // Use BaseStorage if no actual data storage is required
         Storage: 'helpers/MongoStorage', //'helpers/BaseStorage',

@@ -20,7 +20,6 @@ define(['backbone', 'FLOOD'],
         console.log(this.workspace.get('name') + " has no dependencies");
         this.workspace.initializeRunner();
         this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
-        this.workspace.listenTo( this.app, 'geometry-data-received:event', this.workspace.updateNodeGeometry);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
         return;
@@ -79,7 +78,6 @@ define(['backbone', 'FLOOD'],
       if (this.awaitedWorkspaceDependencyIds.length === 0) {
         this.workspace.initializeRunner();
         this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
-        this.workspace.listenTo( this.app, 'geometry-data-received:event', this.workspace.updateNodeGeometry);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
         this.app.get('workspaces').add(this.workspace);

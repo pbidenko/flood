@@ -1,5 +1,5 @@
-define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node', 'Marquee', 'WorkspaceResolver', 'NodeFactory', 'GeometryMessage', 'GeometryExport'], 
-    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node, Marquee, WorkspaceResolver, nodeFactory, GeometryMessage, GeometryExport) {
+define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Runner', 'Node', 'Marquee', 'WorkspaceResolver', 'NodeFactory', 'GeometryMessage'], 
+    function(Backbone, Nodes, Connection, Connections, scheme, FLOOD, Runner, Node, Marquee, WorkspaceResolver, nodeFactory, GeometryMessage) {
 
   return Backbone.Model.extend({
 
@@ -98,6 +98,22 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.listenTo(this, 'change:workspaceDependencyIds', throttledSync);
         this.listenTo(this, 'requestRun', this.run);
 
+        this.listenTo(this.get('nodes'), 'change:selected', function (e) {
+          this.trigger('nodeSelected',  {id: e.get('_id'), selected: e.get('selected')})
+        }.bind(this));
+        this.listenTo(this.get('nodes'), 'change:visible', function (e) {
+          this.trigger('nodeVisible', {id: e.get('_id'), visible: e.get('visible')})
+        }.bind(this));
+        this.listenTo(this.get('nodes'), 'remove', function (e) {
+          this.trigger('nodeRemove', {id: e.get('_id')})
+        }.bind(this));
+        this.listenTo(this, 'change:current', function (e) {
+          this.trigger('changeWorkspace', {ids: e.get('nodes').map(function(n){return n.get('_id');}), visible: e.get('current')})
+        }.bind(this));
+        this.listenTo(this.get('nodes'), 'geometryUpdated', function (e) {
+          this.trigger('geometryUpdated', e)
+        }.bind(this));
+
         // this should not be throttled
         this.listenTo(this, 'change:isCustomizer', function () {
             this.sync('update', this);
@@ -124,7 +140,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     exportSTL: function(){
 
-      GeometryExport.toSTL(scene, this.get('name') + ".stl" );
+      this.trigger('exportSTL', {name: this.get('name') + ".stl"});
 
     },
 
@@ -135,7 +151,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       if (oldNodes && oldNodes.models && oldNodes.models.length) {
             oldNodes = oldNodes.models;
             for(i = 0; i < oldNodes.length; i++) {
-                  oldNodes[i].clearGeometry();
+                this.trigger('clearNodeGeometry', {id: oldNodes[i].get('_id')});
             }
       }
 
@@ -1003,13 +1019,10 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
                 node.updateValue(param.result[i]);
                 if (resultNode.containsGeometryData) {
                     this.app.socket.send(JSON.stringify(new GeometryMessage(param.result[i].nodeId)));
-                    if(this.pendingRequestsCount === 0){
-                        this.app.trigger('show-progress');
-                    }
-                    this.pendingRequestsCount++;
+                    this.app.trigger('requestGeometry');
                 }
                 else {
-                    node.clearGeometry();
+                    this.trigger('clearNodeGeometry', {id: node.get('_id')});
                 }
             }
         }
@@ -1019,17 +1032,6 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         var node = this.get('nodes').get(param.nodeId);
         if (node && node.updateData) {
             node.updateData(param);
-        }
-    },
-
-    updateNodeGeometry: function(param) {
-        var node = this.get('nodes').get(param.geometryData.nodeId);
-        if (node && param.geometryData.graphicPrimitivesData) {
-            node.updateNodeGeometry(param);
-            this.pendingRequestsCount--;
-            if(this.pendingRequestsCount === 0) {
-                this.app.trigger('hide-progress');
-            }
         }
     },
 

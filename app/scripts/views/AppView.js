@@ -17,10 +17,11 @@ define([  'backbone',
           'Feedback', 
           'ShareView',
           'Share',
-          'fastclick' ],
+          'fastclick',
+          'ThreeViewer' ],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback, ShareView, Share, fastclick ) {
+            Help, LoginView, Login, FeedbackView, Feedback, ShareView, Share, fastclick, ThreeViewer ) {
 
   return Backbone.View.extend({
 
@@ -62,6 +63,9 @@ define([  'backbone',
         //we will never get to the render event, because model is already initialized and therefore it
         //won't generate 'change' event
         this.render();
+
+        // ThreeViewer does not expose any public method therefore just call init
+        new ThreeViewer({app: this.model});
     },
 
     events: {
@@ -317,7 +321,7 @@ define([  'backbone',
 
     zoomresetClick: function(){
       if ( this.lookingAtViewer ){
-        zoomToFit();
+        this.model.trigger('zoomToFit');
       } else {
         this.currentWorkspaceView.zoomAll();
       }
@@ -325,7 +329,7 @@ define([  'backbone',
 
     zoominClick: function(){
       if ( this.lookingAtViewer ){
-        controls.dollyOut();
+        this.model.trigger('dollyOut');
       } else {
         this.getCurrentWorkspace().zoomIn();
       }
@@ -333,7 +337,7 @@ define([  'backbone',
 
     zoomoutClick: function(){
       if ( this.lookingAtViewer ){
-        controls.dollyIn();
+        this.model.trigger('dollyIn');
       } else {
         this.getCurrentWorkspace().zoomOut();
       }
