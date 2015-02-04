@@ -375,10 +375,6 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
       if (this.workspace)
         this.workspace.run();
 
-    },
-
-    clearGeometry: function() {
-        this.set('prettyLastValue', {});
     }
 
   });
