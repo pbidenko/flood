@@ -218,7 +218,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
 
       return this;
 
-    },
+    }
 
   });
 

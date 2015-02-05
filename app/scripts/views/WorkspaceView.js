@@ -49,8 +49,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
             this.cleanup().renderNodes();
         });
 
-        //onChangeCurrent: no such method this.listenTo(this.model, 'change:current', this.onChangeCurrent );
-
+        
         this.listenTo(this.model, 'startProxyDrag', this.startProxyDrag);
         this.listenTo(this.model, 'endProxyDrag', this.endProxyDrag);
 
