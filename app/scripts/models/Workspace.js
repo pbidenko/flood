@@ -47,23 +47,23 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
     initialize: function(atts, arr) {
 
-        atts = atts || {};
+      atts = atts || {};
 
-        // if offset is not defined
+      // if offset is not defined
         if (!atts.offset || isNaN(atts.offset[0]) || isNaN(atts.offset[1])) {
-            atts.offset = this.defaults.offset;
+        atts.offset = this.defaults.offset;
             this.set('offset', this.defaults.offset);
-        }
+      }
 
-        this.app = arr.app;
+      this.app = arr.app;
 
-        this.createNodes(atts);
-        this.createConnections(atts);
+      this.createNodes(atts);
+      this.createConnections(atts);
 
-        this.subscribeOnNodesConnectionsChanges();
-        if (atts.notNotifyServer) {
-            this.set('notNotifyServer', true);
-        }
+      this.subscribeOnNodesConnectionsChanges();
+      if (atts.notNotifyServer) {
+          this.set('notNotifyServer', true);
+      }
 
         // the proxy connection is what is drawn when the user is
         // in the process of creating a new connection - it is not
@@ -98,18 +98,24 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.listenTo(this, 'change:workspaceDependencyIds', throttledSync);
         this.listenTo(this, 'requestRun', this.run);
 
-        // this should not be throttled
+      // this should not be throttled
         this.listenTo(this, 'change:isCustomizer', function () {
             this.sync('update', this);
         });
 
-        this.set('tabName', this.get('name'));
-        if ( this.get('isCustomNode') ) this.initializeCustomNode();
+      this.set('tabName', this.get('name'));
 
-        this.resolver = new WorkspaceResolver(null, { app: this.app, workspace: this });
-        this.resolver.resolveAll();
+      // if lazyInit  is set to true it means
+      // the workspace hasn't right now all proper data
+      // for correct initialization (name, guid, nodes, etc)
+      if ( this.get('isCustomNode') && !arr.lazyInit  ) {
+          this.initializeCustomNode();
+      }
 
-        this.app.trigger('workspaceLoaded', this);
+      this.resolver = new WorkspaceResolver(null, { app : this.app, workspace : this });
+      this.resolver.resolveAll();
+
+      this.app.trigger('workspaceLoaded', this);
     },
 
     getCustomizerUrl: function(){
@@ -237,13 +243,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
     subscribeOnNodesConnectionsChanges: function() {
 
         this.listenTo(this.get('connections'), 'add remove', function () {
-            this.trigger('change:connections');
-            this.trigger('requestRun');
+        this.trigger('change:connections');
+        this.trigger('requestRun');
         });
 
         this.listenTo(this.get('nodes'), 'add remove', function () {
-            this.trigger('change:nodes');
-            this.trigger('requestRun');
+        this.trigger('change:nodes');
+        this.trigger('requestRun');
         });
 
         this.listenTo(this.get('nodes'), 'remove', function (node) {
@@ -257,13 +263,13 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
         this.customNode = new FLOOD.internalNodeTypes.CustomNode(this.get('name'), this.get('_id'), this.get('guid'));
 
-        var ni = this.get('nodes').where({typeName: "Input"}).length;
-        var no = this.get('nodes').where({typeName: "Output"}).length;
+      var ni = this.get('nodes').where({typeName: "Input"}).length;
+      var no = this.get('nodes').where({typeName: "Output"}).length;
 
-        this.customNode.setNumInputs(ni);
-        this.customNode.setNumOutputs(no);
+      this.customNode.setNumInputs(ni);
+      this.customNode.setNumOutputs(no);
 
-        this.customNode.searchTags = [this.get('name').toLowerCase()];
+      this.customNode.searchTags = [this.get('name').toLowerCase()];
 
         this.app.SearchElements.addCustomNode(this.customNode);
 
@@ -302,7 +308,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
         this.listenTo(this.runner, 'change:isRunning', function (v) {
             this.set('isRunning', v.get('isRunning'));
-        });
+      });
     },
 
     dispose: function () {
@@ -640,7 +646,7 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
         if(this.isCyclicDependency(ws, id))
           return true;
-      };
+      }
 
       return false;
     },
