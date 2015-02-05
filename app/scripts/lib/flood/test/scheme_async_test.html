@@ -33,31 +33,30 @@
 
     this.done = function(){
 
-      var that = this;
       var args = arguments;
 
       // do work async
       setTimeout(function(){
 
-        if ( that.first && !that.first.fulfilled ){
-          return that.first.done.apply( that.first, args );
+        if ( this.first && !this.first.fulfilled ){
+          return this.first.done.apply( this.first, args );
         }
 
-        var res = that.f.apply(that, args);
+        var res = this.f.apply(this, args);
         
 
         if (res != undefined && res.constructor === Promise){
 
-          res.then( that.next );
+          res.then( this.next );
           res.done();
 
         } else {
 
-          that.resolve( res );
+          this.resolve( res );
 
         }
         
-      }, 0);
+      }.bind(this), 0);
 
      };
 

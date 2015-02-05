@@ -6,8 +6,6 @@ define(['underscore', 'jquery', 'ThreeCSGNodeView'], function(_, $, ThreeCSGNode
 
     getCustomContents: function() {
 
-      var that = this;
-
       // open the parent workspace on double click
       this.$el.bind('dblclick', function(){
           this.trigger('request-open-definition', this.model.get('type').functionId);

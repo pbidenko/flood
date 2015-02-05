@@ -16,17 +16,16 @@ define(['backbone'], function(Backbone) {
 	  		return;
 	  	}
 
-	  	var that = this;
 	  	$.post('/feedback', data, function(e){
 
 	  		if (e.length && e.length > 0 ) {
-	  			that.set('failureMessage', e[0].msg);
-	  			return that.set('failure', true);
+	  			this.set('failureMessage', e[0].msg);
+	  			return this.set('failure', true);
 	  		}
 
-	  		that.set('failure', false);
-	  		that.trigger('success');
-	  	});
+	  		this.set('failure', false);
+	  		this.trigger('success');
+	  	}.bind(this));
 
 	  }
 

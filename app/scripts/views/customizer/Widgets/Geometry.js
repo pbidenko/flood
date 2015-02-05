@@ -147,12 +147,12 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
         scene.add( this.threeGeom );
         this.model.trigger('change:visible');
 
-      }, this );
+      } );
 
     }, 
 
     // creating this data may be quite slow, we'll need to be careful
-    drawChunked: function(geom, list, callback, that){
+    drawChunked: function(geom, list, callback){
 
       var i = 0;
       var tick = function() {
@@ -160,9 +160,9 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
         var start = new Date().getTime();
         for (; i < list.length && (new Date().getTime()) - start < 50; i++) {
         
-          var g3  = that.toThreeGeom( list[i] );
+          var g3  = this.toThreeGeom( list[i] );
 
-          if (that.model.get('selected')){
+          if (this.model.get('selected')){
             var color = 0x66d6ff;
           } else {
             var color = 0x999999;
@@ -185,10 +185,10 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
         if (i < list.length) {
           setTimeout(tick, 25);
         } else {
-          callback.call(that);
+          callback.call(this);
         }
 
-      };
+      }.bind(this);
 
       setTimeout(tick, 0);
 

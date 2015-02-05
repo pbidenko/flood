@@ -478,8 +478,6 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
       // build the command
       var cb = JSON.parse( JSON.stringify( this.app.get('clipboard') ) );
 
-      var that = this;
-
       var nodes = {};
 
       var centerX = (1 / this.get('zoom')) * (this.get('offset')[0] + 80);
@@ -500,10 +498,10 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         var posY = x.position[1] - topLeft[1] + centerY;
 
         nodes[x._id].position = [ posX, posY ];
-        nodes[x._id]._id = that.makeId();
+        nodes[x._id]._id = this.makeId();
         nodeCount++;
 
-      });
+      }.bind(this));
 
       if (nodeCount > 0) this.deselectAllNodes();
 
@@ -520,9 +518,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         }
 
         connections[x._id] = x;
-        connections[x._id]._id = that.makeId();
+        connections[x._id]._id = this.makeId();
 
-      });
+      }.bind(this));
 
       // build the command
       var multipleCmd = { kind: "multiple", commands: [] };
@@ -588,11 +586,10 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
     },
 
     regenerateDependencies: function(){
-      var that = this;
       var directDependencies = this.getCustomNodes().map(function(x){ return x.get('type').functionId; });
       var indirectDependencies = directDependencies.map(function(x){
-          return that.app.get('workspaces').get(x); 
-        }).map(function(x){
+          return this.app.get('workspaces').get(x); 
+      }.bind(this)).map(function (x) {
           if(x) return x.get('workspaceDependencyIds');
           return [];
       });
@@ -674,10 +671,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
       var allDeps = ws.regenerateDependencies().concat([id]);
 
-      var that = this;
       allDeps.forEach(function(depId){
-        that.sendDefinitionToRunner( depId );
-      });
+        this.sendDefinitionToRunner( depId );
+      }.bind(this));
 
     },
 
@@ -778,10 +774,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.runAllowed = false;
 
         // run all of the commands
-        var that = this;
         data.commands.forEach(function(x){
-          that.runInternalCommand.call(that, x);
-        });
+          this.runInternalCommand(x);
+        }.bind(this));
 
         // restore previous runAllowed state and, if necessary, do run
         this.runAllowed = previousRunAllowedState;
@@ -906,10 +901,9 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
 
         var cmdcop = JSON.parse( JSON.stringify( cmd ) );
 
-        var that = this;
         cmdcop.commands = cmdcop.commands.map(function(x){
-          return that.invertCommand.call(that, x);
-        });
+          return this.invertCommand(x);
+        }.bind(this));
         cmdcop.commands.reverse();
         
         return cmdcop;

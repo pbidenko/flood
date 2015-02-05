@@ -23,13 +23,12 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       this.$el.addClass('output-node');
 
-      var that = this;
       var extra = this.model.get('extra');
       var name = extra.name != undefined ? extra.name : "";
 
       this.inputText = this.$el.find(".text-input");
       this.inputText.val( name );
-      this.inputText.change( function(e){ that.nameChanged.call(that, e); e.stopPropagation(); });
+      this.inputText.change(function (e) { this.nameChanged(e); e.stopPropagation(); }.bind(this));
 
       return this;
 

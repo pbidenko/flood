@@ -38,54 +38,53 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'jqueryuislider'], f
       var value = extra.value != undefined ? extra.value : 0;
       if (value === undefined ) value = this.model.get('lastValue');
 
-      var that = this;
       this.slider.slider(
         { min: min, 
           max: max, 
           step: step, 
           value: value,
-          change: function(e, ui){  that.inputSet.call(that, e, ui); },
-          slide: function(e, ui){ that.inputChanged.call(that, e, ui); } 
+          change: function (e, ui) { this.inputSet(e, ui); }.bind(this),
+          slide: function (e, ui) { this.inputChanged(e, ui); }.bind(this)
         });
 
       this.currentValueInput = this.$el.find('.currentValue');
       this.currentValueInput.val( value );
-      this.currentValueInput.change( function(e){ that.valChanged.call(that, e); e.stopPropagation(); });
+      this.currentValueInput.change(function (e) { this.valChanged(e); e.stopPropagation(); }.bind(this));
 
       this.minInput = this.$el.find('.num-min');
       this.minInput.val(min);
-      this.minInput.change( function(e){ that.minChanged.call(that, e); e.stopPropagation(); });
+      this.minInput.change(function (e) { this.minChanged(e); e.stopPropagation(); }.bind(this));
 
       this.maxInput = this.$el.find('.num-max');
       this.maxInput.val(max);
-      this.maxInput.change( function(e){ that.maxChanged.call(that, e); e.stopPropagation(); });
+      this.maxInput.change(function (e) { this.maxChanged(e); e.stopPropagation(); }.bind(this));
 
       this.stepInput = this.$el.find('.num-step');
       this.stepInput.val(step);
-      this.stepInput.change( function(e){ that.stepChanged.call(that, e); e.stopPropagation(); });
+      this.stepInput.change(function (e) { this.stepChanged(e); e.stopPropagation(); }.bind(this));
 
       this.lockInput = this.$el.find('.lock-input');
       this.lockInput.val( lock );
-      this.lockInput.change( function(e){ that.lockChanged.call(that, e); e.stopPropagation(); });
+      this.lockInput.change(function (e) { this.lockChanged(e); e.stopPropagation(); }.bind(this));
 
       // adjust settings dropdown so that it stays open while editing
       // doesn't select the node when you're editing
       $('.dropdown.keep-open').on({
         "shown.bs.dropdown": function() {
-          that.selectable = false;
-          that.model.set('selected', false);
-          $(this).data('closable', false);
-        },
+          this.selectable = false;
+          this.model.set('selected', false);
+          $('.dropdown.keep-open').data('closable', false);
+        }.bind(this),
         "mouseleave": function() {
-          $(this).data('closable', true);
+            $('.dropdown.keep-open').data('closable', true);
         },
         "click": function() {
-          $(this).data('closable', false);
+            $('.dropdown.keep-open').data('closable', false);
         },
         "hide.bs.dropdown": function() {
-          if ( $(this).data('closable') ) that.selectable = true;
-          return $(this).data('closable');
-        }
+            if ($('.dropdown.keep-open').data('closable')) this.selectable = true;
+            return $('.dropdown.keep-open').data('closable');
+        }.bind(this)
       });
 
       // this.rendered = true;

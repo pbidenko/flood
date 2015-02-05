@@ -273,12 +273,11 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
       this.getPorts( isOutput )[portIndex].push(connection);
 
       // listen for deletion or update of the connection
-      var that = this;
       this.listenTo( connection, 'remove', (function(){
         return function(){
-          that.disconnectPort( portIndex, connection, isOutput );
-        };
-      })());
+          this.disconnectPort( portIndex, connection, isOutput );
+        }.bind(this);
+      }.bind(this))());
 
       this.trigger('connection', portIndex, isOutput, connection);
       this.trigger('change');

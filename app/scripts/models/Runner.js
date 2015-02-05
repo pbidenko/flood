@@ -52,10 +52,9 @@ define(['backbone'], function (Backbone) {
 
             var wsc = this.workspace.toJSON();
 
-            var that = this;
             this.workspace.get('nodes').each(function (x) {
-                that.watchNodeEvents.call(that, x);
-            });
+                this.watchNodeEvents(x);
+            }.bind(this));
 
             wsc.kind = "setWorkspaceContents";
             this.post(wsc);
@@ -210,10 +209,9 @@ define(['backbone'], function (Backbone) {
             var c = workspace.toJSON();
             c.kind = "addDefinition";
 
-            var that = this;
             workspace.get('nodes').each(function (x) {
-                that.watchNodeEvents.call(that, x);
-            });
+                this.watchNodeEvents(x);
+            }.bind(this));
 
             this.listenTo(workspace.get('connections'), 'add', function (x) {
                 this.addConnection(x);
