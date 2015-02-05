@@ -247,6 +247,11 @@ require.config({
         BooleanView: 'views/NodeViews/BooleanView',
         ListView: 'views/NodeViews/List',
 
+        // base views
+        BooleanBase: 'views/baseNodeViews/BooleanBase',
+        StringBase: 'views/baseNodeViews/StringBase',
+        NumberBase: 'views/baseNodeViews/NumberBase',
+
         OrbitControls: 'lib/OrbitControls',
         Viewport: 'lib/Viewport',
         FLOODCSG: 'lib/flood/flood_csg',
