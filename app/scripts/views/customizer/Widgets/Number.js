@@ -1,169 +1,56 @@
-define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'jqueryuislider'], function(Backbone, _, $, BaseWidgetView) {
+define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'NumberBase', 'jqueryuislider'],
+    function (Backbone, _, $, BaseWidgetView, NumberBase) {
 
-  return BaseWidgetView.extend({
+    return BaseWidgetView.extend(NumberBase).extend({
 
-    template: _.template( $('#widget-number-template').html() ),
+        template: _.template($('#widget-number-template').html()),
 
-    initialize: function(args) {
+        initialize: function (args) {
 
-        BaseWidgetView.prototype.initialize.apply(this, arguments);
-        this.rendered = false;
+            BaseWidgetView.prototype.initialize.apply(this, arguments);
 
-        this.listenTo(this.model, 'change:extra', function () {
+            this.listenTo(this.model, 'change:extra', this.extraChanged);
+        },
 
-            var ex = this.model.get('extra');
+        render: function () {
 
-            this.silentSyncUI(ex);
+            BaseWidgetView.prototype.render.apply(this, arguments);
 
-            this.model.trigger('update-node');
-            this.model.trigger('requestRun');
-        });
-    },
- 
-    render: function() {
-      
-      BaseWidgetView.prototype.render.apply(this, arguments);
+            this.baseRender();
 
-      if (this.rendered) return this;
+            return this;
+        },
 
-      // make the slider
-      this.slider = this.$el.find('.slider');
-      if (!this.slider) return;
+        inputSet: function () {
 
-      var extra = this.model.get('extra');
-      var min = extra.min != undefined ? extra.min : -150;
-      var max = extra.max != undefined ? extra.max : 150;
-      var step = extra.step != undefined ? extra.step : 0.1;
-      var value = extra.value != undefined ? extra.value : 0;
-      if (value === undefined ) value = this.model.get('lastValue');
+            if (this.silent) return;
 
-      this.slider.slider(
-        { min: min, 
-          max: max, 
-          step: step, 
-          value: value,
-          change: this.inputSet.bind(this),
-          slide: this.inputChanged.bind(this)
-        });
+            var newValue = {
+                value: this.slider.slider("option", "value"),
+                min: this.slider.slider("option", "min"),
+                step: this.slider.slider("option", "step"),
+                max: this.slider.slider("option", "max")
+            };
 
-      // this.currentValueInput = this.$el.find('.currentValue');
-      // this.currentValueInput.html( value );
+            var cmd = { property: 'extra',
+                _id: this.model.get('_id'),
+                newValue: newValue
+            };
 
-      this.currentValueInput = this.$el.find('.currentValue');
-      this.currentValueInput.val( value );
-      this.currentValueInput.change(function (e) { this.valChanged(e); e.stopPropagation(); }.bind(this));
+            this.model.trigger('request-set-node-prop', cmd);
+        },
 
-      this.minInput = this.$el.find('.num-min');
-      this.minInput.val(min);
-      this.minInput.change(function (e) { this.minChanged(e); e.stopPropagation(); }.bind(this));
+        silentSyncUI: function (data) {
 
-      this.maxInput = this.$el.find('.num-max');
-      this.maxInput.val(max);
-      this.maxInput.change(function (e) { this.maxChanged(e); e.stopPropagation(); }.bind(this));
+            this.silent = true;
+            this.currentValueInput.val(data.value);
+            this.setSliderValue(data.value);
+            this.minInput.html(data.min);
+            this.maxInput.html(data.max);
+            this.stepInput.html(data.step);
+            this.silent = false;
+        }
 
-      this.stepInput = this.$el.find('.num-step');
-      this.stepInput.val(step);
-      this.stepInput.change(function (e) { this.stepChanged(e); e.stopPropagation(); }.bind(this));
-
-      // adjust settings dropdown so that it stays open while editing
-      // doesn't select the node when you're editing
-      this.$el.find('.dropdown.keep-open').on({
-        "shown.bs.dropdown": function() {
-            this.selectable = false;
-            this.model.set('selected', false);
-            this.$el.find('.dropdown.keep-open').data('closable', false);
-        }.bind(this),
-        "mouseleave": function() {
-            this.$el.find('.dropdown.keep-open').data('closable', true);
-        }.bind(this),
-        "click": function() {
-            this.$el.find('.dropdown.keep-open').data('closable', false);
-        }.bind(this),
-        "hide.bs.dropdown": function() {
-            if (this.$el.find('.dropdown.keep-open').data('closable')) 
-	        this.selectable = true;
-		
-            return this.$el.find('.dropdown.keep-open').data('closable');
-        }.bind(this)
-      });
-
-      // this.rendered = true;
-
-      return this;
-
-    },
-
-    silentSyncUI: function(data){
-
-      this.silent = true;
-      this.currentValueInput.val( data.value );
-      this.setSliderValue( data.value );
-      this.minInput.html( data.min );
-      this.maxInput.html( data.max );
-      this.stepInput.html( data.step );
-      this.silent = false;
-
-    },
-
-    currentValue: function(){
-      return this.slider.slider("option", "value");
-    },
-
-    setSliderValue: function(val){
-      return this.slider.slider("option", "value", val);
-    },
-
-    valChanged: function(val){
-      var val = parseFloat( this.currentValueInput.val() );
-      if (isNaN(val)) return;
-      return this.setSliderValue( val );
-    },
-
-    minChanged: function(e, u){
-      var val = parseFloat( this.minInput.val() );
-      if (isNaN(val)) return;
-      if (this.currentValue < val) this.setSliderValue(val);
-      this.slider.slider("option", "min", val);
-    },
-
-    maxChanged: function(e){
-      var val = parseFloat( this.maxInput.val() );
-      if (isNaN(val)) return;
-      if (this.currentValue > val) this.setSliderValue(val);
-      this.slider.slider("option", "max", val);
-    },
-
-    stepChanged: function(e){
-      var val = parseFloat( this.stepInput.val() );
-      if (isNaN(val)) return;
-      this.slider.slider("option", "step", val);
-    },
-
-    inputChanged: function(e,ui) {
-
-      var val = ui.value;
-      this.$el.find('.currentValue').html(val);
-
-    },
-
-    inputSet: function(e,ui) {
-
-        if (this.silent) return;
-
-        var newValue = { value: this.slider.slider("option", "value"),
-            min: this.slider.slider("option", "min"),
-            step: this.slider.slider("option", "step"),
-            max: this.slider.slider("option", "max")
-        };
-
-        var cmd = { property: 'extra',
-            _id: this.model.get('_id'),
-            newValue: newValue
-        };
-
-        this.model.trigger('request-set-node-prop', cmd);
-    }
-
-  });
+    });
 
 });
