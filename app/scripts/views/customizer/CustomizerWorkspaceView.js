@@ -1,5 +1,5 @@
-define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView', 'CodeBlockWidgetView', 'StringWidgetView', 'BooleanWidgetView'], 
-  function(Backbone, BaseWidgetView, GeometryWidgetView, NumberWidgetView, CodeBlockWidgetView, StringWidgetView, BooleanWidgetView) {
+define(['backbone', 'BaseWidgetView', 'NumberWidgetView', 'CodeBlockWidgetView', 'StringWidgetView', 'BooleanWidgetView'], 
+  function(Backbone, BaseWidgetView, NumberWidgetView, CodeBlockWidgetView, StringWidgetView, BooleanWidgetView) {
 
   return Backbone.View.extend({
 
@@ -26,7 +26,7 @@ define(['backbone', 'BaseWidgetView', 'GeometryWidgetView', 'NumberWidgetView', 
 
       if (x.get('extra') != undefined && x.get('extra').lock) return;
 
-      var widgetView = GeometryWidgetView;
+      var widgetView = BaseWidgetView;
 
       if (x.get('typeName') in this.map){
         widgetView = this.map[x.get('typeName')];

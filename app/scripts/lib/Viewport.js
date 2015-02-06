@@ -103,9 +103,8 @@ define(['backbone', 'Three', 'OrbitControls'], function (Backbone, THREE) {
 
         this.scene = null;
 
-        this.init = function(){
+        this.init = function(container){
 
-            container = document.getElementById("viewer");
             $container = $(container);
 
             camera = new THREE.PerspectiveCamera(30, $container.width() / $container.height(), 1, 10000);

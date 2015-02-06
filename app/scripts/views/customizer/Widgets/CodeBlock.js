@@ -1,12 +1,12 @@
-define(['backbone', 'GeometryWidgetView'], function (Backbone, GeometryWidgetView) {
+define(['backbone', 'BaseWidgetView'], function (Backbone, BaseWidgetView) {
 
-    return GeometryWidgetView.extend({
+    return BaseWidgetView.extend({
 
         template: _.template($('#widget-code-block-template').html()),
 
         initialize: function (args) {
 
-            GeometryWidgetView.prototype.initialize.apply(this, arguments);
+            BaseWidgetView.prototype.initialize.apply(this, arguments);
             this.listenTo(this.model, 'change:extra', this.onChangedExtra);
         },
 
@@ -18,7 +18,7 @@ define(['backbone', 'GeometryWidgetView'], function (Backbone, GeometryWidgetVie
 
         render: function () {
 
-            GeometryWidgetView.prototype.render.apply(this, arguments);
+            BaseWidgetView.prototype.render.apply(this, arguments);
 
             this.input = this.$el.find('.widget-code-block-input');
 

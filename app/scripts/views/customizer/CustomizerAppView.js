@@ -22,14 +22,30 @@ define(['backbone', 'CustomizerHeaderView', 'CustomizerWorkspaceView', 'ThreeVie
 
     render: _.once(function() {
 
-      new ThreeViewer({app: this.model});
+      this.threeViewer = new ThreeViewer({container: document.getElementById("customizer-viewer")});
+      this.listenTo(this.model, 'geometry-data-received:event', this.updateNodeGeometry);
+      this.listenTo(this.model.get('workspaces'), 'geometryUpdated', this.updateNodeGeometry);
 
       (new CustomizerHeader({model: this.model.getCurrentWorkspace() })).render();
       (new CustomizerWorkspaceView({model: this.model.getCurrentWorkspace() })).render();
 
       return this;
 
-    })
+    }),
+
+    updateNodeGeometry: function(e){
+      var id = e.geometryData.nodeId,
+          visible = false,
+          selected = false;
+      this.model.getCurrentWorkspace().get('nodes').forEach(function (node) {
+        if (node.get('_id') === id) {
+          visible = node.get('visible');
+          selected = node.get('selected');
+        }
+      });
+
+      this.threeViewer.updateNodeGeometry(e, visible, selected);
+    }
 
   });
 });

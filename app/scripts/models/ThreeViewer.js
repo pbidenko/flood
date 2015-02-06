@@ -1,147 +1,44 @@
 define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Backbone, Viewport, staticHelpers, GeometryExport) {
 
-    var colors = {
-        selected: 0x00FFFF,
-        notSelected: 0x999999,
-        notSelectedLine: 0x000000
-    };
+    var partMat = new THREE.PointCloudMaterial({ color: 0x999999, size: 5, sizeAttenuation: false, side: THREE.DoubleSide }),
+        meshMat = new THREE.MeshPhongMaterial({ color: 0x999999, side: THREE.DoubleSide }),
+        lineMat = new THREE.LineBasicMaterial({ color: 0x000000 }),
+        partMatSelected = new THREE.PointCloudMaterial({ color: 0x00FFFF, size: 5, sizeAttenuation: false, side: THREE.DoubleSide });
+        meshMatSelected = new THREE.MeshPhongMaterial({ color: 0x00FFFF, side: THREE.DoubleSide });
+        lineMatSelected = new THREE.LineBasicMaterial({ color: 0x00FFFF });
 
-    function colorSelected(threeGeom, selected) {
+    function getGraphicData(geometryData) {
 
-        var partMat,
-            meshMat,
-            lineMat;
-
-        if (selected) {
-            partMat = new THREE.PointCloudMaterial({ color: colors.selected, size: 5, sizeAttenuation: false, side: THREE.DoubleSide });
-            meshMat = new THREE.MeshPhongMaterial({ color: colors.selected, side: THREE.DoubleSide });
-            lineMat = new THREE.LineBasicMaterial({ color: colors.selected });
-        }
-        else {
-            partMat = new THREE.PointCloudMaterial({ color: colors.notSelected, size: 5, sizeAttenuation: false, side: THREE.DoubleSide });
-            meshMat = new THREE.MeshPhongMaterial({ color: colors.notSelected, side: THREE.DoubleSide });
-            lineMat = new THREE.LineBasicMaterial({ color: colors.notSelectedLine });
-        }
-
-        setMaterials(threeGeom, partMat, meshMat, lineMat);
-    };
-
-    function setMaterials(threeGeom, partMat, meshMat, lineMat) {
-
-        threeGeom.traverse(function (ele) {
-            if (ele instanceof THREE.Mesh) {
-                ele.material = meshMat;
-            } else if (ele instanceof THREE.Line) {
-                ele.material = lineMat;
-            } else {
-                ele.material = partMat;
-            }
-        });
-    };
-
-    function nodeSelected(e) {
-        if (!this.idMap[e.id])
-            return;
-
-        colorSelected(this.idMap[e.id], e.selected);
-    };
-
-    function nodeVisible(e) {
-        if (!this.idMap[e.id])
-            return;
-
-        if (e.visible)
-            this.viewPort.scene.add(this.idMap[e.id]);
-        else
-            this.viewPort.scene.remove(this.idMap[e.id]);
-    };
-
-    function nodeRemove(e) {
-        if (!this.idMap[e.id])
-            return;
-
-        this.viewPort.scene.remove(this.idMap[e.id]);
-        delete this.idMap[e.id];
-    };
-
-    function changeWorkspace(e) {
-        e.ids.forEach(function (node) {
-            if (!this.idMap[node])
-                return;
-
-            if (e.visible)
-                this.viewPort.scene.add(this.idMap[node]);
-            else
-                this.viewPort.scene.remove(this.idMap[node]);
-        }.bind(this));
-    };
-
-    function clearNodeGeometry(e){
-        if (!this.idMap[e.id])
-            return;
-
-        this.viewPort.scene.remove(this.idMap[e.id]);
-        delete this.idMap[e.id];
-    };
-
-    function updateNodeGeometry(param) {
-        var id = param.geometryData.nodeId,
-            threeGeom = this.idMap[id],
-            visible = false,
-            selected = false,
-            threeTemp = new THREE.Object3D(),
-            graphicData,
+        var graphicData = {
+                pointVertices: [],
+                lineStripVertices: [],
+                lineStripCounts: [],
+                triangleVertices: [],
+                triangleNormals: []
+            },
             geometry,
             vertices,
             normals,
             i,
             j;
 
-        this.app.getCurrentWorkspace().get('nodes').forEach(function (node) {
-            if (node.get('_id') === id) {
-                visible = node.get('visible');
-                selected = node.get('selected');
-            }
-        }.bind(this));
-
         // Dynamo geometry
-        if (param.geometryData.graphicPrimitivesData) {
-
-            graphicData = param.geometryData.graphicPrimitivesData;
+        if (geometryData.graphicPrimitivesData) {
+            graphicData = geometryData.graphicPrimitivesData;
             graphicData.pointVertices = staticHelpers.getFloatArray(graphicData.pointVertices);
             graphicData.lineStripVertices = staticHelpers.getFloatArray(graphicData.lineStripVertices);
             graphicData.lineStripCounts = staticHelpers.getIntArray(graphicData.lineStripCounts);
             graphicData.triangleVertices = staticHelpers.getFloatArray(graphicData.triangleVertices);
             graphicData.triangleNormals = staticHelpers.getFloatArray(graphicData.triangleNormals);
-
-
-            draw(threeTemp, graphicData, selected);
-
-            if (threeGeom) {
-                this.viewPort.scene.remove(threeGeom);
-            }
-
-            threeGeom = threeTemp;
-            this.idMap[id] = threeGeom;
-
-            if (visible)
-                this.viewPort.scene.add(threeGeom);
         }
         // Flood geometry
-        else if(param.geometryData.geometry){
+        else if(geometryData.geometry) {
+            geometry = geometryData.geometry;
 
-            geometry = param.geometryData.geometry;
-
-            graphicData = {};
-            graphicData.pointVertices = [];
-            graphicData.lineStripVertices = [];
-            graphicData.lineStripCounts = [];
-            graphicData.triangleVertices = [];
-            graphicData.triangleNormals = [];
-
-            if(geometry.faces){
+            if(geometry.faces) {
                 vertices = [];
                 normals = [];
+
                 for(i = 0; i < geometry.faces.length; i++){
                     for(j = 0; j < 3; j++){
                         vertices.push( geometry.vertices[geometry.faces[i][j]][0],
@@ -159,33 +56,15 @@ define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Ba
             else if(geometry.vertices){
                 graphicData.pointVertices = new Float32Array(graphicData.pointVertices.concat.apply(graphicData.pointVertices, geometry.vertices)); 
             }
-
-            draw(threeTemp, graphicData, selected);
-
-            if (threeGeom) {
-                this.viewPort.scene.remove(threeGeom);
-            }
-
-            threeGeom = threeTemp;
-            this.idMap[id] = threeGeom;
-
-            if (visible)
-                this.viewPort.scene.add(threeGeom);
         }
 
-        this.pendingRequestsCount--;
-
-        if(this.pendingRequestsCount === 0)
-            this.app.trigger('hide-progress');
+        return graphicData;
     };
 
     function draw(geom, list, selected) {
 
         var color,
             colorLine,
-            meshMat,
-            partMat,
-            lineMat,
             mesh,
             geometry,
             count,
@@ -193,18 +72,6 @@ define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Ba
             positions,
             index = 0,
             pos = 0;
-
-        if (selected) {
-            color = colorLine = colors.selected;
-        }
-        else {
-            color = colors.notSelected;
-            colorLine = colors.notSelectedLine;
-        }
-
-        meshMat = new THREE.MeshPhongMaterial({ color: color, side: THREE.DoubleSide });
-        partMat = new THREE.PointCloudMaterial({ color: color, size: 5, sizeAttenuation: false, side: THREE.DoubleSide });
-        lineMat = new THREE.LineBasicMaterial({ color: colorLine });
 
         geometry = new THREE.BufferGeometry();
 
@@ -232,13 +99,13 @@ define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Ba
                 geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
             }
 
-            geom.add(new THREE.Line(geometry, lineMat, THREE.LinePieces));
+            geom.add(new THREE.Line(geometry, selected ? lineMatSelected : lineMat, THREE.LinePieces));
         }
 
         if (list.pointVertices.length) {
 
             geometry.addAttribute('position', new THREE.BufferAttribute(list.pointVertices, 3));
-            mesh = new THREE.PointCloud(geometry, partMat);
+            mesh = new THREE.PointCloud(geometry, selected ? partMatSelected : partMat);
 
             geom.add(mesh);
         }
@@ -247,59 +114,95 @@ define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Ba
 
             geometry.addAttribute('position', new THREE.BufferAttribute(list.triangleVertices, 3));
             geometry.addAttribute('normal', new THREE.BufferAttribute(list.triangleNormals, 3));
-            mesh = new THREE.Mesh(geometry, meshMat);
+            mesh = new THREE.Mesh(geometry, selected ? meshMatSelected : meshMat);
 
             geom.add(mesh);
         }
     };
 
-    function onRequestGeometry(){
-        if(this.pendingRequestsCount === 0)
-            this.app.trigger('show-progress');
-        this.pendingRequestsCount++;
-    };
-
-    function zoomToFit(){
-        this.viewPort.zoomToFit();
-    };
-
-    function dollyOut(){
-        this.viewPort.dollyOut();
-    };
-
-    function dollyIn(){
-        this.viewPort.dollyIn();
-    };
-
-    function exportSTL(e){
-        GeometryExport.toSTL(this.viewPort.scene, e.name);
-    };
 
     return Backbone.Model.extend({
 
         initialize: function (args, options) {
             this.viewPort = new Viewport();
-            this.viewPort.init();
 
-            this.app = args.app;
+            this.viewPort.init(args.container);
+
             this.idMap = {};
+        }, 
 
-            this.pendingRequestsCount = 0;
+        zoomToFit: function(){
+            this.viewPort.zoomToFit();
+        },
 
-            this.listenTo(this.app, 'zoomToFit', zoomToFit.bind(this));
-            this.listenTo(this.app, 'dollyOut', dollyOut.bind(this));
-            this.listenTo(this.app, 'dollyIn', dollyIn.bind(this));
-            this.listenTo(this.app, 'requestGeometry', onRequestGeometry.bind(this));
-            this.listenTo(this.app, 'geometry-data-received:event', updateNodeGeometry.bind(this));
-            this.listenTo(this.app.get('workspaces'), 'geometryUpdated', updateNodeGeometry.bind(this));
-            this.listenTo(this.app.get('workspaces'), 'nodeSelected', nodeSelected.bind(this));
-            this.listenTo(this.app.get('workspaces'), 'nodeVisible', nodeVisible.bind(this));
-            this.listenTo(this.app.get('workspaces'), 'nodeRemove', nodeRemove.bind(this));
-            this.listenTo(this.app.get('workspaces'), 'changeWorkspace', changeWorkspace.bind(this));
-            this.listenTo(this.app.get('workspaces'), 'clearNodeGeometry', clearNodeGeometry.bind(this));
-            this.listenTo(this.app.get('workspaces'), 'exportSTL', exportSTL.bind(this));
+        dollyOut: function(){
+            this.viewPort.dollyOut();
+        },
 
-            
+        dollyIn: function(){
+            this.viewPort.dollyIn();
+        },
+
+        exportSTL: function(e){
+            GeometryExport.toSTL(this.viewPort.scene, e.name);
+        },
+
+        nodeSelected: function(e) {
+            if (!this.idMap[e.id])
+                return;
+
+            this.idMap[e.id].traverse(function (ele) {
+                if (ele instanceof THREE.Mesh) {
+                    ele.material = e.selected ? meshMatSelected : meshMat;
+                } else if (ele instanceof THREE.Line) {
+                    ele.material = e.selected ? lineMatSelected : lineMat;
+                } else {
+                    ele.material = e.selected ? partMatSelected : partMat;
+                }
+            });
+        },
+
+        nodeVisible: function(e) {
+            if (!this.idMap[e.id])
+                return;
+
+            this.idMap[node].traverse(function(el) { el.visible = e.visible; });
+        },
+
+        changeWorkspace: function(e) {
+            e.ids.forEach(function (node) {
+                if (!this.idMap[node])
+                    return;
+
+                this.idMap[node].traverse(function(el) { el.visible = e.visible; });
+            }.bind(this));
+        },
+
+        clearNodeGeometry: function(e){
+            if (!this.idMap[e.id])
+                return;
+
+            this.viewPort.scene.remove(this.idMap[e.id]);
+            delete this.idMap[e.id];
+        },
+
+        updateNodeGeometry: function(param, visible, selected) {
+            var id = param.geometryData.nodeId,
+                threeGeom = this.idMap[id],
+                threeTemp = new THREE.Object3D(),
+                graphicData;
+
+            graphicData = getGraphicData(param.geometryData);
+            draw(threeTemp, graphicData, selected);
+
+            if (threeGeom) {
+                this.viewPort.scene.remove(threeGeom);
+            }
+            threeGeom = threeTemp;
+            this.idMap[id] = threeGeom;
+
+            if (visible)
+                this.viewPort.scene.add(threeGeom);
         }
     });
 

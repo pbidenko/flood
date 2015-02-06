@@ -44,12 +44,22 @@ define([  'backbone',
         this.listenTo(this.model, 'change:showingHelp', this.viewHelp);
         this.listenTo(this.model, 'change:showingBrowser', this.viewBrowser);
         this.listenTo(this.model, 'hide-search', this.hideSearch);
-        this.listenTo(this.model, 'show-progress', this.showProgress);
-        this.listenTo(this.model, 'hide-progress', this.hideProgress);
 
         this.listenTo(this.model.login, 'change:isLoggedIn', this.initBrowserView);
         this.listenTo(this.model.login, 'change:isLoggedIn', this.showHelpOnFirstExperience);
         this.listenTo(this.model.login, 'change:isFirstExperience', this.showHelpOnFirstExperience);
+
+        this.pendingRequestsCount = 0;
+        this.listenTo(this.model, 'requestGeometry', function(){
+            if(this.pendingRequestsCount === 0)
+                this.showProgress();
+            this.pendingRequestsCount++;
+        }.bind(this));
+        this.listenTo(this.model, 'geometry-data-received:event', function(){
+            this.pendingRequestsCount--;
+            if(this.pendingRequestsCount === 0)
+                this.hideProgress();
+        }.bind(this));
 
         $(document).bind('keydown', $.proxy(this.keydownHandler, this));
 
@@ -63,8 +73,17 @@ define([  'backbone',
         //won't generate 'change' event
         this.render();
 
-        // ThreeViewer does not expose any public method therefore just call init
-        new ThreeViewer({app: this.model});
+        this.threeViewer = new ThreeViewer({container: document.getElementById("viewer")});
+
+        this.listenTo(this.model, 'geometry-data-received:event', this.updateNodeGeometry);
+        this.listenTo(this.model.get('workspaces'), 'geometryUpdated', this.updateNodeGeometry);
+        this.listenTo(this.model.get('workspaces'), 'workspaceRemove', this.removeNodes);
+        this.threeViewer.listenTo(this.model.get('workspaces'), 'nodeSelected', this.threeViewer.nodeSelected);
+        this.threeViewer.listenTo(this.model.get('workspaces'), 'nodeVisible', this.threeViewer.nodeVisible);
+        this.threeViewer.listenTo(this.model.get('workspaces'), 'nodeRemove', this.threeViewer.clearNodeGeometry);
+        this.threeViewer.listenTo(this.model.get('workspaces'), 'changeWorkspace', this.threeViewer.changeWorkspace);
+        this.threeViewer.listenTo(this.model.get('workspaces'), 'clearNodeGeometry', this.threeViewer.clearNodeGeometry);
+        this.threeViewer.listenTo(this.model.get('workspaces'), 'exportSTL', this.threeViewer.exportSTL);
     },
 
     events: {
@@ -318,7 +337,7 @@ define([  'backbone',
 
     zoomresetClick: function(){
       if ( this.lookingAtViewer ){
-        this.model.trigger('zoomToFit');
+        this.threeViewer.zoomToFit();
       } else {
         this.currentWorkspaceView.zoomAll();
       }
@@ -326,7 +345,7 @@ define([  'backbone',
 
     zoominClick: function(){
       if ( this.lookingAtViewer ){
-        this.model.trigger('dollyOut');
+        this.threeViewer.dollyOut();
       } else {
         this.getCurrentWorkspace().zoomIn();
       }
@@ -334,7 +353,7 @@ define([  'backbone',
 
     zoomoutClick: function(){
       if ( this.lookingAtViewer ){
-        this.model.trigger('dollyIn');
+        this.threeViewer.dollyIn();
       } else {
         this.getCurrentWorkspace().zoomOut();
       }
@@ -576,6 +595,26 @@ define([  'backbone',
 
     hideProgress: function(){
       this.$el.find('.busy-indicator').hide();
+    },
+
+    updateNodeGeometry: function(e){
+      var id = e.geometryData.nodeId,
+          visible = false,
+          selected = false;
+      this.model.getCurrentWorkspace().get('nodes').forEach(function (node) {
+        if (node.get('_id') === id) {
+          visible = node.get('visible');
+          selected = node.get('selected');
+        }
+      });
+
+      this.threeViewer.updateNodeGeometry(e, visible, selected);
+    },
+
+    removeNodes: function(e){
+      e.get('nodes').forEach(function(n){
+        this.threeViewer.clearNodeGeometry(n);
+      }.bind(this));
     }
 
   });

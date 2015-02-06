@@ -103,6 +103,7 @@ define(['backbone'], function(Backbone) {
         }
         else {
             // clear Home workspace
+            this.model.trigger('workspaceRemove', this.model);
             $('#new-home-workspace').click();
         }
 
