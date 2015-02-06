@@ -81,12 +81,17 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'FLOOD'], function(B
 
       	ex.script = this.input.val();
 
-      	this.model.workspace.setNodeProperty({property: "extra", _id: this.model.get('_id'), newValue: ex });
+      	var cmd = { property: "extra",
+            _id: that.model.get('_id'),
+            newValue: ex
+        };
+
+        this.model.trigger('request-set-node-prop', cmd);
       	this.selectable = true; 
       }.bind(this));
 
-      this.$el.find('.add-input').click(function () { this.addInput(); }.bind(this));
-      this.$el.find('.remove-input').click(function () { this.removeInput(); }.bind(this));
+      this.$el.find('.add-input').click(this.addInput.bind(this));
+      this.$el.find('.remove-input').click(this.removeInput.bind(this));
 
       return this;
 

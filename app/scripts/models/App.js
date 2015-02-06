@@ -38,6 +38,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.context = new Storage({ baseUrl: settings.storageUrl });
 
       this.listenTo(this, 'code-block-node-updated:event', this.updateCodeBlockNode);
+      this.listenTo(this, 'array-items-received:event', this.processArrayItems);
     },
 
     workspaceIdsAwaitingParse : [],
@@ -124,6 +125,13 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
             this.get('workspaces').where({ isCustomNode: false });
         if (workspaces.length) {
             workspaces[0].updateCodeBlockNode(data);
+        }
+    },
+
+    processArrayItems: function(data) {
+        var workspaces = this.get('workspaces').where({ isCustomNode: false });
+        if (workspaces.length) {
+            workspaces[0].appendArrayItems(data);
         }
     },
 

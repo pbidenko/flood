@@ -14,6 +14,8 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
           , inputConnections: []
           , outputConnections: []
           , selected: true
+          , isArray: false
+          , arrayItems: null
           , lastValue: null
           , failureMessage: null
           , visible: true
@@ -88,8 +90,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
             this.listenTo(this, 'connection', this.onConnectPort);
 
             this.listenTo(this, 'disconnection', this.onDisconnectPort);
-            this.workspace = vals.workspace;
-
+            
             this.listenTo(this, 'remove', this.onRemove);
 
             this.initializePorts();
@@ -127,9 +128,29 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
     updateValue: function (values) {
 
+      var isArray = false;
       if (values.data) {
-        this.set('lastValue', values.data);
+          var itemsNumber = parseInt(values.arrayItemsNumber);
+          if (!isNaN(itemsNumber)) {
+              this.set('arrayItemsNumber', itemsNumber);
+              isArray = true;
+              if (itemsNumber) {
+                  this.set('lastValue', 'List');
+              }
+              else {
+                  this.set('lastValue', 'Empty list');
+              }
+          }
+          else {
+              this.set('lastValue', values.data);
+          }
       }
+
+      this.set('isArray', isArray);
+      // reset previous items
+      this.set('arrayItems', []);
+      this.trigger('array-reset');
+      this.trigger('requestRender');
 
       if (values.state === 'Error' || values.state === 'Warning') {
         this.trigger('evalFailed', values.stateMessage);
@@ -139,6 +160,22 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         this.trigger('evalBegin');
       }
 
+    },
+
+    appendArrayItems: function (param) {
+        // -1 means it's not an array
+        if (param.indexFrom === -1) {
+            this.set('isArray', false);
+            // reset previous items
+            this.set('arrayItems', []);
+        }
+        else {
+            var currentItems = this.get('arrayItems') || [];
+            // insert received array at specified index
+            this.set('arrayItems', currentItems.slice(0, param.indexFrom).concat(param.items));
+        }
+
+        this.trigger('requestRender');
     },
 
     onRemove: function(){

@@ -1,9 +1,11 @@
 ﻿define(['backbone', 'ComputationResponse', 'ContentResponse', 'LibraryItemsListResponse',
         'SavedFileResponse', 'NodeCreationDataResponse', 'GeometryDataResponse', 'CodeBlockDataResponse',
-        'UpdateProxyNodesResponse', 'WorkspacePathResponse', 'HasUnsavedChangesResponse', 'settings' ],
+        'UpdateProxyNodesResponse', 'WorkspacePathResponse',
+        'HasUnsavedChangesResponse', 'ArrayItemsDataResponse', 'settings' ],
     function (Backbone, ComputationResponse, ContentResponse, LibraryItemsListResponse,
               SavedFileResponse, NodeCreationDataResponse, GeometryDataResponse, CodeBlockDataResponse,
-              UpdateProxyNodesResponse, WorkspacePathResponse, HasUnsavedChangesResponse, globalSettings ) {
+              UpdateProxyNodesResponse, WorkspacePathResponse,
+              HasUnsavedChangesResponse, ArrayItemsDataResponse, globalSettings ) {
     'use strict';
 
     //Use web socket as a singleton to avoid several connections
@@ -25,7 +27,8 @@
             'UpdateProxyNodesResponse' : UpdateProxyNodesResponse,
             'WorkspacePathResponse' : WorkspacePathResponse,
             'HasUnsavedChangesResponse' : HasUnsavedChangesResponse,
-            'CodeBlockDataResponse' : CodeBlockDataResponse
+            'CodeBlockDataResponse' : CodeBlockDataResponse,
+            'ArrayItemsDataResponse': ArrayItemsDataResponse
         },
         responseEventMap = {
             'ComputationResponse': 'computation-completed:event',
@@ -36,7 +39,8 @@
             'UpdateProxyNodesResponse': 'proxy-nodes-data-received:event',
             'WorkspacePathResponse': 'ws-path-received:event',
             'HasUnsavedChangesResponse': 'ws-unsaved-changes-presence-received:event',
-            'CodeBlockDataResponse': 'code-block-node-updated:event'
+            'CodeBlockDataResponse': 'code-block-node-updated:event',
+            'ArrayItemsDataResponse': 'array-items-received:event'
         },
         app;
 

@@ -541,6 +541,10 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
     },
 
     watchNodeViewEvents: function(nodeView) {
+        this.listenTo(nodeView, 'send-array-message', function(message) {
+            this.model.app.socket.send(JSON.stringify(message));
+        });
+
         this.listenTo(nodeView, 'end-port-conn', this.endPortConnection);
         this.listenTo(nodeView, 'update-connections', function() {
             this.cleanup().updateConnections();

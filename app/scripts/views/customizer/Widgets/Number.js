@@ -42,8 +42,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'jqueryuislider'],
           max: max, 
           step: step, 
           value: value,
-          change: function (e, ui) { this.inputSet(e, ui); }.bind(this),
-          slide: function (e, ui) { this.inputChanged( e, ui); }.bind(this)
+          change: this.inputSet.bind(this),
+          slide: this.inputChanged.bind(this)
         });
 
       // this.currentValueInput = this.$el.find('.currentValue');
@@ -67,21 +67,23 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'jqueryuislider'],
 
       // adjust settings dropdown so that it stays open while editing
       // doesn't select the node when you're editing
-      $('.dropdown.keep-open').on({
+      this.$el.find('.dropdown.keep-open').on({
         "shown.bs.dropdown": function() {
             this.selectable = false;
             this.model.set('selected', false);
-            $('.dropdown.keep-open').data('closable', false);
+            this.$el.find('.dropdown.keep-open').data('closable', false);
         }.bind(this),
         "mouseleave": function() {
-            $('.dropdown.keep-open').data('closable', true);
-        },
+            this.$el.find('.dropdown.keep-open').data('closable', true);
+        }.bind(this),
         "click": function() {
-            $('.dropdown.keep-open').data('closable', false);
-        },
+            this.$el.find('.dropdown.keep-open').data('closable', false);
+        }.bind(this),
         "hide.bs.dropdown": function() {
-            if ($('.dropdown.keep-open').data('closable')) this.selectable = true;
-            return $('.dropdown.keep-open').data('closable');
+            if (this.$el.find('.dropdown.keep-open').data('closable')) 
+	        this.selectable = true;
+		
+            return this.$el.find('.dropdown.keep-open').data('closable');
         }.bind(this)
       });
 

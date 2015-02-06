@@ -170,6 +170,7 @@ require.config({
         LibraryItemsListMessage: 'models/messages/LibraryItemsListMessage',
         SaveFileMessage: 'models/messages/SaveFileMessage',
         GeometryMessage: 'models/messages/GeometryMessage',
+        GetArrayItemsMessage: 'models/messages/GetArrayItemsMessage',
         UploadFileMessage: 'models/messages/UploadFileMessage',
         SetModelPositionMessage: 'models/messages/SetModelPositionMessage',
         HasUnsavedChangesMessage: 'models/messages/HasUnsavedChangesMessage',
@@ -186,6 +187,7 @@ require.config({
         WorkspacePathResponse: 'models/responses/WorkspacePathResponse',
         HasUnsavedChangesResponse: 'models/responses/HasUnsavedChangesResponse',
         CodeBlockDataResponse: 'models/responses/CodeBlockDataResponse',
+        ArrayItemsDataResponse: 'models/responses/ArrayItemsDataResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',

@@ -31,9 +31,7 @@ define(['backbone', 'FLOOD'],
 
       this.listenTo(this.app.get('workspaces'), 'add', this.resolveDependency);
 
-      depIds.forEach(function(x){
-        this.awaitOrResolveDependency(x);
-      }.bind(this));
+      depIds.forEach(this.awaitOrResolveDependency.bind(this));
     },
 
     cleanupDependencies: function(){

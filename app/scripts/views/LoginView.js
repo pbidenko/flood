@@ -18,7 +18,7 @@ define(['backbone'], function(Backbone) {
       this.app = atts.app;
       this.listenTo(this.model, 'loginViewRedraw change:failed change:failureMessage', this.render);
 
-      $('#login-button').click(function () { this.tabClick(); }.bind(this));
+      $('#login-button').click(this.tabClick.bind(this));
     },
 
     rendered : false,
