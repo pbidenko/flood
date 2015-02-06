@@ -13,9 +13,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], fun
         BaseNodeView.prototype.initialize.apply(this, arguments);
 
         this.listenTo(this.model, 'change:selected', this.colorSelected);
-        this.listenTo(this.model, 'change:visible', this.changeVisibility);
         this.listenTo(this.model, 'remove', this.onRemove);
-        this.listenTo(this.model.workspace, 'change:current', this.changeVisibility);
         this.listenTo(this.model, 'change:prettyLastValue', this.onEvalComplete);
         this.onEvalComplete();
     },
@@ -112,7 +110,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], fun
 
     // 3D move to node subclass
     onRemove: function() {
-        this.stopListening(this.model.workspace, 'change:current', this.changeVisibility);
+        this.stopListening();
         scene.remove(this.threeGeom);
         render();
     },
@@ -210,19 +208,19 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], fun
 
         this.threeGeom = threeTemp;
         scene.add( this.threeGeom );
-        this.changeVisibility();
+        this.model.trigger('change:visible');
 
-      }, this );
+      } );
 
     }, 
 
     // creating this data may be quite slow, we'll need to be careful
-    drawChunked: function(geom, list, callback, that){
+    drawChunked: function(geom, list, callback){
 
       var i = 0;
       var tick = function() {
         var color, colorLine;
-        if (that.model.get('selected')){
+        if (this.model.get('selected')){
           color = colorLine = colors.selected;
         }
         else {
@@ -236,9 +234,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], fun
         var start = new Date().getTime();
         for (; i < list.length && (new Date().getTime()) - start < 50; i++) {
         
-          var g3  = that.toThreeGeom( list[i] );
-
-
+          var g3  = this.toThreeGeom( list[i] );
 
           switch (g3._floodType) {
             case 0:
@@ -258,22 +254,22 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'ThreeHelpers'], fun
           setTimeout(tick, 25);
         }
         else {
-          callback.call(that);
+          callback.call(this);
         }
 
-      };
+      }.bind(this);
 
       setTimeout(tick, 0);
 
     },
 
-    changeVisibility: function(){
+    changeVisibility: function(workspace){
 
       if ( !this.threeGeom ){
         return;
       }
         
-      if (!this.model.get('visible') || !this.model.workspace.get('current') )
+      if (!this.model.get('visible') || !workspace.get('current') )
       {
         scene.remove(this.threeGeom);
       } else if ( this.model.get('visible') )

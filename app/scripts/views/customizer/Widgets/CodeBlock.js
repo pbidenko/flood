@@ -7,13 +7,13 @@ define(['backbone', 'GeometryWidgetView'], function (Backbone, GeometryWidgetVie
         initialize: function (args) {
 
             GeometryWidgetView.prototype.initialize.apply(this, arguments);
-            this.model.on('change:extra', this.onChangedExtra, this);
+            this.listenTo(this.model, 'change:extra', this.onChangedExtra);
         },
 
         onChangedExtra: function () {
             this.render();
-            this.model.trigger('updateRunner');
-            this.model.workspace.run();
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         },
 
         render: function () {
@@ -31,7 +31,8 @@ define(['backbone', 'GeometryWidgetView'], function (Backbone, GeometryWidgetVie
 
                 ex.code = this.input[0].innerText;
 
-                this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
+                var cmd = { property: 'extra', _id: this.model.get('_id'), newValue: ex };
+                this.model.trigger('request-set-node-prop', cmd);
 
             }.bind(this));
 

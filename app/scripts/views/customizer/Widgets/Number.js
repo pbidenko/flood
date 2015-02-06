@@ -26,11 +26,18 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'NumberBase', 'jqu
             if (this.silent) return;
 
             var newValue = {
-                value: this.slider.slider("option", "value"), min: this.slider.slider("option", "min"),
-                step: this.slider.slider("option", "step"), max: this.slider.slider("option", "max")
+                value: this.slider.slider("option", "value"),
+                min: this.slider.slider("option", "min"),
+                step: this.slider.slider("option", "step"),
+                max: this.slider.slider("option", "max")
             };
 
-            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: newValue });
+            var cmd = { property: 'extra',
+                _id: this.model.get('_id'),
+                newValue: newValue
+            };
+
+            this.model.trigger('request-set-node-prop', cmd);
         },
 
         silentSyncUI: function (data) {

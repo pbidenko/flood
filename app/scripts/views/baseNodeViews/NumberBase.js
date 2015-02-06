@@ -8,8 +8,8 @@ define(['backbone', 'underscore', 'jquery'],
 
             this.silentSyncUI(ex);
 
-            this.model.trigger('updateRunner');
-            this.model.workspace.trigger('requestRun');
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         },
 
         currentValue: function () {

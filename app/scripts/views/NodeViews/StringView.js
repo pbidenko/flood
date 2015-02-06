@@ -39,7 +39,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'StringBase'],
 
             ex.lock = this.lockInput.is(':checked');
 
-            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
+            this.model.trigger('request-set-node-prop', { property: 'extra', _id: this.model.get('_id'), newValue: ex });
         },
 
         focusInput: function (e) {

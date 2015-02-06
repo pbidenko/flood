@@ -49,44 +49,43 @@ define(function() {
 
     };
 
-    this.done = function(){
+    this.done = function() {
 
-      var that = this;
-      var args = arguments;
+        var args = arguments;
 
-      // do work async
-      setTimeout(function(){
+        // do work async
+        setTimeout(function() {
 
-        if ( that.first && !that.first.redeemed ){
-          return that.first.done.apply( that.first, args );
-        }
+            if (this.first && !this.first.redeemed) {
+                return this.first.done.apply(this.first, args);
+            }
 
-        var res = that.f.apply(that, args);
-        that.redeemed = true;
+            var res = this.f.apply(this, args);
+            this.redeemed = true;
 
-        that.continueNext( res );
+            this.continueNext(res);
 
-      }, 0);
+        }.bind(this), 0);
 
-     };
+    };
 
-     this.continueNext = function(res){
+    this.continueNext = function(res) {
 
-     		if ( !shouldContinue ) return res;
+        if (!shouldContinue) return res;
 
         // imperative
-        if (that.next){
-        	return that.next.done.call(that.next, res);
+        if (this.next) {
+            return this.next.done.call(this.next, res);
         }
 
         // conditional
-        if (that.nextTrue){
-        	return res ? 
-        		that.nextTrue.done.call(that.nextTrue, res) : 
-        		that.nextFalse.done.call(that.nextFalse, res);
+        if (this.nextTrue) {
+            return res ?
+                this.nextTrue.done.call(this.nextTrue, res) :
+                this.nextFalse.done.call(this.nextFalse, res);
         }
 
-     }
+    }.bind(this);
 
   }
 
@@ -135,10 +134,9 @@ define(function() {
 
 		vars = typeof vars !== 'undefined' ? vars : [];
 		this.scope = {};
-		var that = this;
 		vars.forEach(function(val, i) {
-			that.scope[val] = args[i];
-		});
+			this.scope[val] = args[i];
+		}.bind(this));
 		outer = typeof outer !== 'undefined' ? outer : null;
 		this.outer = outer;
 
@@ -147,12 +145,11 @@ define(function() {
 		};
 
 		this.add_methods = function(object) {
-			var that = this;
 			Object.getOwnPropertyNames(object).forEach(function(ele){
 				if (typeof object[ele] === "function"){
-					that.scope[ele] = object[ele];
+					this.scope[ele] = object[ele];
 				}
-			});
+			}.bind(this));
 		};
 
 	};
@@ -207,8 +204,6 @@ define(function() {
 
 			env = typeof env !== 'undefined' ? env : this.global_env;
 
-			var that = this;
-
 			if ( typeof x === "string") {							// variable reference
 
 				return new Promise(function(){ return env.find(x)[x]; });
@@ -230,16 +225,16 @@ define(function() {
 			} else if (x[0] === "if") {								// (if test conseq alt)
 
 				var test = x[1], conseq = x[2], alt = x[3];
-		    // return this.eval( (this.eval(test, env) ? conseq : alt), env );
+				// return this.eval( (this.eval(test, env) ? conseq : alt), env );
 
-		    return that.async(test, env).test( that.async(conseq, env), that.async(alt, env) );
+				return this.async(test, env).test( this.async(conseq, env), this.async(alt, env) );
 
 			} else if (x[0] === "set!") {							// (set! var exp)
 
 				var vari = x[1], exp = x[2];
 				// env.find(vari)[vari] = this.eval(exp); 
 
-				return that.async( exp, env ).then(function(val){
+				return this.async( exp, env ).then(function(val){
 					env.find(vari)[vari] = val;
 				});
 
@@ -247,7 +242,7 @@ define(function() {
 
 				var vari = x[1], exp = x[2];
 
-				return that.async( exp, env ).then(function(val){
+				return this.async( exp, env ).then(function(val){
 					env.scope[vari] = val;
 				});
 
@@ -260,18 +255,18 @@ define(function() {
 				// todo
 
 				return (function(args) {
-					return that.eval( exp, new Env(vars, arguments, env) );
-				});
+					return this.eval( exp, new Env(vars, arguments, env) );
+				}.bind(this));
 
 
 			} else if (x[0] === "begin") {							// (begin exp*)
 
 				// do all individually
-				var f = that.async( x[1], env );
+				var f = this.async( x[1], env );
 
 				for (var i = 2, l = x.length; i < l; i++) {
 
-					f.then( that.async( x[i], env ) );
+					f.then( this.async( x[i], env ) );
 
 					// f = this.eval( x[i] );
 				}
@@ -322,7 +317,6 @@ define(function() {
 		this.eval = function(x, env) {
 			env = typeof env !== 'undefined' ? env : this.global_env;
 
-			var that = this;
 			if ( typeof x === "string") {							// variable reference
 				return env.find(x)[x];
 			} else if ( !(x instanceof Array) ){					// literal	
@@ -331,7 +325,7 @@ define(function() {
 				return x[1];
 			} else if (x[0] === "if") {								// (if test conseq alt)
 				var test = x[1], conseq = x[2], alt = x[3];
-		    return this.eval( (this.eval(test, env) ? conseq : alt), env );
+				return this.eval( (this.eval(test, env) ? conseq : alt), env );
 			} else if (x[0] === "set!") {							// (set! var exp)
 				var vari = x[1], exp = x[2];
 				env.find(vari)[vari] = this.eval(exp); 
@@ -341,8 +335,8 @@ define(function() {
 			} else if (x[0] === "lambda") {							// (lambda (var*) exp)
 				var vars = x[1], exp = x[2];
 				return (function(args) {
-					return that.eval( exp, new Env(vars, arguments, env) );
-				});
+					return this.eval( exp, new Env(vars, arguments, env) );
+				}.bind(this));
 			} else if (x[0] === "begin") {							// (begin exp*)
 				var f;
 				for (var i = 1, l = x.length; i < l; i++) {
@@ -350,10 +344,9 @@ define(function() {
 				}
 				return f;
 			} else {												// (proc exp*)
-				var that = this;									
 				var exps = x.map(function(exp) { 					
-					return that.eval(exp, env);
-				});
+					return this.eval(exp, env);
+				}.bind(this));
 			  var proc = exps.shift();
 			  return proc.apply(this, exps);
 			}
@@ -409,10 +402,4 @@ define(function() {
 	}
 
 });
-
-
-
-
-
-
 

@@ -8,8 +8,8 @@ define(['backbone', 'underscore', 'jquery'],
             var value = !!ex.value;
 
             this.syncUI(value);
-            this.model.trigger('updateRunner');
-            this.model.workspace.trigger('requestRun');
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         },
 
         clickTrue: function (e) {
@@ -42,13 +42,14 @@ define(['backbone', 'underscore', 'jquery'],
                 value: value
             };
 
-            this.model.workspace.setNodeProperty({
+            var cmd = {
                 property: 'extra',
                 _id: this.model.get('_id'),
                 newValue: newValue
-            });
+            };
 
-            this.model.workspace.trigger('updateRunner');
+            this.model.trigger('request-set-node-prop', cmd);
+            this.model.trigger('updateRunner');
         }
     };
 });

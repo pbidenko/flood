@@ -1054,19 +1054,18 @@
     async.seq = function (/* functions... */) {
         var fns = arguments;
         return function () {
-            var that = this;
             var args = Array.prototype.slice.call(arguments);
             var callback = args.pop();
             async.reduce(fns, args, function (newargs, fn, cb) {
-                fn.apply(that, newargs.concat([function () {
+                fn.apply(this, newargs.concat([function () {
                     var err = arguments[0];
                     var nextargs = Array.prototype.slice.call(arguments, 1);
                     cb(err, nextargs);
                 }]))
-            },
+            }.bind(this),
             function (err, results) {
-                callback.apply(that, [err].concat(results));
-            });
+                callback.apply(this, [err].concat(results));
+            }.bind(this));
         };
     };
 
@@ -1076,12 +1075,11 @@
 
     var _applyEach = function (eachfn, fns /*args...*/) {
         var go = function () {
-            var that = this;
             var args = Array.prototype.slice.call(arguments);
             var callback = args.pop();
             return eachfn(fns, function (fn, cb) {
-                fn.apply(that, args.concat([cb]));
-            },
+                fn.apply(this, args.concat([cb]));
+            }.bind(this),
             callback);
         };
         if (arguments.length > 2) {

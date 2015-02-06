@@ -7,11 +7,13 @@ define(['backbone', 'underscore', 'jquery'],
             var ex = this.model.get('extra');
 
             this.syncUI(ex.value);
-            this.model.trigger('updateRunner');
-            this.model.workspace.trigger('requestRun');
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         },
 
         blurInput: function () {
+            this.selectable = true;
+
             var ex = this.model.get('extra');
             var text = this.$el.find('.string-node-input').val();
 
@@ -22,13 +24,14 @@ define(['backbone', 'underscore', 'jquery'],
                 value: text
             };
 
-            this.model.workspace.setNodeProperty({
+            var cmd = {
                 property: 'extra',
                 _id: this.model.get('_id'),
                 newValue: newValue
-            });
+            };
 
-            this.model.workspace.trigger('updateRunner');
+            this.model.trigger('request-set-node-prop', cmd);
+            this.model.trigger('updateRunner');
         },
 
         syncUI: function (value) {
