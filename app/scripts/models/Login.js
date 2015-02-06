@@ -45,42 +45,39 @@ define(['backbone'], function(Backbone) {
 
 	  signup: function(data){
 
-	  	var that = this;
 	  	$.post('/signup', data, function(e){
 
 	  		if (e.length && e.length > 0 ) {
-	  			that.set('failureMessage', e[0].msg);
-	  			return that.set('failed', true);
+	  			this.set('failureMessage', e[0].msg);
+	  			return this.set('failed', true);
 	  		}
 
-	  		that.set('failed', false);
-	  		that.app.fetch();
-	  	});
+	  		this.set('failed', false);
+	  		this.app.fetch();
+	  	}.bind(this));
 
 	  },
 
 	  login: function(data){
 
-	  	var that = this;
 	  	$.post('/login', data, function(e){
 
 	  		if (e.length && e.length > 0 ) {
-	  			that.set('failureMessage', e[0].msg);
-	  			return that.set('failed', true);
+	  			this.set('failureMessage', e[0].msg);
+	  			return this.set('failed', true);
 	  		}
 
-	  		that.set('failed', false);
-	  		that.app.fetch();
-	  	});
+	  		this.set('failed', false);
+	  		this.app.fetch();
+	  	}.bind(this));
 
 	  },
 
 	  logout: function(){
 
-	  	var that = this;
 	  	this.app.context.logout().done(function(e){
-	  		that.app.fetch();
-	  	});
+	  		this.app.fetch();
+	  	}.bind(this));
 
 	  }
 

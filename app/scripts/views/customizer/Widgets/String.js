@@ -4,8 +4,8 @@ define(['backbone', 'BaseWidgetView'], function(Backbone, BaseWidgetView) {
         var ex = this.model.get('extra');
 
         this.syncUI(ex.value);
-        this.model.trigger('updateRunner');
-        this.model.workspace.trigger('requestRun');
+        this.model.trigger('update-node');
+        this.model.trigger('requestRun');
     }
 
     function blurInput () {
@@ -19,13 +19,14 @@ define(['backbone', 'BaseWidgetView'], function(Backbone, BaseWidgetView) {
             value: text
         };
 
-        this.model.workspace.setNodeProperty({
+        var cmd = {
             property: 'extra',
             _id: this.model.get('_id'),
             newValue: newValue
-        });
+        };
 
-        this.model.workspace.trigger('updateRunner');
+        this.model.trigger('request-set-node-prop', cmd);
+        this.model.trigger('updateRunner');
     }
 
     return BaseWidgetView.extend({

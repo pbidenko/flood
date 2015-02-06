@@ -20,12 +20,13 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
 
             this.$el.on('mouseup', adjustElements.bind(this));
             this.$el.on('mousemove', adjustElements.bind(this));
+        },
 
+        setCodeblockDraggableOption: function() {
             // Get a value of the cancel option before it is set to avoid losing previous value
             var cancelOption = this.$el.draggable( 'option', 'cancel' );
             if(!cancelOption.match(/.code-block-input/i))
                 this.$el.draggable( 'option', 'cancel', cancelOption + ',.code-block-input' );
-            
         },
 
         getCustomContents: function () {
@@ -43,8 +44,8 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
         onChangedExtra: function () {
             this.render();
             this.$el.addClass('node-evaluating');
-            this.model.trigger('updateRunner');
-            this.model.workspace.run();
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         },
 
         onConnectionsUpdate: function () {
@@ -112,7 +113,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
                         // Dynamo has already deleted this connection
                         conn.silentRemove = true;
                         this.model.disconnectPort(i, conn, true);
-                        this.model.workspace.get('connections').remove(conn);
+                        this.model.trigger('request-remove-conn-from-collection').remove(conn);
                     }
                 }
             }
@@ -191,7 +192,13 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
             var exCopy = JSON.parse(JSON.stringify(ex));
 
             exCopy.inputs = inputs;
-            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: exCopy, oldValue: ex });
+            var cmd = { property: 'extra',
+                _id: this.model.get('_id'),
+                newValue: exCopy,
+                oldValue: ex
+            };
+
+            this.model.trigger('request-set-node-prop', cmd);
         },
 
         setOutputsProperty: function (outputs) {
@@ -201,7 +208,13 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
             var exCopy = JSON.parse(JSON.stringify(ex));
 
             exCopy.outputs = outputs;
-            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: exCopy, oldValue: ex });
+            var cmd = { property: 'extra',
+                _id: this.model.get('_id'),
+                newValue: exCopy,
+                oldValue: ex
+            };
+
+            this.model.trigger('request-set-node-prop', cmd);
         },
 
         renderNode: function () {
@@ -231,7 +244,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
                 var ex = JSON.parse(JSON.stringify(this.model.get('extra')));
 
                 if (!this.input[0].innerText) {
-                    this.model.workspace.removeNodeById(this.model.get('_id'));
+                    this.model.trigger('request-remove-node', this.model.get('_id'));
                     return;
                 }
 
@@ -239,8 +252,12 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
                     return;
 
                 ex.code = this.input[0].innerText;
+                var cmd = { property: 'extra',
+                    _id: this.model.get('_id'),
+                    newValue: ex
+                };
 
-                this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
+                this.model.trigger('request-set-node-prop', cmd);
             }.bind(this));
 
             this.input.keyup(function () {
@@ -303,7 +320,8 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
 
             ex.lock = this.lockInput.is(':checked');
 
-            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
+            var cmd = { property: 'extra', _id: this.model.get('_id'), newValue: ex };
+            this.model.trigger('request-set-node-prop', cmd);
         }
     });
 
@@ -312,7 +330,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
         var $textEl = this.$el.find('code');
         if ($textEl.outerWidth() !== $textEl.data('x') || $textEl.outerHeight() !== $textEl.data('y')) {
             this.renderPorts();
-            this.model.workspace.trigger('update-connections');
+            this.trigger('update-connections');
             // store new height/width
             $textEl.data('x', $textEl.outerWidth());
             $textEl.data('y', $textEl.outerHeight());

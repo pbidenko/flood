@@ -17,8 +17,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
             var value = !!ex.value;
 
             this.syncUI(value);
-            this.model.trigger('updateRunner');
-            this.model.workspace.trigger('requestRun');
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         }
 
         return BaseNodeView.extend({
@@ -49,13 +49,14 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
                 value: value
             };
 
-            this.model.workspace.setNodeProperty({
+            var cmd = {
                 property: 'extra',
                 _id: this.model.get('_id'),
                 newValue: newValue
-            });
+            };
 
-            this.model.workspace.trigger('updateRunner');
+            this.model.trigger('request-set-node-prop', cmd);
+            this.model.trigger('updateRunner');
         },
 
         syncUI: function(value){
@@ -72,7 +73,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
 
             ex.lock = this.lockInput.is(':checked');
 
-            this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
+            this.model.trigger('request-set-node-prop', { property: 'extra', _id: this.model.get('_id'), newValue: ex });
         }
     });
 });

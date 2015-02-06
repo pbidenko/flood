@@ -29,12 +29,11 @@ define(['backbone', 'FLOOD'],
 
       console.log(this.workspace.get('name') + " has dependencies: " + JSON.stringify( depIds) );
 
-      var that = this;
       this.listenTo(this.app.get('workspaces'), 'add', this.resolveDependency);
 
       depIds.forEach(function(x){
-        that.awaitOrResolveDependency.call(that, x);
-      });
+        this.awaitOrResolveDependency(x);
+      }.bind(this));
     },
 
     cleanupDependencies: function(){
@@ -126,19 +125,17 @@ define(['backbone', 'FLOOD'],
         if (this.watchedDependencies[ customNodeWorkspace.id ]) return;
         this.watchedDependencies[ customNodeWorkspace.id ] = true;
 
-        var that = this;
-
         var sync = function () {
-                that.syncCustomNodesWithWorkspace.call(that, customNodeWorkspace)
-            }
+                this.syncCustomNodesWithWorkspace(customNodeWorkspace)
+            }.bind(this)
             , syncAndRequestRun = function () {
-                that.syncCustomNodesWithWorkspace.call(that, customNodeWorkspace);
-                that.workspace.trigger('requestRun');
-            }
+                this.syncCustomNodesWithWorkspace(customNodeWorkspace);
+                this.workspace.trigger('requestRun');
+            }.bind(this)
             , syncAndUpdateRunner = function () {
-                that.syncCustomNodesWithWorkspace.call(that, customNodeWorkspace);
-                that.workspace.trigger('updateRunner');
-            };
+                this.syncCustomNodesWithWorkspace(customNodeWorkspace);
+                this.workspace.trigger('updateRunner');
+            }.bind(this);
 
         this.listenTo(customNodeWorkspace, 'change:name', sync);
         this.listenTo(customNodeWorkspace, 'change:workspaceDependencyIds', sync);
@@ -196,7 +193,7 @@ define(['backbone', 'FLOOD'],
               var inConn = x.getConnectionAtIndex(inputConns.length - 1);
 
               if (inConn != null){
-                x.workspace.removeConnection(inConn);
+                this.workspace.removeConnection(inConn);
               }
 
               inputConns.pop();
@@ -222,8 +219,10 @@ define(['backbone', 'FLOOD'],
               var ocs = x.get('outputConnections')
                 .last();
 
-              if (ocs){
-                ocs.slice(0).forEach(function(outConn){ x.workspace.removeConnection(outConn); })
+              if (ocs) {
+                  ocs.slice(0).forEach(function (outConn) {
+                      this.workspace.removeConnection(outConn);
+                  }.bind(this))
               }
 
               outputConns.pop();
@@ -286,9 +285,9 @@ define(['backbone', 'FLOOD'],
         x.trigger('requestRender');
 
         // update runner
-        x.trigger('updateRunner');
+        x.trigger('update-node');
 
-      });
+      }.bind(this));
 
       if (directlyAffectedCustomNodes.length > 0) this.workspace.sync('update', this.workspace);
 
@@ -299,7 +298,7 @@ define(['backbone', 'FLOOD'],
       var indirectlyAffectedNodes = this.getIndirectlyAffectedCustomNodes( workspace.id );
 
       indirectlyAffectedNodes.forEach(function(x){
-        x.trigger('updateRunner');
+        x.trigger('update-node');
       });
 
       if (indirectlyAffectedNodes.length > 0) this.workspace.sync('update', this.workspace );

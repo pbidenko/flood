@@ -39,7 +39,6 @@ define([  'backbone',
         this.listenTo(this.model.get('workspaces'), 'add', this.addWorkspaceTab);
         this.listenTo(this.model.get('workspaces'), 'remove', this.removeWorkspaceTab);
         this.listenTo(this.model.get('workspaces'), 'hide', this.hideWorkspaceTab);
-        //viewSettings: no such method this.model.on('change:showingSettings', this.viewSettings, this);
         this.listenTo(this.model, 'change:showingFeedback', this.viewFeedback);
         this.listenTo(this.model, 'change:showingShare', this.viewShare);
         this.listenTo(this.model, 'change:showingHelp', this.viewHelp);
@@ -106,15 +105,13 @@ define([  'backbone',
 
     showHelpOnFirstExperience: function(){
 
-      var that = this;
-
       setTimeout(function(){
-        if (that.model.login.get('isLoggedIn') && that.model.get('isFirstExperience')){
-          that.model.set( 'showingHelp', true);
+        if (this.model.login.get('isLoggedIn') && this.model.get('isFirstExperience')){
+          this.model.set( 'showingHelp', true);
         } else {
-          that.model.set( 'showingHelp', false);
+          this.model.set( 'showingHelp', false);
         }
-      }, 800);
+      }.bind(this), 800);
 
     },
 
