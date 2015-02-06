@@ -75,10 +75,10 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'jqueryuislider'],
         }.bind(this),
         "mouseleave": function() {
             this.$el.find('.dropdown.keep-open').data('closable', true);
-        },
+        }.bind(this),
         "click": function() {
             this.$el.find('.dropdown.keep-open').data('closable', false);
-        },
+        }.bind(this),
         "hide.bs.dropdown": function() {
             if (this.$el.find('.dropdown.keep-open').data('closable')) 
 	        this.selectable = true;
