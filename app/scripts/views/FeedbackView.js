@@ -61,16 +61,14 @@ define(['backbone'], function(Backbone) {
       this.sendingView.hide();
       this.successView.show();
 
-      var that = this;
-
       setTimeout(function(){
-        that.app.set("showingFeedback", false);
+        this.app.set("showingFeedback", false);
 
-        that.subject.val("");
-        that.message.val("");
+        this.subject.val("");
+        this.message.val("");
 
-        that.successView.fadeOut();
-      }, 800);
+        this.successView.fadeOut();
+      }.bind(this), 800);
 
     },
 

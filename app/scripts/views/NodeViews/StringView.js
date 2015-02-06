@@ -8,8 +8,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
             var ex = this.model.get('extra');
 
             this.syncUI(ex.value);
-            this.model.trigger('updateRunner');
-            this.model.workspace.trigger('requestRun');
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         }
 
         function focusInput (e) {
@@ -31,13 +31,13 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
                 value: text
             };
 
-            this.model.workspace.setNodeProperty({
-                property: 'extra',
+            var cmd = { property: 'extra',
                 _id: this.model.get('_id'),
                 newValue: newValue
-            });
+            };
 
-            this.model.workspace.trigger('updateRunner');
+            this.model.trigger('request-set-node-prop', cmd);
+            this.model.trigger('updateRunner');
         }
 
         function fitSize (e) {
@@ -90,7 +90,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'],
 
                 ex.lock = this.lockInput.is(':checked');
 
-                this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: ex });
+                this.model.trigger('request-set-node-prop', { property: 'extra', _id: this.model.get('_id'), newValue: ex });
             }
         });
     });

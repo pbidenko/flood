@@ -15,8 +15,8 @@ define(['backbone', 'BaseWidgetView'], function(Backbone, BaseWidgetView) {
 
         onChangedExtra: function () {
             this.render();
-            this.model.trigger('updateRunner');
-            this.model.workspace.run();
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         },
 
         valueChanged: function(value) {
@@ -24,13 +24,14 @@ define(['backbone', 'BaseWidgetView'], function(Backbone, BaseWidgetView) {
                 value: value
             };
 
-            this.model.workspace.setNodeProperty({
+            var cmd = {
                 property: 'extra',
                 _id: this.model.get('_id'),
                 newValue: newValue
-            });
+            };
 
-            this.model.workspace.trigger('updateRunner');
+            this.model.trigger('request-set-node-prop', cmd);
+            this.model.trigger('updateRunner');
         },
 
         syncUI: function(value){
@@ -57,8 +58,8 @@ define(['backbone', 'BaseWidgetView'], function(Backbone, BaseWidgetView) {
         var value = !!ex.value;
 
         this.syncUI(value);
-        this.model.trigger('updateRunner');
-        this.model.workspace.trigger('requestRun');
+        this.model.trigger('update-node');
+        this.model.trigger('requestRun');
     }
 
     return booleanWidget;

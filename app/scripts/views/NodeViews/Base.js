@@ -105,9 +105,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
 
     initialize: function(args) {
 
-      this.workspace = args.workspace;
-      this.workspaceView = args.workspaceView;
-
       this.listenTo(this.model, 'requestRender', this.render );
       this.listenTo(this.model, 'change:position', this.move );
       this.listenTo(this.model, 'change:lastValue', this.renderLastValue );
@@ -123,7 +120,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
       this.listenTo(this.model, 'evalFailed', this.onEvalFailed);
       this.listenTo(this.model, 'evalBegin', this.onEvalBegin);
 
-      this.makeDraggable();
       this.listenTo(this.model, 'array-reset', this.resetRequestData );
       
       this.$workspace_canvas = $('#workspace_canvas');
@@ -137,12 +133,17 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
       this.$el.on('keyup', 'input.shown-items', keyUp.bind(this));
     },
 
-    updateName: function(e){
-      var val = this.$el.find('.name-input').val();
-      if (this.model.get('name') === val) return;
-      
-      var cmd = { property: 'name', _id: this.model.get('_id'), newValue : val };
-      this.model.workspace.setNodeProperty(cmd);
+    updateName: function(e) {
+        var val = this.$el.find('.name-input').val();
+        if (this.model.get('name') === val)
+            return;
+
+        var cmd = { property: 'name',
+            _id: this.model.get('_id'),
+            newValue: val
+        };
+
+        this.model.trigger('request-set-node-prop', cmd);
     },
 
     onEvalFailed: function(exception){
@@ -164,8 +165,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
       var cmd = { property: 'ignoreDefaults', _id: this.model.get('_id'), 
             newValue : ign };
 
-      this.model.workspace.setNodeProperty(cmd);
-      this.model.workspace.run();
+      this.model.trigger('request-set-node-prop', cmd);
+      this.model.trigger('requestRun');
 
     },
 
@@ -173,8 +174,8 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
 
       var cmd = { property: 'replication', _id: this.model.get('_id'), 
             newValue : $(e.target).attr('data-rep-type') };
-      this.model.workspace.setNodeProperty(cmd);
-      this.model.workspace.run();
+        this.model.trigger('request-set-node-prop', cmd);
+        this.model.trigger('requestRun');
 
     },
 
@@ -188,53 +189,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
       e.stopPropagation();
     },
 
-    makeDraggable: function() {
-
-      var that = this;
-      this.initPos = [];
-      this.$el.draggable( {
-        drag : function(e, ui) {
-          var zoom = 1 / that.workspace.get('zoom');
-
-          ui.position.left = zoom * ui.position.left;
-          ui.position.top = zoom * ui.position.top;
-
-          that.workspace.get('nodes').moveSelected([ ui.position.left - that.initPos[0], ui.position.top - that.initPos[1]], that);
-
-          that.model.set('position', [ ui.position.left, ui.position.top ]);
-
-        },
-        start : function(startEvent) {
-
-          if ( !that.model.get('selected') ){
-            that.model.workspace.get('nodes').deselectAll();
-          }
-
-          that.model.set('selected', true );
-          that.workspace.get('nodes').startDragging(that);
-
-          var zoom = 1 / that.model.workspace.get('zoom');
-          var pos = that.model.get('position');
-
-          that.initPos = [ pos[0], pos[1] ];
-
-        },
-        stop : function() {
-
-          var start = [ that.initPos[0], that.initPos[1] ];
-          var pos = that.model.get('position');
-          var end = [ pos[0], pos[1] ];
-
-          var cmd = { property: 'position', _id: that.model.get('_id'), 
-            oldValue: start, newValue : end };
-          that.model.workspace.setNodeProperty( cmd );
-
-        }
-      });
-      this.$el.css('position', 'absolute');
-
-    },
-
     beginPortDisconnection: function(e){
       var index = parseInt( $(e.currentTarget).attr('data-index') );
 
@@ -245,27 +199,28 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
         , connection = inputConnections[index][0]
         , oppos = connection.getOpposite( this.model );
 
-      this.workspace.startProxyConnection( oppos.node.get('_id'), oppos.portIndex, this.getPortPosition(index, false));
-      this.workspace.removeConnection( connection.toJSON() );
+        var startNodeId = oppos.node.get('_id'),
+            nodePort = oppos.portIndex,
+            startPosition = this.getPortPosition(index, false);
+
+        this.model.trigger('start-proxy-conn', startNodeId, nodePort, startPosition);
+        this.model.trigger('request-remove-conn', connection.toJSON());
 
       e.stopPropagation();
     },
 
-    beginPortConnection: function(e){
-      var index = parseInt( $(e.currentTarget).attr('data-index') );
-      this.workspace.startProxyConnection(this.model.get('_id'), index, this.getPortPosition(index, true));
-      e.stopPropagation();
+    beginPortConnection: function(e) {
+        var index = parseInt($(e.currentTarget).attr('data-index'));
+        var startNodeId = this.model.get('_id'),
+            nodePort = index,
+            startPosition = this.getPortPosition(index, true);
+
+        this.model.trigger('start-proxy-conn', startNodeId, nodePort, startPosition);
+        e.stopPropagation();
     },
 
-    endPortConnection: function(e){
-
-      if ( !this.workspace.draggingProxy )
-        return;
-
-      var index = parseInt( $(e.currentTarget).attr('data-index') );
-      this.workspace.completeProxyConnection(this.model.get('_id'), index );
-      e.stopPropagation();
-
+    endPortConnection: function(e) {
+        this.trigger('end-port-conn', e, this.model.get('_id'));
     },
 
     // touch-specific handlers
@@ -278,11 +233,10 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
       if ( !this.model.isPortConnected(index, false) )
         return;
 
-      var inputConnections = this.model.get('inputConnections')
-        , connection = inputConnections[index][0]
-        , oppos = connection.getOpposite( this.model );
+        var inputConnections = this.model.get('inputConnections')
+            , connection = inputConnections[index][0];
 
-      this.workspace.removeConnection( connection.toJSON() );
+        this.model.trigger('request-remove-conn', connection.toJSON());
 
       e.stopPropagation();
       e.preventDefault();
@@ -302,12 +256,12 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
 
         if (!elem.attr('data-index')) return;
 
-        this.workspace.draggingProxy = true;
+        this.model.trigger('request-set-draggingproxy', true);
 
         var e = $.Event( "mouseup" );
         elem.trigger(e);
 
-        this.workspace.draggingProxy = false;
+        this.model.trigger('request-set-draggingproxy', false);
 
       }.bind( this ));
 
@@ -336,15 +290,18 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
 
     selectThis: function(event) {
 
-      if (!this.selectable) return;
+        if (!this.selectable) return;
 
-      if ( !this.model.get('selected') ){
-        if (!event.shiftKey)
-          this.workspace.get('nodes').deselectAll();
-        this.model.set('selected', true );
-      } else {
-        this.workspace.get('nodes').deselectAll();
-      }
+        if (!this.model.get('selected')) {
+            if (!event.shiftKey) {
+                this.model.trigger('deselect-all-nodes');
+            }
+
+            this.model.set('selected', true);
+        }
+        else {
+            this.model.trigger('deselect-all-nodes');
+        }
 
     },
 
@@ -434,10 +391,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
 
     formatPreview: function( value ){
 
-      var that = this;
-      return JSON.stringify(this.truncatePreview(value), function (k, v) {
-        return that.prettyPrint.call(that, k, v);
-      });
+      return JSON.stringify(this.truncatePreview(value), this.prettyPrint.bind(this));
 
     },
 
@@ -523,16 +477,15 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
     colorPorts: function() {
 
       // update port colors
-      var that = this;
       var isPartial = false;
 
       this.inputPorts.forEach(function(ele, ind){
 
         ele.setAttribute('stroke','black');
 
-        if (that.model.isPortConnected(ind, false) ){
+        if (this.model.isPortConnected(ind, false) ){
           ele.setAttribute('fill','black');
-        } else if (that.model.isInputPortUsingDefault(ind)){
+        } else if (this.model.isInputPortUsingDefault(ind)){
           ele.setAttribute('fill','white');
         } else {
           isPartial = true;
@@ -540,13 +493,13 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
           ele.setAttribute('stroke','white');
         }
           
-      });
+      }.bind(this));
 
       this.outputPorts.forEach(function(ele, ind){
 
         ele.setAttribute('stroke','black');
 
-        if (that.model.isPortConnected(ind, true)){
+        if (this.model.isPortConnected(ind, true)){
           ele.setAttribute('fill','black');
         } else if (isPartial) {
           ele.setAttribute('fill','grey');
@@ -555,7 +508,7 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
           ele.setAttribute('fill','white');
         }
           
-      });
+      }.bind(this));
 
       return this;
 
@@ -606,7 +559,6 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
       this.outputPorts = [];
 
       // draw the circles
-      var that = this;
       var inIndex = 0;
       var outIndex = 0;
       var ex = this.model.get('extra') || {};
@@ -632,23 +584,23 @@ define(['backbone', 'jqueryuidraggable', 'bootstrap', 'Hammer', 'GetArrayItemsMe
         // position input ports on left side, output ports on right side
         if ( $(ele).hasClass('node-port-input') ) {
           nodeCircle.setAttribute('cx', 0);
-          nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * $(ele).position().top ); 
-          that.inputPorts.push(nodeCircle);
+          nodeCircle.setAttribute('cy', this.portHeight / 2 + 1/zoom * $(ele).position().top ); 
+          this.inputPorts.push(nodeCircle);
           inIndex++;
         } else {
           if(ex.lineIndices && ex.lineIndices.length > outIndex)
             portIndex = outIndex > 0 ? ex.lineIndices[outIndex] - ex.lineIndices[outIndex - 1] - 1 : ex.lineIndices[outIndex];
-          nodeCircle.setAttribute('cx', that.$el.width() + 2.5 );
+          nodeCircle.setAttribute('cx', this.$el.width() + 2.5 );
           // that.portHeight is equal to 29, but actual height of port is 25
-          nodeCircle.setAttribute('cy', that.portHeight / 2 + 1/zoom * ($(ele).position().top + portIndex * 25) );
-          that.outputPorts.push(nodeCircle);
+          nodeCircle.setAttribute('cy', this.portHeight / 2 + 1/zoom * ($(ele).position().top + portIndex * 25) );
+          this.outputPorts.push(nodeCircle);
           outIndex++;
         }
         
         // append 
-        that.portGroup.appendChild(nodeCircle);
+        this.portGroup.appendChild(nodeCircle);
 
-      });
+      }.bind(this));
 
       this.colorPorts();
 

@@ -7,11 +7,9 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
         BaseWidgetView.prototype.initialize.apply(this, arguments);
 
         this.listenTo(this.model, 'change:selected', this.colorSelected);
-        this.listenTo(this.model, 'change:visible', this.changeVisibility);
         this.listenTo(this.model, 'remove', this.onRemove);
         this.listenTo(this.model, 'change:prettyLastValue', this.onEvalComplete);
-        this.listenTo(this.model.workspace, 'change:current', this.changeVisibility);
-
+        
         this.onEvalComplete();
     },
 
@@ -57,7 +55,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
 
     // 3D move to node subclass
     onRemove: function() {
-        this.stopListening(this.model.workspace, 'change:current', this.changeVisibility);
+        this.stopListening();
         scene.remove(this.threeGeom);
     },
 
@@ -147,14 +145,14 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
 
         this.threeGeom = threeTemp;
         scene.add( this.threeGeom );
-        this.changeVisibility();
+        this.model.trigger('change:visible');
 
-      }, this );
+      } );
 
     }, 
 
     // creating this data may be quite slow, we'll need to be careful
-    drawChunked: function(geom, list, callback, that){
+    drawChunked: function(geom, list, callback){
 
       var i = 0;
       var tick = function() {
@@ -162,9 +160,9 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
         var start = new Date().getTime();
         for (; i < list.length && (new Date().getTime()) - start < 50; i++) {
         
-          var g3  = that.toThreeGeom( list[i] );
+          var g3  = this.toThreeGeom( list[i] );
 
-          if (that.model.get('selected')){
+          if (this.model.get('selected')){
             var color = 0x66d6ff;
           } else {
             var color = 0x999999;
@@ -187,22 +185,22 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
         if (i < list.length) {
           setTimeout(tick, 25);
         } else {
-          callback.call(that);
+          callback.call(this);
         }
 
-      };
+      }.bind(this);
 
       setTimeout(tick, 0);
 
     },
 
-    changeVisibility: function(){
+    changeVisibility: function(workspace){
 
       if ( !this.threeGeom ){
         return;
       }
-        
-      if (!this.model.get('visible') || !this.model.workspace.get('current') )
+
+      if (!this.model.get('visible') || !workspace.get('current') )
       {
         this.threeGeom.traverse(function(e) { e.visible = false; });
       } else if ( this.model.get('visible') )
@@ -218,7 +216,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseWidgetView', 'ThreeHelpers'], f
 
       return this;
 
-    },
+    }
 
   });
 

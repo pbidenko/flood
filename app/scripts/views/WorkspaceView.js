@@ -37,10 +37,6 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
             this.cleanup().renderConnections();
         });
 
-        this.listenTo(this.model, 'update-connections', function () {
-            this.cleanup().updateConnections();
-        });
-
         this.listenTo(this.model, 'change:zoom', this.updateZoom);
         this.listenTo(this.model, 'change:offset', this.updateOffset);
         this.listenTo(this.model, 'change:isRunning', this.renderRunnerStatus);
@@ -49,8 +45,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
             this.cleanup().renderNodes();
         });
 
-        //onChangeCurrent: no such method this.listenTo(this.model, 'change:current', this.onChangeCurrent );
-
+        
         this.listenTo(this.model, 'startProxyDrag', this.startProxyDrag);
         this.listenTo(this.model, 'endProxyDrag', this.endProxyDrag);
 
@@ -527,13 +522,14 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
           }
 
           nodeView = new NodeView({ model: nodeModel, workspaceView: this_, workspace: this_.model });
+          this_.watchNodeViewEvents(nodeView);
           this_.nodeViews[ nodeView.model.get('_id') ] = nodeView;
 
         }
 
         this_.$workspace.prepend( nodeView.$el );
+        this_.makeDraggable(nodeView);
         nodeView.render();
-        nodeView.makeDraggable();
         nodeView.delegateEvents();
         
         this_.$workspace_canvas.append( nodeView.portGroup );
@@ -542,6 +538,91 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
 
       return this;
 
+    },
+
+    watchNodeViewEvents: function(nodeView) {
+        this.listenTo(nodeView, 'send-array-message', function(message) {
+            this.model.app.socket.send(JSON.stringify(message));
+        });
+
+        this.listenTo(nodeView, 'end-port-conn', this.endPortConnection);
+        this.listenTo(nodeView, 'update-connections', function() {
+            this.cleanup().updateConnections();
+        });
+
+        this.listenTo(nodeView, 'request-open-definition', function(id) {
+            this.model.app.openWorkspace( id );
+        });
+
+        if (nodeView.changeVisibility) {
+            nodeView.listenTo(this.model, 'change:current', nodeView.changeVisibility.bind(nodeView, this.model));
+            nodeView.listenTo(nodeView.model, 'change:visible', nodeView.changeVisibility.bind(nodeView, this.model));
+        }
+    },
+
+    endPortConnection: function(e, id) {
+        if ( !this.model.draggingProxy )
+            return;
+
+        var index = parseInt( $(e.currentTarget).attr('data-index') );
+        this.model.completeProxyConnection(id, index );
+        e.stopPropagation();
+    },
+
+    makeDraggable: function(nodeView) {
+
+        nodeView.initPos = [];
+        nodeView.$el.draggable({
+            drag: function (e, ui) {
+                var zoom = 1 / this.model.get('zoom');
+
+                ui.position.left = zoom * ui.position.left;
+                ui.position.top = zoom * ui.position.top;
+
+                var offset = [ui.position.left - nodeView.initPos[0],
+                        ui.position.top - nodeView.initPos[1]];
+
+                this.model.get('nodes').moveSelected(offset, nodeView);
+
+                nodeView.model.set('position', [ ui.position.left, ui.position.top ]);
+
+            }.bind(this),
+            start: function () {
+
+                if (!nodeView.model.get('selected')) {
+                    this.model.get('nodes').deselectAll();
+                }
+
+                nodeView.model.set('selected', true);
+                this.model.get('nodes').startDragging(nodeView);
+
+                var zoom = 1 / this.model.get('zoom');
+                var pos = nodeView.model.get('position');
+
+                nodeView.initPos = [ pos[0], pos[1] ];
+
+            }.bind(this),
+            stop: function () {
+
+                var start = [ nodeView.initPos[0], nodeView.initPos[1] ];
+                var pos = nodeView.model.get('position');
+                var end = [ pos[0], pos[1] ];
+
+                var cmd = { property: 'position',
+                    _id: nodeView.model.get('_id'),
+                    oldValue: start,
+                    newValue: end
+                };
+
+                this.model.setNodeProperty(cmd);
+
+            }.bind(this)
+        });
+
+        if (nodeView.setCodeblockDraggableOption)
+            nodeView.setCodeblockDraggableOption();
+
+        nodeView.$el.css('position', 'absolute');
     },
 
     keydownHandler: function(e){
@@ -604,7 +685,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
         var view = this_.connectionViews[cntn.get('_id')]
 
         if ( this_.connectionViews[cntn.get('_id')] === undefined){
-          view = new ConnectionView({ model: cntn, workspaceView: this_, workspace: this_.model });
+          view = new ConnectionView({ model: cntn, workspaceView: this_ });
         }
 
         view.delegateEvents();
@@ -633,6 +714,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       for (var key in this.nodeViews){
         if (this.model.get('nodes').get(key) === undefined){
           this.nodeViews[key].remove();
+          this.stopListening(this.nodeViews[key]);
           delete this.nodeViews[key];
         }
       }

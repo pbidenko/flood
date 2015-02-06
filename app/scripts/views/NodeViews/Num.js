@@ -15,8 +15,8 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'jqueryuislider'], f
 
             this.silentSyncUI(ex);
 
-            this.model.trigger('updateRunner');
-            this.model.workspace.trigger('requestRun');
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         });
     },
  
@@ -38,54 +38,55 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'jqueryuislider'], f
       var value = extra.value != undefined ? extra.value : 0;
       if (value === undefined ) value = this.model.get('lastValue');
 
-      var that = this;
       this.slider.slider(
         { min: min, 
           max: max, 
           step: step, 
           value: value,
-          change: function(e, ui){  that.inputSet.call(that, e, ui); },
-          slide: function(e, ui){ that.inputChanged.call(that, e, ui); } 
+          change: this.inputSet.bind(this),
+          slide: this.inputChanged.bind(this)
         });
 
       this.currentValueInput = this.$el.find('.currentValue');
       this.currentValueInput.val( value );
-      this.currentValueInput.change( function(e){ that.valChanged.call(that, e); e.stopPropagation(); });
+      this.currentValueInput.change(function (e) { this.valChanged(e); e.stopPropagation(); }.bind(this));
 
       this.minInput = this.$el.find('.num-min');
       this.minInput.val(min);
-      this.minInput.change( function(e){ that.minChanged.call(that, e); e.stopPropagation(); });
+      this.minInput.change(function (e) { this.minChanged(e); e.stopPropagation(); }.bind(this));
 
       this.maxInput = this.$el.find('.num-max');
       this.maxInput.val(max);
-      this.maxInput.change( function(e){ that.maxChanged.call(that, e); e.stopPropagation(); });
+      this.maxInput.change(function (e) { this.maxChanged(e); e.stopPropagation(); }.bind(this));
 
       this.stepInput = this.$el.find('.num-step');
       this.stepInput.val(step);
-      this.stepInput.change( function(e){ that.stepChanged.call(that, e); e.stopPropagation(); });
+      this.stepInput.change(function (e) { this.stepChanged(e); e.stopPropagation(); }.bind(this));
 
       this.lockInput = this.$el.find('.lock-input');
       this.lockInput.val( lock );
-      this.lockInput.change( function(e){ that.lockChanged.call(that, e); e.stopPropagation(); });
+      this.lockInput.change(function (e) { this.lockChanged(e); e.stopPropagation(); }.bind(this));
 
       // adjust settings dropdown so that it stays open while editing
       // doesn't select the node when you're editing
-      $('.dropdown.keep-open').on({
+      this.$el.find('.dropdown.keep-open').on({
         "shown.bs.dropdown": function() {
-          that.selectable = false;
-          that.model.set('selected', false);
-          $(this).data('closable', false);
-        },
+          this.selectable = false;
+          this.model.set('selected', false);
+          this.$el.find('.dropdown.keep-open').data('closable', false);
+        }.bind(this),
         "mouseleave": function() {
-          $(this).data('closable', true);
+            this.$el.find('.dropdown.keep-open').data('closable', true);
         },
         "click": function() {
-          $(this).data('closable', false);
+            this.$el.find('.dropdown.keep-open').data('closable', false);
         },
         "hide.bs.dropdown": function() {
-          if ( $(this).data('closable') ) that.selectable = true;
-          return $(this).data('closable');
-        }
+            if (this.$el.find('.dropdown.keep-open').data('closable')) 
+	         this.selectable = true;
+		 
+            return this.$el.find('.dropdown.keep-open').data('closable');
+        }.bind(this)
       });
 
       // this.rendered = true;
@@ -152,12 +153,21 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'jqueryuislider'], f
 
     inputSet: function() {
 
-      if ( this.silent ) return;
+        if (this.silent) return;
 
-      var newValue = {   value: this.slider.slider("option", "value"), min: this.slider.slider("option", "min"), 
-        step: this.slider.slider("option", "step"), max: this.slider.slider("option", "max"), lock: this.lockInput.is(':checked') };
+        var newValue = { value: this.slider.slider("option", "value"),
+            min: this.slider.slider("option", "min"),
+            step: this.slider.slider("option", "step"),
+            max: this.slider.slider("option", "max"),
+            lock: this.lockInput.is(':checked')
+        };
 
-      this.model.workspace.setNodeProperty({property: 'extra', _id: this.model.get('_id'), newValue: newValue });      
+        var cmd = { property: 'extra',
+            _id: this.model.get('_id'),
+            newValue: newValue
+        };
+
+        this.model.trigger('request-set-node-prop', cmd);
 
     }
 
