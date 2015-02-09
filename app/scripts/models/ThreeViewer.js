@@ -1,4 +1,4 @@
-define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Backbone, Viewport, staticHelpers, GeometryExport) {
+define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport', 'Three'], function (Backbone, Viewport, staticHelpers, GeometryExport) {
 
     var partMat = new THREE.PointCloudMaterial({ color: 0x999999, size: 5, sizeAttenuation: false, side: THREE.DoubleSide }),
         meshMat = new THREE.MeshPhongMaterial({ color: 0x999999, side: THREE.DoubleSide }),

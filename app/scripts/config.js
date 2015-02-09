@@ -29,13 +29,6 @@ require.config({
             deps: ['CSG'],
             exports: 'FLOODCSG'
         },
-        Viewport: {
-            deps: [
-                'Three',
-                'OrbitControls'
-            ],
-            exports: 'Viewport'
-        },
         OrbitControls: {
             deps: [
                 'Three'

@@ -1,4 +1,4 @@
-define(['backbone', 'Three', 'OrbitControls'], function (Backbone, THREE) {
+define(['backbone', 'Three', 'OrbitControls'], function (Backbone) {
 
     var container, $container;
     var camera, controls, renderer;
