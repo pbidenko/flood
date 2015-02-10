@@ -11,9 +11,11 @@ define(['backbone', 'PrismPython'], function(Backbone) {
 
     template: _.template( $('#python-template').html() ),
 
-    render: function(model) {
+    initialize: function(args) {
+        this.model = args.model;
+    },
 
-      this.model = model;
+    render: function(model) {
 
       this.$el.html( this.template({
         script: this.model.get('extra').script
@@ -31,7 +33,9 @@ define(['backbone', 'PrismPython'], function(Backbone) {
       var exCopy = JSON.parse(JSON.stringify(ex));
 
       exCopy.script = this.script[0].innerText;
-      this.model.workspace.setNodeProperty({ property: 'extra', _id: this.model.get('_id'), newValue: exCopy, oldValue: ex });
+
+      var cmd = { property: 'extra', _id: this.model.get('_id'), newValue: exCopy, oldValue: ex };
+      this.model.trigger('request-set-node-prop', cmd);
 
       this.$el.fadeOut();
     },

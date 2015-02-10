@@ -18,11 +18,10 @@ define([  'backbone',
           'ShareView',
           'Share',
           'fastclick',
-          'ThreeViewer',
-          'PythonEditorView' ],
+          'ThreeViewer'],
           function(Backbone, App, WorkspaceView, Search, SearchElement, SearchView, WorkspaceControlsView, 
             WorkspaceTabView, Workspace, WorkspaceBrowser, WorkspaceBrowserView, HelpView, 
-            Help, LoginView, Login, FeedbackView, Feedback, ShareView, Share, fastclick, ThreeViewer, PythonEditorView ) {
+            Help, LoginView, Login, FeedbackView, Feedback, ShareView, Share, fastclick, ThreeViewer ) {
 
   return Backbone.View.extend({
 
@@ -36,7 +35,6 @@ define([  'backbone',
         this.listenTo(this.model, 'ws-data-loaded', this.zoomresetClick);
 
         this.$workspace_tabs = this.$('#workspace-tabs');
-        this.listenTo(this.model, 'showPythonEditor', this.viewPythonEditor);
 
         this.listenTo(this.model.get('workspaces'), 'add', this.addWorkspaceTab);
         this.listenTo(this.model.get('workspaces'), 'remove', this.removeWorkspaceTab);
@@ -266,16 +264,6 @@ define([  'backbone',
       } else {
         this.shareView.$el.fadeOut();
       }
-    },
-
-    viewPythonEditor: function(e){
-      if (!this.pythonView){
-        this.pythonView = new PythonEditorView();
-      }
-
-      this.pythonView.render(e);
-      this.pythonView.$el.fadeIn();
-
     },
 
     toggleHelp: function(){

@@ -12,12 +12,16 @@ define(['backbone', 'underscore', 'jquery', 'VariableInputView', 'PythonEditorVi
         },
 
         onChangedExtra: function () {
-            this.model.trigger('updateRunner');
-            this.model.workspace.run();
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         },
 
         openPythonScriptView: function(){
-            this.workspace.app.trigger('showPythonEditor', this.model);
+            if (!this.pythonView){
+                this.pythonView = new PythonEditorView({model: this.model});
+            }
+            this.pythonView.render();
+            this.pythonView.$el.fadeIn();
         },
 
         getPortName: function(data){
