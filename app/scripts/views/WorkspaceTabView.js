@@ -98,11 +98,12 @@ define(['backbone'], function(Backbone) {
                 app.trigger('closing-request', this.model);
             }
             else {
-                app.get('workspaces').remove(this.model);
+                app.get('workspaces').trigger('hide', this.model);
             }
         }
         else {
             // clear Home workspace
+            this.model.trigger('workspaceRemove', this.model);
             $('#new-home-workspace').click();
         }
 

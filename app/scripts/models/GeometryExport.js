@@ -16,39 +16,47 @@ define(['FileSaver'], function(FileSaver) {
 		var faces = [];
 		var faceNormals = [];
 		var vertOffset = 0;
+		var geometry;
 
-     	scene.traverse(function(ele) {
-	    	
-     		if (!ele.visible || !(ele instanceof THREE.Mesh) ) return;
+		scene.traverse(function(ele) {
 
- 			// collect vertices
- 			ele.geometry.vertices.forEach(function(v){
- 				vertices.push( v.x );
- 				vertices.push( v.y );
- 				vertices.push( v.z );
- 			});
+			if (!ele.visible || !(ele instanceof THREE.Mesh) ) return;
 
- 			// collect faces, face normals
- 			ele.geometry.faces.forEach(function(face){
- 				faces.push(vertOffset + face.a);
- 				faces.push(vertOffset + face.b);
- 				faces.push(vertOffset + face.c);
+			if(ele.geometry.type === 'BufferGeometry'){
+				geometry = new THREE.Geometry().fromBufferGeometry(ele.geometry);
+			}
+			else {
+				geometry = ele.geometry;
+			}
 
- 				faceNormals.push( face.normal.x );
- 				faceNormals.push( face.normal.y );
- 				faceNormals.push( face.normal.z );
+			// collect vertices
+			geometry.vertices.forEach(function(v){
+				vertices.push( v.x );
+				vertices.push( v.y );
+				vertices.push( v.z );
+			});
 
- 				numTris += 1;
- 			});
+			// collect faces, face normals
+			geometry.faces.forEach(function(face){
+				faces.push(vertOffset + face.a);
+				faces.push(vertOffset + face.b);
+				faces.push(vertOffset + face.c);
 
- 			vertOffset += ele.geometry.vertices.length;
+				faceNormals.push( face.normal.x );
+				faceNormals.push( face.normal.y );
+				faceNormals.push( face.normal.z );
 
-      	});
+				numTris += 1;
+			});
 
-     	var blob = Export.toAsciiSTL(vertices, faces, faceNormals, numTris );
+			vertOffset += geometry.vertices.length;
 
-     	FileSaver( blob, filename );
-		
+		});
+
+		var blob = Export.toAsciiSTL(vertices, faces, faceNormals, numTris );
+
+		FileSaver( blob, filename );
+
 	};
 
 	Utils.normalizeArrayVec3 = function (array, out) {

@@ -5,18 +5,16 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
     template: _.template( $('#node-input-template').html() ),
 
     initialize: function(args) {
-      BaseNodeView.prototype.initialize.apply(this, arguments);
+        BaseNodeView.prototype.initialize.apply(this, arguments);
 
-      this.model.on('change:extra', function() { 
-        
-        var ex = this.model.get('extra') ;
-        var name = ex != undefined ? ex.name : "";
-        
-        this.silentSyncUI( name );
-        this.model.trigger('updateRunner'); 
+        this.listenTo(this.model, 'change:extra', function () {
 
-      }, this);
+            var ex = this.model.get('extra');
+            var name = ex != undefined ? ex.name : "";
 
+            this.silentSyncUI(name);
+            this.model.trigger('update-node');
+        });
     },
 
     render: function(){
@@ -25,13 +23,12 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       this.$el.addClass('input-node');
 
-      var that = this;
       var extra = this.model.get('extra');
       var name = extra.name != undefined ? extra.name : "";
 
       this.inputText = this.$el.find(".text-input");
       this.inputText.val( name );
-      this.inputText.change( function(e){ that.nameChanged.call(that, e); e.stopPropagation(); });
+      this.inputText.change(function (e) { this.nameChanged(e); e.stopPropagation(); }.bind(this));
 
       return this;
 
@@ -39,7 +36,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
     nameChanged: function(){
       this.inputSet();
-      this.model.workspace.trigger('updateRunner');
+      this.model.trigger('updateRunner');
     },
 
     silentSyncUI: function(name){
@@ -52,11 +49,15 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
     inputSet: function(e,ui) {
 
-      if ( this.silent ) return;
+        if (this.silent) return;
 
-      var newValue = { name: this.inputText.val() };
-      this.model.workspace.setNodeProperty({property: 'extra', _id: this.model.get('_id'), newValue: newValue });      
+        var newValue = { name: this.inputText.val() };
+        var cmd = { property: 'extra',
+            _id: this.model.get('_id'),
+            newValue: newValue
+        };
 
+        this.model.trigger('request-set-node-prop', cmd);
     }
 
   });

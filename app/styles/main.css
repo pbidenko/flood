@@ -414,8 +414,8 @@ input[type="button"].btn-block {
 .node:hover .node-last-value-container:hover {
     right: -100px;
     left: -100px;
-    height: 60px;
-    bottom: -60px;
+    height: 82px;
+    bottom: -82px;
     overflow-x: auto;
     overflow-y: auto;
 }
@@ -424,6 +424,17 @@ input[type="button"].btn-block {
     width: 100%;
     -ms-word-wrap: break-word;
     word-wrap: break-word;
+}
+
+.node:hover .node-last-value-container .array-items {
+    display: none;
+    list-style-type: none;
+    padding-left: 15px;
+    margin-bottom: 0;
+}
+
+.node:hover .node-last-value-container:hover .array-items {
+    display: block;
 }
 
 .node-failed .node-last-value {
@@ -1966,6 +1977,8 @@ li.notmatch {
 .code-block-input {
     -moz-appearance: textfield-multiline;
     -webkit-appearance: textarea;
+	-webkit-border-radius:0px;
+	border-radius:0px;
     font-size: 14px;
     line-height: 25px;
     text-align: left;

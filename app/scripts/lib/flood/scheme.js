@@ -22,10 +22,9 @@ define('scheme', function() {
 
 		vars = typeof vars !== 'undefined' ? vars : [];
 		this.scope = {};
-		var that = this;
 		vars.forEach(function(val, i) {
-			that.scope[val] = args[i];
-		});
+			this.scope[val] = args[i];
+		}.bind(this));
 		outer = typeof outer !== 'undefined' ? outer : null;
 		this.outer = outer;
 
@@ -40,12 +39,11 @@ define('scheme', function() {
 		};
 
 		this.add_methods = function(object) {
-			var that = this;
 			Object.getOwnPropertyNames(object).forEach(function(ele){
 				if (typeof object[ele] === "function"){
-					that.scope[ele] = object[ele];
+					this.scope[ele] = object[ele];
 				}
-			});
+			}.bind(this));
 		};
 
 	};
@@ -103,7 +101,6 @@ define('scheme', function() {
 
 			env = typeof env !== 'undefined' ? env : this.global_env;
 
-			var that = this;
 			if ( typeof x === "string") {							// variable reference
 
 				defer(function(){ cb( env.find(x)[x] ); });
@@ -129,11 +126,11 @@ define('scheme', function() {
 
 				var vars = x[1], exp = x[2];
 
-				defer(function(){ 
+				defer(function(){
 					cb( function(args) {
-						return that.eval( exp, new Env(vars, arguments, env) );
-					});
-				});
+						return this.eval( exp, new Env(vars, arguments, env) );
+					}.bind(this));
+				}.bind(this));
 
 			} else if (x[0] === "begin") {							// (begin exp*)
 
@@ -142,11 +139,11 @@ define('scheme', function() {
 				// build up all of the evaluations
 				var exps = x.map(function(exp){
 					return function(cbi){
-						that.eval_async( exp, env, function(res){
+						this.eval_async( exp, env, function(res){
 							cbi(null, res);
 						});
-					};
-				});
+					}.bind(this);
+				}.bind(this));
 
 				// do all in parallel, returning results as array
 				return async.parallel( exps, function(err, res){
@@ -159,13 +156,13 @@ define('scheme', function() {
 			} else {												// (proc exp*)
 
 				// build all evaluations
-				var exps = x.map(function(exp){
-					return function(cbi){
-						that.eval_async( exp, env, function(res){
+				var exps = x.map(function(exp) {
+					return function(cbi) {
+						this.eval_async(exp, env, function(res) {
 							cbi(null, res);
 						});
-					}
-				});
+					}.bind(this);
+				}.bind(this));
 
 				// evaluate all of the inputs in parallel
 				async.parallel( exps, function(err, results){
@@ -173,10 +170,10 @@ define('scheme', function() {
 					// then finally apply function in deferred fashion
 					defer(function(){
 						var proc = results.shift();
-			  		cb( proc.apply(that, results) );
-					});
+						cb( proc.apply(this, results) );
+					}.bind(this));
 
-				});
+				}.bind(this));
 			
 			}
 
@@ -185,7 +182,6 @@ define('scheme', function() {
 		this.eval = function(x, env) {
 			env = typeof env !== 'undefined' ? env : this.global_env;
 
-			var that = this;
 			if ( typeof x === "string") {							// variable reference
 				return env.find(x)[x];
 			} else if ( !(x instanceof Array) ){					// literal	
@@ -194,7 +190,7 @@ define('scheme', function() {
 				return x[1];
 			} else if (x[0] === "if") {								// (if test conseq alt)
 				var test = x[1], conseq = x[2], alt = x[3];
-		    return this.eval( (this.eval(test, env) ? conseq : alt), env );
+				return this.eval( (this.eval(test, env) ? conseq : alt), env );
 			} else if (x[0] === "set!") {							// (set! var exp)
 				var vari = x[1], exp = x[2];
 				env.find(vari)[vari] = this.eval(exp); 
@@ -204,8 +200,8 @@ define('scheme', function() {
 			} else if (x[0] === "lambda") {							// (lambda (var*) exp)
 				var vars = x[1], exp = x[2];
 				return (function(args) {
-					return that.eval( exp, new Env(vars, arguments, env) );
-				});
+					return this.eval( exp, new Env(vars, arguments, env) );
+				}.bind(this));
 			} else if (x[0] === "begin") {							// (begin exp*)
 				var f;
 				for (var i = 1, l = x.length; i < l; i++) {
@@ -213,10 +209,9 @@ define('scheme', function() {
 				}
 				return f;
 			} else {												// (proc exp*)
-				var that = this;									
-				var exps = x.map(function(exp) { 					
-					return that.eval(exp, env);
-				});
+				var exps = x.map(function(exp) {
+					return this.eval(exp, env);
+				}.bind(this));
 
 			  var proc = exps.shift();
 			  return proc.apply(this, exps);

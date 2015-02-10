@@ -1,8 +1,10 @@
 /**
  * Created by Masha on 11/26/2014.
  */
-define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspaceMessage', 'staticHelpers'],
-    function(Backbone, SaveFileMessage, SetModelPositionMessage, ClearWorkspaceMessage, helpers) {
+define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage',
+        'ClearWorkspaceMessage', 'staticHelpers', 'FileSaver'],
+    function(Backbone, SaveFileMessage, SetModelPositionMessage,
+             ClearWorkspaceMessage, helpers, FileSaver) {
 
         var data = null;
 
@@ -41,6 +43,10 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                 this.watchNodeEvents(x);
             }.bind(ws.runner));
 
+            if (ws.get('isCustomNode')) {
+                ws.initializeCustomNode();
+            }
+
             app.trigger('computation-completed:event', data);
             
             if (data.workspaceId) {
@@ -49,6 +55,9 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
 
             if (ws.get('nodes').length)
                 app.trigger('ws-data-loaded');
+
+            // make the loaded ws appear in workspace browser
+            app.trigger('request-workspace-browser-refresh');
         }
 
         return Backbone.Model.extend({
@@ -140,13 +149,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                 var byteArray = helpers.getByteArray(param.fileContent);
 
                 var blob = new Blob([byteArray], { type : 'application/octet-stream' });
-                var url = window.URL || window.webkitURL;
-                var downloadUrl = url.createObjectURL(blob);
-                var downloadElement = document.createElement('a');
-                downloadElement.style = 'display: none;';
-                downloadElement.href = downloadUrl;
-                downloadElement.download = param.fileName;
-                downloadElement.click();
+                FileSaver( blob, param.fileName );
             },
 
             createWorkspaceWithData: function (params) {
@@ -190,7 +193,7 @@ define(['backbone', 'SaveFileMessage', 'SetModelPositionMessage', 'ClearWorkspac
                     workspaces = this.app.workspaceBrowser ? this.app.workspaceBrowser
                         .get('workspaces').where({ guid: params.workspaceId }) : [];
                     if (workspaces.length) {
-                        app.loadWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true, true);
+                        app.openWorkspace(workspaces[0].get('_id'), prepareWorkspace.bind(this), true);
                     }
                     else {
                         app.newNodeWorkspace(prepareWorkspace.bind(this), null, true);

@@ -3,7 +3,7 @@ define(['backbone'], function(Backbone) {
 	return Backbone.Model.extend({
 
 	  defaults: {
-	  	isProjectWorkspace: false,
+	  	isProjectWorkspace: false
 	  },
 
 	  initialize: function(atts, vals) {
@@ -14,7 +14,7 @@ define(['backbone'], function(Backbone) {
 	  	// 	console.log( this.app.getCurrentWorkspace() );
 	  	// }, this);
 
-	  },
+	  }
 
 	});
 

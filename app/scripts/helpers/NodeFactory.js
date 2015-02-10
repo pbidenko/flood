@@ -1,14 +1,15 @@
-define(['Node', 'NumberNode', 'CodeBlockNode', 'StringNode', 'BooleanNode'], 
-function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode) {
+define(['Node', 'NumberNode', 'CodeBlockNode', 'StringNode', 'BooleanNode', 'ListNode'], 
+function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode, ListNode) {
     var map = {
         'Code Block': CodeBlockNode,
         'Number': NumberNode,
         'String' : StringNode,
-        'Boolean' : BooleanNode
+        'Boolean' : BooleanNode,
+        'List.Create': ListNode
     };
 
     return {
-        create: function(settings){
+        create: function(settings) {
             var ctr;
             if (map.hasOwnProperty(settings.config.typeName)) {
                 ctr = map[settings.config.typeName];
@@ -16,7 +17,13 @@ function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode) {
                 ctr = Node;
             }
 
-            return new ctr(settings.config, { workspace: settings.workspace });
+            var options = {};
+            var elements = settings.searchElements.where({ creationName: settings.config.typeName });
+            if (elements.length) {
+                options.searchElement = elements[0];
+            }
+
+            return new ctr(settings.config, options);
         }
     }
 });

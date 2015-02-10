@@ -20,7 +20,7 @@ require.config({
             exports: 'List'
         },
         Three: {
-            exports: 'Three'
+            exports: 'THREE'
         },
         CSG: {
             exports: 'CSG'
@@ -134,6 +134,7 @@ require.config({
         StringNode: 'models/nodes/StringNode',
         BooleanNode: 'models/nodes/BooleanNode',
         CodeBlockNode: 'models/nodes/CodeBlockNode',
+        ListNode: 'models/nodes/ListNode',
         Search: 'models/Search',
         SearchElement: 'models/SearchElement',
         Workspace: 'models/Workspace',
@@ -152,6 +153,7 @@ require.config({
         WorkspaceBrowser: 'models/WorkspaceBrowser',
         SocketConnection: 'models/SocketConnection',
         WorkspaceResolver: 'models/WorkspaceResolver',
+        ThreeViewer: 'models/ThreeViewer',
 
         CreateNodeCommand: 'models/commands/CreateNodeCommand',
         CreateProxyNodeCommand: 'models/commands/CreateProxyNodeCommand',
@@ -168,6 +170,7 @@ require.config({
         LibraryItemsListMessage: 'models/messages/LibraryItemsListMessage',
         SaveFileMessage: 'models/messages/SaveFileMessage',
         GeometryMessage: 'models/messages/GeometryMessage',
+        GetArrayItemsMessage: 'models/messages/GetArrayItemsMessage',
         UploadFileMessage: 'models/messages/UploadFileMessage',
         SetModelPositionMessage: 'models/messages/SetModelPositionMessage',
         HasUnsavedChangesMessage: 'models/messages/HasUnsavedChangesMessage',
@@ -184,6 +187,7 @@ require.config({
         WorkspacePathResponse: 'models/responses/WorkspacePathResponse',
         HasUnsavedChangesResponse: 'models/responses/HasUnsavedChangesResponse',
         CodeBlockDataResponse: 'models/responses/CodeBlockDataResponse',
+        ArrayItemsDataResponse: 'models/responses/ArrayItemsDataResponse',
 
         //helpers
         commandsMap: 'helpers/CommandsMap',
@@ -198,8 +202,10 @@ require.config({
 
         // customizer
         BaseWidgetView: 'views/customizer/widgets/Base',
-        GeometryWidgetView: 'views/customizer/widgets/Geometry',
         NumberWidgetView: 'views/customizer/widgets/Number',
+        CodeBlockWidgetView: 'views/customizer/widgets/CodeBlock',
+        BooleanWidgetView: 'views/customizer/widgets/Boolean',
+        StringWidgetView: 'views/customizer/widgets/String',
 
         CustomizerAppView: 'views/customizer/CustomizerAppView',
         CustomizerHeaderView: 'views/customizer/CustomizerHeaderView',
@@ -240,6 +246,12 @@ require.config({
         ThreeCSGNodeView: 'views/NodeViews/ThreeCSG',
         StringView: 'views/NodeViews/StringView',
         BooleanView: 'views/NodeViews/BooleanView',
+        ListView: 'views/NodeViews/List',
+
+        // base views
+        BooleanBase: 'views/baseNodeViews/BooleanBase',
+        StringBase: 'views/baseNodeViews/StringBase',
+        NumberBase: 'views/baseNodeViews/NumberBase',
 
         OrbitControls: 'lib/OrbitControls',
         Viewport: 'lib/Viewport',

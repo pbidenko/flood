@@ -44,12 +44,16 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
         closeWorkspaceTab: function (data) {
             var saveUploader = this.app.saveUploader;
             var ws = saveUploader.getWorkspaceByGuid(data.guid);
-            this.app.get('workspaces').remove(ws);
+            if (ws.get('isCustomNode')) {
+                this.app.get('workspaces').trigger('hide', ws);
+            }
+            else {
+                this.app.get('workspaces').remove(ws);
+            }
         },
 
         clearHomeWorkspace: function (data) {
             var saveUploader = this.app.saveUploader;
-            var ws = saveUploader.getWorkspaceByGuid(data.guid);
             // ensure it's Home workspace
             if (!data.guid) {
                 saveUploader.clearHomeWorkspace();

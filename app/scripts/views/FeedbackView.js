@@ -16,10 +16,10 @@ define(['backbone'], function(Backbone) {
     template: _.template( $('#feedback-template').html() ),
 
     initialize: function( args, atts ) {
-      this.app = atts.app;
+        this.app = atts.app;
 
-      this.model.on('change:failure', this.fail, this );
-      this.model.on('success', this.success, this );
+        this.listenTo(this.model, 'change:failure', this.fail);
+        this.listenTo(this.model, 'success', this.success);
     },
 
     render: function() {
@@ -61,16 +61,14 @@ define(['backbone'], function(Backbone) {
       this.sendingView.hide();
       this.successView.show();
 
-      var that = this;
-
       setTimeout(function(){
-        that.app.set("showingFeedback", false);
+        this.app.set("showingFeedback", false);
 
-        that.subject.val("");
-        that.message.val("");
+        this.subject.val("");
+        this.message.val("");
 
-        that.successView.fadeOut();
-      }, 800);
+        this.successView.fadeOut();
+      }.bind(this), 800);
 
     },
 

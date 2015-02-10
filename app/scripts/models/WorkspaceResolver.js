@@ -20,7 +20,6 @@ define(['backbone', 'FLOOD'],
         console.log(this.workspace.get('name') + " has no dependencies");
         this.workspace.initializeRunner();
         this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
-        this.workspace.listenTo( this.app, 'geometry-data-received:event', this.workspace.updateNodeGeometry);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
         return;
@@ -30,12 +29,9 @@ define(['backbone', 'FLOOD'],
 
       console.log(this.workspace.get('name') + " has dependencies: " + JSON.stringify( depIds) );
 
-      var that = this;
-      this.app.get('workspaces').on('add', function(ws){ that.resolveDependency.call(that, ws); }, this);
+      this.listenTo(this.app.get('workspaces'), 'add', this.resolveDependency);
 
-      depIds.forEach(function(x){
-        that.awaitOrResolveDependency.call(that, x);
-      });
+      depIds.forEach(this.awaitOrResolveDependency.bind(this));
     },
 
     cleanupDependencies: function(){
@@ -79,7 +75,6 @@ define(['backbone', 'FLOOD'],
       if (this.awaitedWorkspaceDependencyIds.length === 0) {
         this.workspace.initializeRunner();
         this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
-        this.workspace.listenTo( this.app, 'geometry-data-received:event', this.workspace.updateNodeGeometry);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
         this.app.get('workspaces').add(this.workspace);
@@ -119,26 +114,31 @@ define(['backbone', 'FLOOD'],
 
     watchedDependencies: {},
 
-    watchOneDependency: function( customNodeWorkspace ){
+    watchOneDependency: function( customNodeWorkspace ) {
 
-      if ( !customNodeWorkspace.id ){
-        customNodeWorkspace = this.app.getLoadedWorkspace( customNodeWorkspace );
-      } 
+        if (!customNodeWorkspace.id) {
+            customNodeWorkspace = this.app.getLoadedWorkspace(customNodeWorkspace);
+        }
 
-      if ( this.watchedDependencies[ customNodeWorkspace.id ] ) return;
-      this.watchedDependencies[ customNodeWorkspace.id ] = true;
+        if (this.watchedDependencies[ customNodeWorkspace.id ]) return;
+        this.watchedDependencies[ customNodeWorkspace.id ] = true;
 
-      var that = this;
+        var sync = function () {
+                this.syncCustomNodesWithWorkspace(customNodeWorkspace)
+            }.bind(this)
+            , syncAndRequestRun = function () {
+                this.syncCustomNodesWithWorkspace(customNodeWorkspace);
+                this.workspace.trigger('requestRun');
+            }.bind(this)
+            , syncAndUpdateRunner = function () {
+                this.syncCustomNodesWithWorkspace(customNodeWorkspace);
+                this.workspace.trigger('updateRunner');
+            }.bind(this);
 
-      var sync = function(){ that.syncCustomNodesWithWorkspace.call(that, customNodeWorkspace) }
-        , syncAndRequestRun = function(){ that.syncCustomNodesWithWorkspace.call(that, customNodeWorkspace); that.workspace.trigger('requestRun'); }
-        , syncAndUpdateRunner = function(){ that.syncCustomNodesWithWorkspace.call(that, customNodeWorkspace); that.workspace.trigger('updateRunner'); };
-
-      customNodeWorkspace.on('change:name', sync, this);
-      customNodeWorkspace.on('change:workspaceDependencyIds', sync, this);
-      customNodeWorkspace.on('requestRun', syncAndRequestRun, this );
-      customNodeWorkspace.on('updateRunner', syncAndUpdateRunner, this );
-
+        this.listenTo(customNodeWorkspace, 'change:name', sync);
+        this.listenTo(customNodeWorkspace, 'change:workspaceDependencyIds', sync);
+        this.listenTo(customNodeWorkspace, 'requestRun', syncAndRequestRun);
+        this.listenTo(customNodeWorkspace, 'updateRunner', syncAndUpdateRunner);
     },
 
     syncCustomNodesWithWorkspace: function(workspace){
@@ -191,7 +191,7 @@ define(['backbone', 'FLOOD'],
               var inConn = x.getConnectionAtIndex(inputConns.length - 1);
 
               if (inConn != null){
-                x.workspace.removeConnection(inConn);
+                this.workspace.removeConnection(inConn);
               }
 
               inputConns.pop();
@@ -217,8 +217,10 @@ define(['backbone', 'FLOOD'],
               var ocs = x.get('outputConnections')
                 .last();
 
-              if (ocs){
-                ocs.slice(0).forEach(function(outConn){ x.workspace.removeConnection(outConn); })
+              if (ocs) {
+                  ocs.slice(0).forEach(function (outConn) {
+                      this.workspace.removeConnection(outConn);
+                  }.bind(this))
               }
 
               outputConns.pop();
@@ -281,9 +283,9 @@ define(['backbone', 'FLOOD'],
         x.trigger('requestRender');
 
         // update runner
-        x.trigger('updateRunner');
+        x.trigger('update-node');
 
-      });
+      }.bind(this));
 
       if (directlyAffectedCustomNodes.length > 0) this.workspace.sync('update', this.workspace);
 
@@ -294,7 +296,7 @@ define(['backbone', 'FLOOD'],
       var indirectlyAffectedNodes = this.getIndirectlyAffectedCustomNodes( workspace.id );
 
       indirectlyAffectedNodes.forEach(function(x){
-        x.trigger('updateRunner');
+        x.trigger('update-node');
       });
 
       if (indirectlyAffectedNodes.length > 0) this.workspace.sync('update', this.workspace );

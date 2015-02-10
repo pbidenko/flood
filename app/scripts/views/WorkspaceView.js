@@ -17,48 +17,42 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       'MozMousePixelScroll':  'mousewheelMove',
     },
 
-    initialize: function(atts) { 
+    initialize: function(atts) {
 
-      this.nodeViews = {};
-      this.connectionViews = {};
+        this.nodeViews = {};
+        this.connectionViews = {};
 
-      this.app = this.model.app;
+        this.app = this.model.app;
 
-      this.$workspace = $('<div/>', {class: 'workspace'});
+        this.$workspace = $('<div/>', {class: 'workspace'});
 
-      this.$workspace_back = $('<div/>', {class: 'workspace_back'});
-      this.$workspace_canvas = $('<svg class="workspace_canvas" xmlns="http://www.w3.org/2000/svg" version="1.1" />');
+        this.$workspace_back = $('<div/>', {class: 'workspace_back'});
+        this.$workspace_canvas = $('<svg class="workspace_canvas" xmlns="http://www.w3.org/2000/svg" version="1.1" />');
 
-      this.$el.append( this.$workspace );
-      this.$workspace.append( this.$workspace_back );
-      this.$workspace.append( this.$workspace_canvas );
+        this.$el.append(this.$workspace);
+        this.$workspace.append(this.$workspace_back);
+        this.$workspace.append(this.$workspace_canvas);
 
-      var that = this;
+        this.listenTo(this.model, 'change:connections', function () {
+            this.cleanup().renderConnections();
+        });
 
-      this.listenTo(this.model, 'change:connections', function() {
-        that.cleanup().renderConnections();
-      });
-      this.listenTo(this.model, 'update-connections', function () {
-          that.cleanup().updateConnections();
-      });
-      this.model.on('change:zoom', this.updateZoom, this );
-      this.model.on('change:offset', this.updateOffset, this );
-      this.model.on('change:isRunning', this.renderRunnerStatus, this);
+        this.listenTo(this.model, 'change:zoom', this.updateZoom);
+        this.listenTo(this.model, 'change:offset', this.updateOffset);
+        this.listenTo(this.model, 'change:isRunning', this.renderRunnerStatus);
 
-      this.listenTo(this.model, 'change:nodes', function() {
-        that.cleanup().renderNodes();
-      });
+        this.listenTo(this.model, 'change:nodes', function () {
+            this.cleanup().renderNodes();
+        });
 
-      this.listenTo(this.model, 'change:current', this.onChangeCurrent );
+        
+        this.listenTo(this.model, 'startProxyDrag', this.startProxyDrag);
+        this.listenTo(this.model, 'endProxyDrag', this.endProxyDrag);
 
-      this.listenTo(this.model, 'startProxyDrag', this.startProxyDrag);
-      this.listenTo(this.model, 'endProxyDrag', this.endProxyDrag);
+        this.renderProxyConnection();
+        this.renderMarquee();
 
-      this.renderProxyConnection();
-      this.renderMarquee();
-
-      this.renderRunnerStatus();
-
+        this.renderRunnerStatus();
     },
 
     render: function() {
@@ -83,98 +77,92 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       return [ (1 / zoom) * (x - offset.left), (1 / zoom) * ( y - offset.top) ];
     },
 
-    setupHammer: function(){
+    setupHammer: function() {
 
-      if (this.hammerSetupDone) return this;
-      this.hammerSetupDone = true;
+        if (this.hammerSetupDone) return this;
+        this.hammerSetupDone = true;
 
-      function isTouchDevice() {  
-        return 'ontouchstart' in window // works on most browsers 
-          || 'onmsgesturechange' in window; // works on ie10
-      }
+        function isTouchDevice() {
+            return 'ontouchstart' in window // works on most browsers
+                || 'onmsgesturechange' in window; // works on ie10
+        }
 
-      if (!isTouchDevice()) return;
+        if (!isTouchDevice()) return;
 
-      this.$workspace_back.on('touchmove', function(e){
-        e.preventDefault();
-      })
+        this.$workspace_back.on('touchmove', function (e) {
+            e.preventDefault();
+        });
 
-      // marquee - single finger on .workspace_back
+        // marquee - single finger on .workspace_back
 
-      var mcm = new Hammer.Manager(this.$workspace_back.get(0));
-      mcm.add( new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, pointers: 1 }) );
+        var mcm = new Hammer.Manager(this.$workspace_back.get(0));
+        mcm.add(new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, pointers: 1 }));
 
-      // start marquee
-      mcm.on('panstart', function(event){
+        // start marquee
+        this.listenTo(mcm, 'panstart', function (event) {
+            this.model.marquee.setStartCorner(this.inWorkspaceCoordinates(event.center.x, event.center.y));
+        });
 
-        this.model.marquee.setStartCorner( this.inWorkspaceCoordinates(event.center.x, event.center.y) );
+        // marquee
+        this.listenTo(mcm, 'pan', function (event) {
+            this.model.marquee.set('hidden', false);
+            this.model.marquee.setEndCorner(this.inWorkspaceCoordinates(event.center.x, event.center.y));
+            this.doMarqueeSelect();
+        });
 
-      }.bind(this));
-
-      // marquee
-      mcm.on('pan', function(event) {
-
-        this.model.marquee.set('hidden', false);
-        this.model.marquee.setEndCorner( this.inWorkspaceCoordinates(event.center.x, event.center.y) );
-        this.doMarqueeSelect();
-
-      }.bind(this));
-
-      // end marquee
-      mcm.on('panend', function(){
-
-        this.model.marquee.set('hidden', true);
-
-      }.bind(this));
+        // end marquee
+        this.listenTo(mcm, 'panend', function () {
+            this.model.marquee.set('hidden', true);
+        });
 
 
-      var mc = new Hammer.Manager(this.el);
-      mc.add( new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, pointers: 3 }) );
+        var mc = new Hammer.Manager(this.el);
+        mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, pointers: 3 }));
 
-      // start pan
-      mc.on('panstart', function(){
-        this.scrollStart = [ this.$el.scrollLeft(), this.$el.scrollTop() ];
-      }.bind(this));
+        // start pan
+        this.listenTo(mc, 'panstart', function () {
+            this.scrollStart = [ this.$el.scrollLeft(), this.$el.scrollTop() ];
+        });
 
-      // pan
-      mc.on('pan', function(ev) {
-        this.model.set('offset', [ this.scrollStart[0] - ev.deltaX, this.scrollStart[1] - ev.deltaY ] );
-      }.bind(this));
+        // pan
+        this.listenTo(mc, 'pan', function (ev) {
+            this.model.set('offset', [ this.scrollStart[0] - ev.deltaX, this.scrollStart[1] - ev.deltaY ]);
+        });
 
-      // end pan
-      mc.on('panend', function(){
-        this.zoomDisabled = true;
-        setTimeout(function(){ this.zoomDisabled = false; }.bind(this), 200)
-      }.bind(this));
+        // end pan
+        this.listenTo(mc, 'panend', function () {
+            this.zoomDisabled = true;
+            setTimeout(function () {
+                this.zoomDisabled = false;
+            }.bind(this), 200)
+        });
 
-      // pinching
-      mc.add( new Hammer.Pinch({ threshold: 0.1 }) );
+        // pinching
+        mc.add(new Hammer.Pinch({ threshold: 0.1 }));
 
-      mc.on('pinchstart', function(ev) {
-        this.zoomStart = this.model.get('zoom');
-      }.bind( this ));
+        this.listenTo(mc, 'pinchstart', function (ev) {
+            this.zoomStart = this.model.get('zoom');
+        });
 
-      mc.on('pinch', function(ev) {
-        if (this.zoomDisabled) return;
+        this.listenTo(mc, 'pinch', function (ev) {
+            if (this.zoomDisabled) return;
 
-        var val = this.zoomStart * ev.scale;
+            var val = this.zoomStart * ev.scale;
 
-        if (val < 0.25) val = 0.25;
-        if (val > 1.2) val = 1.2;
+            if (val < 0.25) val = 0.25;
+            if (val > 1.2) val = 1.2;
 
-        this.model.set('zoom', val );
-      }.bind( this ));
+            this.model.set('zoom', val);
+        });
 
+        // tap
+        mc.add(new Hammer.Tap({ taps: 2 }));
 
-      // tap
-      mc.add( new Hammer.Tap({ taps: 2 }) );
+        this.listenTo(mc, 'tap', function (e) {
+            this.showNodeSearch({ clientX: e.center.x, clientY: e.center.y });
+        });
 
-      mc.on('tap', function(e) {
-        this.showNodeSearch({ clientX: e.center.x, clientY: e.center.y });
-      }.bind( this ));
-
-      return this;
-
+        return this;
     },
 
     mousewheelMove: function(e){
@@ -534,13 +522,14 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
           }
 
           nodeView = new NodeView({ model: nodeModel, workspaceView: this_, workspace: this_.model });
+          this_.watchNodeViewEvents(nodeView);
           this_.nodeViews[ nodeView.model.get('_id') ] = nodeView;
 
         }
 
         this_.$workspace.prepend( nodeView.$el );
+        this_.makeDraggable(nodeView);
         nodeView.render();
-        nodeView.makeDraggable();
         nodeView.delegateEvents();
         
         this_.$workspace_canvas.append( nodeView.portGroup );
@@ -549,6 +538,91 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
 
       return this;
 
+    },
+
+    watchNodeViewEvents: function(nodeView) {
+        this.listenTo(nodeView, 'send-array-message', function(message) {
+            this.model.app.socket.send(JSON.stringify(message));
+        });
+
+        this.listenTo(nodeView, 'end-port-conn', this.endPortConnection);
+        this.listenTo(nodeView, 'update-connections', function() {
+            this.cleanup().updateConnections();
+        });
+
+        this.listenTo(nodeView, 'request-open-definition', function(id) {
+            this.model.app.openWorkspace( id );
+        });
+
+        if (nodeView.changeVisibility) {
+            nodeView.listenTo(this.model, 'change:current', nodeView.changeVisibility.bind(nodeView, this.model));
+            nodeView.listenTo(nodeView.model, 'change:visible', nodeView.changeVisibility.bind(nodeView, this.model));
+        }
+    },
+
+    endPortConnection: function(e, id) {
+        if ( !this.model.draggingProxy )
+            return;
+
+        var index = parseInt( $(e.currentTarget).attr('data-index') );
+        this.model.completeProxyConnection(id, index );
+        e.stopPropagation();
+    },
+
+    makeDraggable: function(nodeView) {
+
+        nodeView.initPos = [];
+        nodeView.$el.draggable({
+            drag: function (e, ui) {
+                var zoom = 1 / this.model.get('zoom');
+
+                ui.position.left = zoom * ui.position.left;
+                ui.position.top = zoom * ui.position.top;
+
+                var offset = [ui.position.left - nodeView.initPos[0],
+                        ui.position.top - nodeView.initPos[1]];
+
+                this.model.get('nodes').moveSelected(offset, nodeView);
+
+                nodeView.model.set('position', [ ui.position.left, ui.position.top ]);
+
+            }.bind(this),
+            start: function () {
+
+                if (!nodeView.model.get('selected')) {
+                    this.model.get('nodes').deselectAll();
+                }
+
+                nodeView.model.set('selected', true);
+                this.model.get('nodes').startDragging(nodeView);
+
+                var zoom = 1 / this.model.get('zoom');
+                var pos = nodeView.model.get('position');
+
+                nodeView.initPos = [ pos[0], pos[1] ];
+
+            }.bind(this),
+            stop: function () {
+
+                var start = [ nodeView.initPos[0], nodeView.initPos[1] ];
+                var pos = nodeView.model.get('position');
+                var end = [ pos[0], pos[1] ];
+
+                var cmd = { property: 'position',
+                    _id: nodeView.model.get('_id'),
+                    oldValue: start,
+                    newValue: end
+                };
+
+                this.model.setNodeProperty(cmd);
+
+            }.bind(this)
+        });
+
+        if (nodeView.setCodeblockDraggableOption)
+            nodeView.setCodeblockDraggableOption();
+
+        nodeView.$el.css('position', 'absolute');
     },
 
     keydownHandler: function(e){
@@ -611,7 +685,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
         var view = this_.connectionViews[cntn.get('_id')]
 
         if ( this_.connectionViews[cntn.get('_id')] === undefined){
-          view = new ConnectionView({ model: cntn, workspaceView: this_, workspace: this_.model });
+          view = new ConnectionView({ model: cntn, workspaceView: this_ });
         }
 
         view.delegateEvents();
@@ -640,6 +714,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
       for (var key in this.nodeViews){
         if (this.model.get('nodes').get(key) === undefined){
           this.nodeViews[key].remove();
+          this.stopListening(this.nodeViews[key]);
           delete this.nodeViews[key];
         }
       }

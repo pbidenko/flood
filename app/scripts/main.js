@@ -1,6 +1,6 @@
 require(["config"], function() {
 
-  require(['backbone', 'App', 'AppView', 'Three', 'Viewport', 'FLOODCSG', 'bootstrap', 'augment'], function (Backbone, App, AppView) {
+  require(['backbone', 'App', 'AppView', 'FLOODCSG', 'bootstrap', 'augment'], function (Backbone, App, AppView) {
 
     var app = new App();
 

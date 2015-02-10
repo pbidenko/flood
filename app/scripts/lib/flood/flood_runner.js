@@ -1,32 +1,29 @@
 importScripts( 'scheme.js', 'flood.js', 'csg.js', 'flood_csg.js'); 
 
-// Routing
-var that = this;
-
 onmessage = function (m) {
 
 	if (!checkCommandData(m.data)) return;
 	commands.push(m.data);
-	that[ "on_" + m.data.kind ](m.data);
+	this[ "on_" + m.data.kind ](m.data);
 
-};
+}.bind(this);
 
-checkCommandData = function(data){
+checkCommandData = function(data) {
 
 	if (!data.kind) {
-		fail({kind: "noCommand", msg: "No command given"});
+		fail({ kind: "noCommand", msg: "No command given" });
 		return false;
 	}
 
 	var handler = "on_" + data.kind;
 
-	if (!that[handler]) {
-		fail({kind: data.kind, msg: "No such command"});
+	if (!this[handler]) {
+		fail({ kind: data.kind, msg: "No such command" });
 		return false;
 	}
 
 	return true;
-}
+}.bind(this);
 
 success = function(m, silent){
 	if (silent) return;
@@ -396,16 +393,16 @@ post_nodeEvalBegin = function(node, isNew){
 
 };
 
-post_nodeEvalComplete = function(node, args, isNew, value, prettyValue ){
+post_nodeEvalComplete = function(node, args, isNew, value, geometry ){
 
 	if (typeof value === "function") {
 		value = value.toString();
-		prettyValue = value.toString();
+		geometry = value.toString();
 	}
 	
 	if ( isNew ){
 		// console.log('copying value', node.typeName );
-		return success({ kind: "nodeEvalComplete", isNew : isNew, _id: node.id, value : value, prettyValue: prettyValue  });
+		return success({ kind: "nodeEvalComplete", isNew : isNew, _id: node.id, value : value, geometry: geometry  });
 	} else {
 		// console.log('not copying value', node.typeName );
 		return success({ kind: "nodeEvalComplete", isNew : isNew, _id: node.id });

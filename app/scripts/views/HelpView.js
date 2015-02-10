@@ -18,8 +18,6 @@ define(['backbone'], function(Backbone) {
 
       var template = _.template( $('#help-section-template').html() );
 
-      var that = this;
-
       this.$el.empty();
 
       this.model.get('sections').forEach(function(section){
@@ -43,9 +41,9 @@ define(['backbone'], function(Backbone) {
         }
 
         section.elementPosition = [ offset.left + width, offset.top + height ];
-        that.$el.append(template( section ));
+        this.$el.append(template( section ));
 
-      });
+      }.bind(this));
 
       return this;
 

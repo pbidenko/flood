@@ -15,10 +15,9 @@ define(['AbstractRunner'], function (AbstractRunner) {
 
             this.worker = new Worker('scripts/lib/flood/flood_runner.js');
 
-            var that = this;
             this.worker.addEventListener('message', function (e) {
-                return that.onWorkerMessage.call(that, e.data);
-            }, false);
+                return this.onWorkerMessage(e.data);
+            }.bind(this), false);
 
         },
 

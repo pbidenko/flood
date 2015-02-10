@@ -6,7 +6,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Customizer - Flood</title>
+        <title>Reach Customizer</title>
         <meta name="description" content="">
         <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -248,7 +248,15 @@
             <span class="indicator private">private</span>
           <% } %>
 
-          <i class="fa fa-download fa-fw dim-button"></i>
+          <i id="save-file-button" class="fa fa-download fa-fw dim-button"></i>
+          <div id="save-file-select-container">
+            <ul>
+              <li id="save-stl">Save as STL</li>
+            </ul>
+            <ul>
+              <li id="save-dyn">Save as DYN</li>
+            </ul>
+          </div>
 
         </div>
 
@@ -272,6 +280,50 @@
         </div>
 
         !-->
+
+      </script>
+
+      <script type="text/template" id="widget-code-block-template">
+
+          <span class="name">
+            <% if ( !name || name === "DefaultNodeName" || name === "") { %>
+              <%= typeName %>
+            <% } else { %>
+              <%= name %>
+            <% } %>
+          </span>
+
+          <code class="language-designScript widget-code-block-input" contenteditable><%= extra.code %></code>
+
+      </script>
+
+      <script type="text/template" id="widget-boolean-template">
+
+        <span class="name">
+          <% if ( !name || name === "DefaultNodeName" || name === "") { %>
+            <%= typeName %>
+          <% } else { %>
+            <%= name %>
+          <% } %>
+        </span>
+
+        <input type="radio" class="true-flag" name=<%= "radio" +_id %> <%= extra.value ? 'checked' : '' %> />
+        <label style="padding-right: 5px">True</label>
+        <input type="radio" class="false-flag" name=<%= "radio" +_id %> <%= extra.value ? '' : 'checked' %> />
+        <label>False</label>
+
+	  </script>
+      <script type="text/template" id="widget-string-template">
+
+          <span class="name">
+            <% if ( !name || name === "DefaultNodeName" || name === "") { %>
+              <%= typeName %>
+            <% } else { %>
+              <%= name %>
+            <% } %>
+          </span>
+
+          <textarea class="widget-string-input"><%= extra.value %></textarea>
 
       </script>
 
