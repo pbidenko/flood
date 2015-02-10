@@ -172,7 +172,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         else {
             var currentItems = this.get('arrayItems') || [];
             // insert received array at specified index
-            this.set('arrayItems', currentItems.slice(0, param.indexFrom).concat(param.items));
+            this.set('arrayItems', currentItems.slice(0, param.indexFrom).concat(JSON.parse(param.items)));
         }
 
         this.trigger('requestRender');

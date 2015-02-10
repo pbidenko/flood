@@ -1,6 +1,6 @@
-define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'ThreeCSGNodeView', 'FormulaView',
+define(['BaseNodeView', 'ShowNodeView', 'NumNodeView', 'ThreeCSGNodeView', 'FormulaView', 'WatchNodeView',
 'CodeBlockView', 'OutputView', 'InputView', 'CustomNodeView', 'StringView', 'BooleanView', 'ListView'], 
-  function(BaseNodeView, WatchNodeView, NumNodeView, ThreeCSGNodeView, FormulaView,
+  function(BaseNodeView, ShowNodeView, NumNodeView, ThreeCSGNodeView, FormulaView, WatchNodeView,
   CodeBlockView, OutputView, InputView, CustomNodeView, StringView, BooleanView, ListView){
 
   var nodeViewTypes = {
@@ -10,7 +10,7 @@ define(['BaseNodeView', 'WatchNodeView', 'NumNodeView', 'ThreeCSGNodeView', 'For
   };
 
   nodeViewTypes.Base = ThreeCSGNodeView;
-  nodeViewTypes.Show = WatchNodeView;
+  nodeViewTypes.Show = ShowNodeView;
   nodeViewTypes.Number = NumNodeView;
   nodeViewTypes.CodeBlock = CodeBlockView;
   nodeViewTypes.CustomNode = CustomNodeView;

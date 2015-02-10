@@ -566,11 +566,45 @@
 
     <ul class="node-inputs">
         <% _.each(type.inputs, function(ele, index) { %>
-        <li class="node-port node-port-input" data-index=" <%= index %> "> <span class="node-port-name"> <%= ele.name %> </span>  </li>
+        <li class="node-port node-port-input" data-index=" <%= index %> "> <span class="node-port-name"> object </span> </li>
         <% }); %>
     </ul>
 
     <div class="node-data-container watch-data-container">
+        <span class="name searchfield"><pre><%= prettyValue ? prettyValue : "Nothing" %></pre></span>
+    </div>
+
+    <div class="dropdown node-settings" style="position:absolute">
+        <a data-toggle="dropdown" href="#">
+            <span style="color:black; padding: 1px">...</span>
+        </a>
+
+        <ul class="dropdown-menu node-dropdown-menu" role="menu" aria-labelledby="dLabel">
+            <li class="dropdown-header">Name</li>
+            <li class="node-dropown-menu-item">
+                <input class="name-input" value="<%= name %>">
+            </li>
+
+            <li class="dropdown-header shown-items hidden">Shown array items</li>
+
+            <li class="node-dropown-menu-item shown-items hidden">
+                <input type="number" class="shown-items" min="1" max="10" value="10" step="1">
+                <span class="shown-items" style="padding-left: 5px">of 1 is shown</span>
+            </li>
+        </ul>
+    </div>
+
+</script>
+
+<script type="text/template" id="node-show-template">
+
+    <ul class="node-inputs">
+        <% _.each(type.inputs, function(ele, index) { %>
+        <li class="node-port node-port-input" data-index=" <%= index %> "> <span class="node-port-name"> <%= ele.name %> </span>  </li>
+        <% }); %>
+    </ul>
+
+    <div class="node-data-container show-data-container">
         <span class="name searchfield"><pre><%= prettyValue ? prettyValue : "Nothing" %></pre></span>
     </div>
 
@@ -579,7 +613,7 @@
 <script type="text/template" id="workspace-tab-template">
     <!-- build:remove -->
     <i class="fa fa-fw fa-pencil dim-button edit-button" style="visibility: hidden; margin-left: 10px"></i>
-	<!-- /build -->
+    <!-- /build -->
     <span class="workspace-tab-function <%= isCustomNode ? " " : " hidden" %>">
         <i class="fa fa-bolt"></i>
     </span>

@@ -2,50 +2,60 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
 
     return BaseNodeView.extend({
 
-        template: _.template($('#node-watch-template').html()),
+        template: _.template( $('#node-watch-template').html() ),
 
-        initialize: function (args) {
+        initialize: function(args) {
+            BaseNodeView.prototype.initialize.apply(this, arguments);
 
-        BaseNodeView.prototype.initialize.apply(this, arguments);
-        this.listenTo(this.model, 'change:lastValue', this.renderNode);
-        this.listenTo(this.model, 'disconnection', this.renderNode);
+            this.$el.on('blur', 'input.shown-items', this.renderNode.bind(this));
         },
 
-        renderNode: function () {
+        renderNode: function(){
 
-            var pretty = this.model.get('lastValue') != undefined ? this.prettyPrint(this.model.get('lastValue')) : this.model.get('lastValue');
+            var arrayItems = this.model.get('arrayItems') || [];
+            for(var i = 0; i < arrayItems.length; i++){
+              try{
+                var val = JSON.parse(arrayItems[i]);
+                arrayItems[i] = val;
+              }catch(e){}
+            }
+            if(this.itemsToShow <= arrayItems.length)
+                arrayItems = arrayItems.slice(0, this.itemsToShow);
 
-            this.model.set('prettyValue', pretty);
+            var prettyValue = arrayItems.length ? this.format(arrayItems) : this.model.get('lastValue');
+            this.model.set('prettyValue', prettyValue);
 
             var json = this.model.toJSON();
-
             this.$el.html(this.template(json));
 
-            return this;
+            return BaseNodeView.prototype.renderNode.apply(this, arguments);
 
         },
 
-        prettyPrint: function (data) {
-            var val = JSON.parse(data);
+        format: function (data) {
 
-            if (typeof val === 'number') {
-                return val.toPrecision(4);
+            if (typeof data === 'number') {
+                return data.toPrecision(4);
             }
 
-            if (typeof val === 'string') {
-                return val.replace(new RegExp('\t', 'g'), '').replace(new RegExp('\n', 'g'), '<br>');
+            if (typeof data === 'string') {
+                return data.replace(new RegExp('\t', 'g'), '').replace(new RegExp('\n', 'g'), '<br>');
             }
 
-            if ($.isArray(val)) {
-                return this.parseArray(val, 2);
+            if ($.isArray(data)) {
+                var text = this.parseArray(data, 2);
+                if (this.maxItemsNumber > this.itemsToShow) {
+                    text += '...';
+                }
+                return text;
             }
 
-            return val;
+            return data;
         },
 
         parseArray: function (array, index) {
             var tab = Array(index).join('&#09;');
-            var result = array.length ? 'List: <br>' : 'Empty List';
+            var result = array.length ? 'List: <br>' : 'Nothing';
 
             for (var i = 0; i < array.length; i++) {
                 result += tab + '[' + i + '] ';
