@@ -142,16 +142,15 @@ define('FLOOD', function() {
 
 	FLOOD.baseTypes.NodeType = function(options) {
 
-		var that = this;
 		var options = options || {};
 		this.replication = options.replication || "applyLongest";
 
 		// tell the inputs about their parent node & index
 		if (options.inputs) {
 			options.inputs.forEach( function(e, i) {
-				e.parentNode = that;
+				e.parentNode = this;
 				e.parentIndex = i;
-			});
+			}.bind(this));
 
 			this.inputs = options.inputs;
 		} else {
@@ -161,9 +160,9 @@ define('FLOOD', function() {
 		// tell the outputs about their parent node & index
 		if (options.outputs) {
 			options.outputs.forEach( function(e, i) {
-				e.parentNode = that;
+				e.parentNode = this;
 				e.parentIndex = i;
-			});
+			}.bind(this));
 
 			this.outputs = options.outputs;
 		} else {
@@ -239,18 +238,16 @@ define('FLOOD', function() {
 
 		this.compile = function() { 
 			
-			var that = this;
-
 			var partialEvalClosure = (function() { 
 
 					// if we have enough args, eval, otherwise return function
 					return function() {
 
-						var dirty = that.isDirty();
+						var dirty = this.isDirty();
 
 						try {
 
-							that.evalBegin(that, dirty);
+							this.evalBegin(this, dirty);
 
 							if ( dirty ){
 
@@ -267,49 +264,49 @@ define('FLOOD', function() {
 									
 									// build replication options and types
 									var options = {
-										replication: that.replication,
-										expected_arg_types: that.inputTypes()
+										replication: this.replication,
+										expected_arg_types: this.inputTypes()
 									};
 
 									try {
 										// actually evaluate the function!
-										that.value = that.eval.mapApply(that, Array.prototype.slice.call(arguments, 0), options);
+										this.value = this.eval.mapApply(this, Array.prototype.slice.call(arguments, 0), options);
 									} catch (e) {
-										that.value = null;
-										that.evalFailed(that, e);
+										this.value = null;
+										this.evalFailed(this, e);
 									}
 
 								} else { 
 									// return a partial function application
 									var originalArgs = arguments;
-									that.value = (function(){
+									this.value = (function () {
 										// return a closure
 										return function(){
-											return that.eval.partial.apply(that.eval, originalArgs).apply(that, arguments);
-										}
-									})();
+											return this.eval.partial.apply(this.eval, originalArgs).apply(this, arguments);
+										}.bind(this);
+									}.bind(this))();
 								}
 								
-								that.markClean();
+								this.markClean();
 
-								if ( that.doPostProcess && that.postProcess ){
-									that.prettyValue = that.postProcess( that.value );
+								if (this.doPostProcess && this.postProcess) {
+									this.geometry = this.postProcess(this.value);
 								}
 							}
 
 							// tell listeners that the evalation is complete
-							that.evalComplete( that, arguments, dirty, that.value, that.prettyValue );
+							this.evalComplete(this, arguments, dirty, this.value, this.geometry);
 
 						} catch (e) {
-							that.evalFailed(that, e);
+							this.evalFailed(this, e);
 							return null;
 						}
 
 						// yield the value
-						return that.value;
-					};
+						return this.value;
+					}.bind(this);
 
-			})();
+			}.bind(this))();
 
 			// return an s-expression, represented by the function to execute, and the list
 			// of arguments to apply to it
@@ -479,9 +476,6 @@ define('FLOOD', function() {
 
 		};
 
-		var that = this;
-
-
 		this.setInputTypes = function( inputTypes ){
 
 			for (var i = 0; i < this.inputs.length; i++) 
@@ -514,28 +508,28 @@ define('FLOOD', function() {
 		};
 
 		var addInput = function(){
-			var port = new FLOOD.baseTypes.InputPort( characters[ that.inputs.length ], [AnyTypeButQuotedArray], 0 );
-			port.parentNode = that;
-			port.parentIndex = that.inputs.length;
-			that.inputs.push( port );
-		};
+			var port = new FLOOD.baseTypes.InputPort( characters[ this.inputs.length ], [AnyTypeButQuotedArray], 0 );
+			port.parentNode = this;
+			port.parentIndex = this.inputs.length;
+			this.inputs.push( port );
+		}.bind(this);
 
 		var removeInput = function(){
-			if (that.inputs.length === 0) return;
-			that.inputs.pop();
-		};
+			if (this.inputs.length === 0) return;
+			this.inputs.pop();
+		}.bind(this);
 
 		var addOutput = function(){
-			var port = new FLOOD.baseTypes.OutputPort( characters[ that.outputs.length ], [AnyType] );
-			port.parentNode = that;
-			port.parentIndex = that.outputs.length;
-			that.outputs.push( port );
-		};
+			var port = new FLOOD.baseTypes.OutputPort( characters[ this.outputs.length ], [AnyType] );
+			port.parentNode = this;
+			port.parentIndex = this.outputs.length;
+			this.outputs.push( port );
+		}.bind(this);
 
 		var removeOutput = function(){
-			if (that.outputs.length === 0) return;
-			that.outputs.pop();
-		};
+			if (this.outputs.length === 0) return;
+			this.outputs.pop();
+		}.bind(this);
 
 	}.inherits( FLOOD.baseTypes.NodeType );
 
@@ -692,20 +686,20 @@ define('FLOOD', function() {
 		this.script = "A;";
 		this.portNames = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-		this.extend = function(args){
+		this.extend = function(args) {
 
-			if (args.script && typeof args.script === "string"){
+			if (args.script && typeof args.script === "string") {
 				this.script = args.script;
 				compileExpression();
 			}
 
-			if (args.numInputs && typeof args.numInputs === "number" ){
+			if (args.numInputs && typeof args.numInputs === "number") {
 				this.setNumInputs(args.numInputs);
 			}
 
-		}
+		};
 
-		this.setNumInputs = function( numInputs ){
+		this.setNumInputs = function(numInputs) {
 
 			if (typeof numInputs != "number" || numInputs < 0 || this.inputs.length === numInputs) {
 				return compileExpression();
@@ -714,45 +708,43 @@ define('FLOOD', function() {
 			if (this.inputs.length < numInputs) addFormulaInput();
 			if (this.inputs.length > numInputs) removeFormulaInput();
 
-			this.setNumInputs( numInputs );
-		}
-
-		var that = this;
+			this.setNumInputs(numInputs);
+		};
 
 		var prefix = function(){
 
-			var inputNames = that.inputs.map(function(x){
+			var inputNames = this.inputs.map(function(x){
 				return x.name;
 			}).join(',');
 
 			return '(function('+ inputNames + ') { return ';
-		};
+		}.bind(this);
 
 		var suffix = function(){
 
-			var argNames = that.inputs.map(function(x,i){
+			var argNames = this.inputs.map(function(x,i){
 				return "_fa[" + i + "]";
 			}).join(',');
 
 			return '}(' + argNames + '))';
-		};
+		}.bind(this);
 
 		var compileExpression = function(){
-			that.expression = prefix() + that.script + suffix();
-			return that.expression;
-		};
+			this.expression = prefix() + this.script + suffix();
+			return this.expression;
+		}.bind(this);
 
 		var addFormulaInput = function(){
-			var port = new FLOOD.baseTypes.InputPort( that.portNames[ that.inputs.length ], [AnyTypeButQuotedArray], 0 );
-			port.parentNode = that;
-			port.parentIndex = that.inputs.length;
-			that.inputs.push( port );
-		};
+			var port = new FLOOD.baseTypes.InputPort( this.portNames[ this.inputs.length ], [AnyTypeButQuotedArray], 0 );
+			port.parentNode = this;
+			port.parentIndex = this.inputs.length;
+			this.inputs.push( port );
+		}.bind(this);
 
 		var removeFormulaInput = function(){
-			if (that.inputs.length === 0) return;
-			that.inputs.pop();
-		};
+			if (this.inputs.length === 0) return;
+			this.inputs.pop();
+		}.bind(this);
 
 		compileExpression();
 

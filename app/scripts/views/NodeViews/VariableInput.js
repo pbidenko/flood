@@ -28,11 +28,12 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function (Backbone,
 
             this.model.set('ignoreDefaults', ignoreDefaults);
 
-            this.model.workspace.setNodeProperty({ property: "extra", _id: this.model.get('_id'), newValue: exCopy, oldValue: ex });
+            var cmd = { property: "extra", _id: this.model.get('_id'), newValue: exCopy, oldValue: ex };
+            this.model.trigger('request-set-node-prop', cmd);
 
             this.render();
-            this.model.trigger('updateRunner');
-            this.model.workspace.run();
+            this.model.trigger('update-node');
+            this.model.trigger('requestRun');
         },
 
         addInput: function (e) {

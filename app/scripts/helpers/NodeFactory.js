@@ -10,7 +10,7 @@ function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode, VariableInpu
     };
 
     return {
-        create: function(settings){
+        create: function(settings) {
             var ctr;
             if (map.hasOwnProperty(settings.config.typeName)) {
                 ctr = map[settings.config.typeName];
@@ -18,7 +18,13 @@ function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode, VariableInpu
                 ctr = Node;
             }
 
-            return new ctr(settings.config, { workspace: settings.workspace });
+            var options = {};
+            var elements = settings.searchElements.where({ creationName: settings.config.typeName });
+            if (elements.length) {
+                options.searchElement = elements[0];
+            }
+
+            return new ctr(settings.config, options);
         }
     }
 });

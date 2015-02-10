@@ -52,10 +52,7 @@ define(['backbone'], function (Backbone) {
 
             var wsc = this.workspace.toJSON();
 
-            var that = this;
-            this.workspace.get('nodes').each(function (x) {
-                that.watchNodeEvents.call(that, x);
-            });
+            this.workspace.get('nodes').each(this.watchNodeEvents.bind(this));
 
             wsc.kind = "setWorkspaceContents";
             this.post(wsc);
@@ -65,7 +62,7 @@ define(['backbone'], function (Backbone) {
 
             var node = this.workspace.get('nodes').get(data._id);
             if (node)
-                node.onEvalComplete(data.isNew, data.value, data.prettyValue);
+                node.onEvalComplete(data.isNew, data.value, data.geometry);
 
         },
 
@@ -117,7 +114,7 @@ define(['backbone'], function (Backbone) {
                 this.updateNode(node);
             };
 
-            this.listenTo(node, 'change:replication change:ignoreDefaults updateRunner', update);
+            this.listenTo(node, 'change:replication change:ignoreDefaults update-node', update);
         },
 
 		updateNode: function( node ){
@@ -125,7 +122,6 @@ define(['backbone'], function (Backbone) {
 			var n = node.serialize();
 
 			n.kind = "updateNode";
-			n.workspace_id = node.workspace.id;
 
 			this.post( n );
 
@@ -135,7 +131,6 @@ define(['backbone'], function (Backbone) {
 
 			var n = node.serialize();
 			n.kind = "addNode";
-			n.workspace_id = node.workspace.id;
 
 			this.watchNodeEvents( node );
 
@@ -147,7 +142,6 @@ define(['backbone'], function (Backbone) {
 
 			var n = node.serialize();
 			n.kind = "removeNode";
-			n.workspace_id = node.workspace.id;
 
 			this.post( n );
 
@@ -180,7 +174,6 @@ define(['backbone'], function (Backbone) {
 			var c = connection.toJSON();
 			c.kind = "addConnection";
 			c.id = connection.get('_id');
-			c.workspace_id = connection.workspace.id;
 
 			this.post(c);
 
@@ -188,14 +181,13 @@ define(['backbone'], function (Backbone) {
 
 		removeConnection: function(connection){
 
-			if (connection.silentRemove)
-				return;
+                        if (connection.silentRemove)
+                             return;
 			var c = connection.toJSON();
 			c.kind = "removeConnection";
 			c.id = connection.get('endNodeId');
 			c.portIndex = connection.get('endPortIndex');
 			c.startPortIndex = -1;
-			c.workspace_id = connection.workspace.id;
 
 			this.post( c );
 
@@ -214,12 +206,8 @@ define(['backbone'], function (Backbone) {
 
             var c = workspace.toJSON();
             c.kind = "addDefinition";
-            c.workspace_id = c._id;
 
-            var that = this;
-            workspace.get('nodes').each(function (x) {
-                that.watchNodeEvents.call(that, x);
-            });
+            workspace.get('nodes').each(this.watchNodeEvents.bind(this));
 
             this.listenTo(workspace.get('connections'), 'add', function (x) {
                 this.addConnection(x);

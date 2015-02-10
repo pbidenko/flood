@@ -13,7 +13,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
             var name = ex != undefined ? ex.name : "";
 
             this.silentSyncUI(name);
-            this.model.trigger('updateRunner');
+            this.model.trigger('update-node');
         });
     },
 
@@ -23,13 +23,12 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
       this.$el.addClass('output-node');
 
-      var that = this;
       var extra = this.model.get('extra');
       var name = extra.name != undefined ? extra.name : "";
 
       this.inputText = this.$el.find(".text-input");
       this.inputText.val( name );
-      this.inputText.change( function(e){ that.nameChanged.call(that, e); e.stopPropagation(); });
+      this.inputText.change(function (e) { this.nameChanged(e); e.stopPropagation(); }.bind(this));
 
       return this;
 
@@ -37,7 +36,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
 
     nameChanged: function(){
       this.inputSet();
-      this.model.workspace.trigger('updateRunner');
+      this.model.trigger('updateRunner');
     },
 
     silentSyncUI: function(name){
@@ -47,10 +46,15 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView'], function(Backbone, 
     },
 
     inputSet: function(e,ui) {
-      if ( this.silent ) return;
+        if (this.silent) return;
 
-      var newValue = { name: this.inputText.val() };
-      this.model.workspace.setNodeProperty({property: 'extra', _id: this.model.get('_id'), newValue: newValue });      
+        var newValue = { name: this.inputText.val() };
+        var cmd = { property: 'extra',
+            _id: this.model.get('_id'),
+            newValue: newValue
+        };
+
+        this.model.trigger('request-set-node-prop', cmd);
     }
 
   });

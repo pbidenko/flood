@@ -14,6 +14,8 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
           , inputConnections: []
           , outputConnections: []
           , selected: true
+          , isArray: false
+          , arrayItems: null
           , lastValue: null
           , failureMessage: null
           , visible: true
@@ -26,8 +28,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
         initialize: function (attrs, vals) {
             var inPort,
-                outPort,
-                elems;
+                outPort;
             // Need to know the type in order to create the node
             if (attrs.typeName && FLOOD.nodeTypes[attrs.typeName]) {
                 this.set('type', new FLOOD.nodeTypes[attrs.typeName]());
@@ -38,16 +39,15 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
                 this.set('creationName', attrs.extra.creationName);
                 this.set('displayName', attrs.extra.displayName);
             } else {
-                elems = vals.workspace.app.SearchElements.where({ creationName: attrs.typeName });
-                if (elems.length === 0) {
+                if (!vals.searchElement) {
                     if (attrs.ignoreDefaults) {
                         inPort = staticHelpers.generatePortNames(attrs.ignoreDefaults.length);
                     }
                 } else {
-                    inPort = elems[0].get('inPort');
-                    outPort = elems[0].get('outPort');
-                    this.set('displayName', elems[0].get('displayName'));
-                    this.set('creationName', elems[0].get('creationName'));
+                    inPort = vals.searchElement.get('inPort');
+                    outPort = vals.searchElement.get('outPort');
+                    this.set('displayName', vals.searchElement.get('displayName'));
+                    this.set('creationName', vals.searchElement.get('creationName'));
                 }
 
                 this.set('type', new FLOOD.nodeTypes.ServerNode(inPort, outPort));
@@ -90,8 +90,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
             this.listenTo(this, 'connection', this.onConnectPort);
 
             this.listenTo(this, 'disconnection', this.onDisconnectPort);
-            this.workspace = vals.workspace;
-
+            
             this.listenTo(this, 'remove', this.onRemove);
 
             this.initializePorts();
@@ -129,9 +128,29 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
     updateValue: function (values) {
 
+      var isArray = false;
       if (values.data) {
-        this.set('lastValue', values.data);
+          var itemsNumber = parseInt(values.arrayItemsNumber);
+          if (!isNaN(itemsNumber)) {
+              this.set('arrayItemsNumber', itemsNumber);
+              isArray = true;
+              if (itemsNumber) {
+                  this.set('lastValue', 'List');
+              }
+              else {
+                  this.set('lastValue', 'Empty list');
+              }
+          }
+          else {
+              this.set('lastValue', values.data);
+          }
       }
+
+      this.set('isArray', isArray);
+      // reset previous items
+      this.set('arrayItems', []);
+      this.trigger('array-reset');
+      this.trigger('requestRender');
 
       if (values.state === 'Error' || values.state === 'Warning') {
         this.trigger('evalFailed', values.stateMessage);
@@ -141,6 +160,22 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         this.trigger('evalBegin');
       }
 
+    },
+
+    appendArrayItems: function (param) {
+        // -1 means it's not an array
+        if (param.indexFrom === -1) {
+            this.set('isArray', false);
+            // reset previous items
+            this.set('arrayItems', []);
+        }
+        else {
+            var currentItems = this.get('arrayItems') || [];
+            // insert received array at specified index
+            this.set('arrayItems', currentItems.slice(0, param.indexFrom).concat(param.items));
+        }
+
+        this.trigger('requestRender');
     },
 
     onRemove: function(){
@@ -163,12 +198,13 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
     },
 
-    onEvalComplete: function(isNew, value, prettyValue){
+    onEvalComplete: function(isNew, value, geometry){
 
       if (!isNew) return;
 
+      this.trigger('geometryUpdated', {geometryData: {nodeId: this.get('_id'), geometry: geometry}});
+
       this.set('lastValue', value);
-      this.set('prettyLastValue', prettyValue);
       this.set('isEvaluating', false);
       this.trigger('evalComplete');
 
@@ -275,12 +311,11 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
       this.getPorts( isOutput )[portIndex].push(connection);
 
       // listen for deletion or update of the connection
-      var that = this;
       this.listenTo( connection, 'remove', (function(){
         return function(){
-          that.disconnectPort( portIndex, connection, isOutput );
-        };
-      })());
+          this.disconnectPort( portIndex, connection, isOutput );
+        }.bind(this);
+      }.bind(this))());
 
       this.trigger('connection', portIndex, isOutput, connection);
       this.trigger('change');
@@ -332,7 +367,7 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
         index = 0;
         connection = port[0];
         isOutput = false;
-        this.workspace.get('connections').remove(connection);
+        this.trigger('request-remove-conn-from-collection', connection);
       }
 
       if (index === -1)
@@ -361,138 +396,14 @@ define(['backbone', 'FLOOD', 'staticHelpers'], function (Backbone, FLOOD, static
 
     },
 
-    onDisconnectPort: function( portIndex, isOutput, connection ){
-      
-      if (isOutput){
-        return;
-      }
+    onDisconnectPort: function( portIndex, isOutput, connection ) {
 
-      if (!isOutput){
+        if (isOutput) {
+            return;
+        }
+
         this.get('type').inputs[portIndex].disconnect();
-      }
-
-      if (this.workspace)
-        this.workspace.run();
-
-    },
-
-    updateNodeGeometry: function(param) {
-        var graphicData = param.geometryData.graphicPrimitivesData;
-
-        graphicData.pointVertices = staticHelpers.getFloatArray(graphicData.pointVertices);
-        graphicData.lineStripVertices = staticHelpers.getFloatArray(graphicData.lineStripVertices);
-        graphicData.lineStripCounts = staticHelpers.getIntArray(graphicData.lineStripCounts);
-        graphicData.triangleVertices = staticHelpers.getFloatArray(graphicData.triangleVertices);
-        graphicData.triangleNormals = staticHelpers.getFloatArray(graphicData.triangleNormals);
-
-        var geometries = []; // prettyLastValue
-        graphicData.numberOfCoordinates = 3;
-
-        this.addPoints(graphicData, geometries);
-        this.addTriangles(graphicData, geometries);
-        this.addCurves(graphicData, geometries);
-
-        this.set('prettyLastValue', geometries);
-        },
-
-        clearGeometry: function() {
-            this.set('prettyLastValue', {});
-    },
-
-    addPoints: function (graphicData, geometries) {
-        var length, pos;
-        // if we have single points
-        if (graphicData.pointVertices && graphicData.pointVertices.length) {
-            length = graphicData.pointVertices.length / graphicData.numberOfCoordinates
-            var points = {vertices: []}, onePoint;
-            for(var i = 0; i < length; i++){
-                // add [x, y, z]
-                pos = i * graphicData.numberOfCoordinates;
-                onePoint = [
-                  graphicData.pointVertices[pos], 
-                  graphicData.pointVertices[pos + 1],
-                  graphicData.pointVertices[pos + 2]
-                ];
-                points.vertices.push(onePoint);
-            }
-
-            geometries.push(points);
-        }
-    },
-
-    addCurves: function (graphicData, geometries) {
-        // if we have line strips
-        if (graphicData.lineStripVertices && graphicData.lineStripVertices.length
-            && graphicData.lineStripCounts && graphicData.lineStripCounts.length) {
-            var curve, count, oneVertex, size, index = 0, pos = 0;
-
-            for (var k = 0; k < graphicData.lineStripCounts.length; k++) {
-                curve = { linestrip: []};
-                count = graphicData.lineStripCounts[k];
-
-                if(!count) {
-                    continue;
-                }
-
-                size = index + count;
-
-                for(var i = index; i < size; i++) {
-                    pos = i * graphicData.numberOfCoordinates;
-                    oneVertex = [
-                      graphicData.lineStripVertices[pos],
-                      graphicData.lineStripVertices[pos + 1],
-                      graphicData.lineStripVertices[pos + 2]
-                    ];
-                    curve.linestrip.push(oneVertex);
-                }
-
-                index += count;
-                geometries.push(curve);
-            }
-        }
-    },
-
-    addTriangles: function (graphicData, geometries) {
-        // if we have triangles
-        if (graphicData.triangleVertices && graphicData.triangleVertices.length
-            && graphicData.triangleNormals && graphicData.triangleNormals.length) {
-            var triangles = {vertices: [], faces:[]};
-            var index = 0, oneVertex, vertexCount = 3, length, pos;
-
-            length = graphicData.triangleVertices.length / vertexCount * 3;
-
-            for(var i = 0; i <= length; i++) {
-                for (var j = 0; j < vertexCount; j++) {
-                    // Add vertex - [x, y, z]
-                    pos = i * 9 + j * 3;
-                    oneVertex = [
-                      graphicData.triangleVertices[pos],
-                      graphicData.triangleVertices[pos + 1],
-                      graphicData.triangleVertices[pos + 2]
-                    ];
-                    triangles.vertices.push(oneVertex);
-                }
-
-                pos = i * 9;
-                // add [indexA, indexB, indexC, normal_vector: [x1, y1, z1, x2, y2, z2, x3, y3, z3]]
-                triangles.faces.push([index++, index++, index++, [
-                    // x1, y1, z1
-                    graphicData.triangleNormals[pos],
-                    graphicData.triangleNormals[pos + 1],
-                    graphicData.triangleNormals[pos + 2],
-                    // x2, y2, z2
-                    graphicData.triangleNormals[pos + 3],
-                    graphicData.triangleNormals[pos + 4],
-                    graphicData.triangleNormals[pos + 5],
-                    // x3, y3, z3
-                    graphicData.triangleNormals[pos + 6],
-                    graphicData.triangleNormals[pos + 7],
-                    graphicData.triangleNormals[pos + 8]]
-                ]);
-            }
-
-            geometries.push(triangles);
-        }
+        this.trigger('requestRun');
     }
 
   });

@@ -38,6 +38,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.context = new Storage({ baseUrl: settings.storageUrl });
 
       this.listenTo(this, 'code-block-node-updated:event', this.updateCodeBlockNode);
+      this.listenTo(this, 'array-items-received:event', this.processArrayItems);
     },
 
     workspaceIdsAwaitingParse : [],
@@ -127,6 +128,13 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         }
     },
 
+    processArrayItems: function(data) {
+        var workspaces = this.get('workspaces').where({ isCustomNode: false });
+        if (workspaces.length) {
+            workspaces[0].appendArrayItems(data);
+        }
+    },
+
     newWorkspace: function( callback ){
 
       this.context.createNewWorkspace().done(function(data){
@@ -145,18 +153,20 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    newNodeWorkspace: function( callback, customNodeName, silent ) {
+    newNodeWorkspace: function( callback, customNodeName, lazyInit  ) {
       this.context.createNewNodeWorkspace().done(function(data){
 
         data.isCustomNode = true;
         data.guid = this.makeId();
         data.name = customNodeName;
 
+        var attr = { app : this };
         // if we need to not send it to the dynamo
-        if (silent) {
+        if (lazyInit ) {
             data.notNotifyServer = true;
+            attr.lazyInit  = true;
         }
-        var ws = new Workspace(data, { app: this });
+        var ws = new Workspace(data, attr);
 
         this.get('workspaces').add( ws );
         this.set('currentWorkspace', ws.get('_id') );
@@ -246,7 +256,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
     },
 
-    openWorkspace: function( id, callback ){
+    openWorkspace: function( id, callback, silent ){
 
       this.removeWorkspaceFromBackground( id );
 
@@ -261,7 +271,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
 
-      }.bind(this));
+      }.bind(this), null, silent);
 
     },
 

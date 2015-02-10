@@ -5,14 +5,14 @@
 // CustomizerNodeView - similar to a nodeview, but no inputs/outputs, simplified controls, potentially multiple options with labels
 // CustomizerViewer - allows you to view your customized geometry, with saved camera position
 
-define(['backbone', 'CustomizerViewerView', 'CustomizerHeaderView', 'CustomizerWorkspaceView'], 
-  function(Backbone, CustomizerViewer, CustomizerHeader, CustomizerWorkspaceView ) {
+define(['backbone', 'CustomizerHeaderView', 'CustomizerWorkspaceView', 'ThreeViewer'], 
+  function(Backbone, CustomizerHeader, CustomizerWorkspaceView, ThreeViewer) {
 
   'use strict';
 
   return Backbone.View.extend({
 
-    el: '#customizer-app ',
+    el: '#customizer-app',
 
     events: {  },
 
@@ -22,13 +22,30 @@ define(['backbone', 'CustomizerViewerView', 'CustomizerHeaderView', 'CustomizerW
 
     render: _.once(function() {
 
-      (new CustomizerViewer()).render();
+      this.threeViewer = new ThreeViewer({container: document.getElementById("customizer-viewer")});
+      this.listenTo(this.model, 'geometry-data-received:event', this.updateNodeGeometry);
+      this.listenTo(this.model.get('workspaces'), 'geometryUpdated', this.updateNodeGeometry);
+
       (new CustomizerHeader({model: this.model.getCurrentWorkspace() })).render();
       (new CustomizerWorkspaceView({model: this.model.getCurrentWorkspace() })).render();
 
       return this;
 
-    })
+    }),
+
+    updateNodeGeometry: function(e){
+      var id = e.geometryData.nodeId,
+          visible = false,
+          selected = false;
+      this.model.getCurrentWorkspace().get('nodes').forEach(function (node) {
+        if (node.get('_id') === id) {
+          visible = node.get('visible');
+          selected = node.get('selected');
+        }
+      });
+
+      this.threeViewer.updateNodeGeometry(e, visible, selected);
+    }
 
   });
 });
