@@ -13,37 +13,52 @@ define(['backbone', 'underscore', 'jquery'],
         },
 
         currentValue: function () {
-            return this.slider.slider("option", "value");
+            return this.slider.slider('option', 'value');
         },
 
         setSliderValue: function (val) {
-            return this.slider.slider("option", "value", val);
+            return this.slider.slider('option', 'value', val);
         },
 
         valChanged: function () {
             var val = parseFloat(this.currentValueInput.val());
-            if (isNaN(val)) return;
+            if (isNaN(val)) {
+                return;
+            }
             return this.setSliderValue(val);
         },
 
         minChanged: function (e) {
             var val = parseFloat(this.minInput.val());
-            if (isNaN(val)) return;
-            if (this.currentValue < val) this.setSliderValue(val);
-            this.slider.slider("option", "min", val);
+            if (isNaN(val)) {
+                return;
+            }
+            if (this.currentValue < val) {
+                this.setSliderValue(val);
+            }
+            this.slider.slider('option', 'min', val);
+            this.inputSet();
         },
 
         maxChanged: function (e) {
             var val = parseFloat(this.maxInput.val());
-            if (isNaN(val)) return;
-            if (this.currentValue > val) this.setSliderValue(val);
-            this.slider.slider("option", "max", val);
+            if (isNaN(val)) {
+                return;
+            }
+            if (this.currentValue > val) {
+                this.setSliderValue(val);
+            }
+            this.slider.slider('option', 'max', val);
+            this.inputSet();
         },
 
         stepChanged: function (e) {
             var val = parseFloat(this.stepInput.val());
-            if (isNaN(val)) return;
-            this.slider.slider("option", "step", val);
+            if (isNaN(val)) {
+                return;
+            }
+            this.slider.slider('option', 'step', val);
+            this.inputSet();
         },
 
         inputChanged: function (e, ui) {
@@ -55,7 +70,9 @@ define(['backbone', 'underscore', 'jquery'],
 
             // make the slider
             this.slider = this.$el.find('.slider');
-            if (!this.slider) return;
+            if (!this.slider){
+                return;
+            }
 
             var extra = this.model.get('extra');
             var min = extra.min != undefined ? extra.min : -150;
@@ -91,20 +108,22 @@ define(['backbone', 'underscore', 'jquery'],
 
             // adjust settings dropdown so that it stays open while editing
             // doesn't select the node when you're editing
+            var view = this;
+
             $('.dropdown.keep-open').on({
-                "shown.bs.dropdown": function () {
-                    that.selectable = false;
-                    that.model.set('selected', false);
+                'shown.bs.dropdown': function () {
+                    view.selectable = false;
+                    view.model.set('selected', false);
                     $(this).data('closable', false);
                 },
-                "mouseleave": function () {
+                'mouseleave': function () {
                     $(this).data('closable', true);
                 },
-                "click": function () {
+                'click': function () {
                     $(this).data('closable', false);
                 },
-                "hide.bs.dropdown": function () {
-                    if ($(this).data('closable')) that.selectable = true;
+                'hide.bs.dropdown': function () {
+                    if ($(this).data('closable')) view.selectable = true;
                     return $(this).data('closable');
                 }
             });

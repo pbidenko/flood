@@ -14,7 +14,9 @@ define(['backbone', 'BaseWidgetView', 'NumberWidgetView', 'CodeBlockWidgetView',
     },
 
     map: {
-      "Number" : NumberWidgetView,
+      'Number' : NumberWidgetView,
+      'Integer Slider' : NumberWidgetView,
+      'Double Slider' : NumberWidgetView,
       'Code Block': CodeBlockWidgetView,
       'Boolean': BooleanWidgetView,
       'String': StringWidgetView

@@ -33,10 +33,10 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'NumberBase', 'jquer
             if (this.silent) return;
 
             var newValue = {
-                value: this.slider.slider("option", "value"),
-                min: this.slider.slider("option", "min"),
-                step: this.slider.slider("option", "step"),
-                max: this.slider.slider("option", "max"),
+                value: this.slider.slider('option', 'value'),
+                min: this.slider.slider('option', 'min'),
+                step: this.slider.slider('option', 'step'),
+                max: this.slider.slider('option', 'max'),
                 lock: this.lockInput.is(':checked')
             };
 

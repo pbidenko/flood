@@ -5,7 +5,9 @@ function (Node, NumberNode, CodeBlockNode, StringNode, BooleanNode, ListNode) {
         'Number': NumberNode,
         'String' : StringNode,
         'Boolean' : BooleanNode,
-        'List.Create': ListNode
+        'List.Create': ListNode,
+        'Integer Slider' : NumberNode,
+        'Double Slider': NumberNode
     };
 
     return {

@@ -82,7 +82,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'FLOOD'], function(B
       	ex.script = this.input.val();
 
       	var cmd = { property: "extra",
-            _id: that.model.get('_id'),
+            _id: this.model.get('_id'),
             newValue: ex
         };
 
