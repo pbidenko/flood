@@ -73,12 +73,11 @@ define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Ba
             index = 0,
             pos = 0;
 
-        geometry = new THREE.BufferGeometry();
-
         if (list.lineStripVertices.length && list.lineStripCounts.length) {
 
             for (var k = 0; k < list.lineStripCounts.length; k++) {
 
+                geometry = new THREE.BufferGeometry();
                 positions = [];
                 count = list.lineStripCounts[k];
                 if (!count) {
@@ -97,13 +96,13 @@ define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Ba
 
                 index += count;
                 geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+                geom.add(new THREE.Line(geometry, selected ? lineMatSelected : lineMat, THREE.LineStrip));
             }
-
-            geom.add(new THREE.Line(geometry, selected ? lineMatSelected : lineMat, THREE.LinePieces));
         }
 
         if (list.pointVertices.length) {
 
+            geometry = new THREE.BufferGeometry();
             geometry.addAttribute('position', new THREE.BufferAttribute(list.pointVertices, 3));
             mesh = new THREE.PointCloud(geometry, selected ? partMatSelected : partMat);
 
@@ -111,7 +110,7 @@ define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Ba
         }
 
         if (list.triangleVertices.length) {
-
+            geometry = new THREE.BufferGeometry();
             geometry.addAttribute('position', new THREE.BufferAttribute(list.triangleVertices, 3));
             geometry.addAttribute('normal', new THREE.BufferAttribute(list.triangleNormals, 3));
             mesh = new THREE.Mesh(geometry, selected ? meshMatSelected : meshMat);
