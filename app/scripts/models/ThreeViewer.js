@@ -166,15 +166,15 @@ define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Ba
             if (!this.idMap[e.id])
                 return;
 
-            this.idMap[node].traverse(function(el) { el.visible = e.visible; });
+            this.idMap[e.id].traverse(function(el) { el.visible = e.visible; });
         },
 
         changeWorkspace: function(e) {
-            e.ids.forEach(function (node) {
-                if (!this.idMap[node])
+            e.nodes.forEach(function (node) {
+                if (!this.idMap[node.id])
                     return;
 
-                this.idMap[node].traverse(function(el) { el.visible = e.visible; });
+                this.idMap[node.id].traverse(function(el) { el.visible = node.visible; });
             }.bind(this));
         },
 
@@ -201,8 +201,8 @@ define(['backbone', 'Viewport', 'staticHelpers', 'GeometryExport'], function (Ba
             threeGeom = threeTemp;
             this.idMap[id] = threeGeom;
 
-            if (visible)
-                this.viewPort.scene.add(threeGeom);
+            this.viewPort.scene.add(threeGeom);
+            this.nodeVisible({id: id, visible: visible});
         }
     });
 

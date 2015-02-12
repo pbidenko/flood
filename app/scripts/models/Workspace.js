@@ -99,16 +99,20 @@ define(['backbone', 'Nodes', 'Connection', 'Connections', 'scheme', 'FLOOD', 'Ru
         this.listenTo(this, 'requestRun', this.run);
 
         this.listenTo(this.get('nodes'), 'change:selected', function (e) {
-          this.trigger('nodeSelected',  {id: e.get('_id'), selected: e.get('selected')})
+          this.trigger('nodeSelected',  {id: e.get('_id'), selected: e.get('selected')});
         }.bind(this));
         this.listenTo(this.get('nodes'), 'change:visible', function (e) {
-          this.trigger('nodeVisible', {id: e.get('_id'), visible: e.get('visible')})
+          this.trigger('nodeVisible', {id: e.get('_id'), visible: e.get('visible')});
         }.bind(this));
         this.listenTo(this.get('nodes'), 'remove', function (e) {
-          this.trigger('nodeRemove', {id: e.get('_id')})
+          this.trigger('nodeRemove', {id: e.get('_id')});
         }.bind(this));
         this.listenTo(this, 'change:current', function (e) {
-          this.trigger('changeWorkspace', {ids: e.get('nodes').map(function(n){return n.get('_id');}), visible: e.get('current')})
+          this.trigger('changeWorkspace', {
+            nodes: e.get('nodes').map(function(n) {
+              return { id: n.get('_id'), visible: e.get('current') && n.get('visible') };
+            })
+          });
         }.bind(this));
         this.listenTo(this.get('nodes'), 'geometryUpdated', function (e) {
           this.trigger('geometryUpdated', e)
