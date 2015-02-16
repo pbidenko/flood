@@ -113,7 +113,7 @@ define(['backbone', 'ThreeCSGNodeView'], function (Backbone, ThreeCSGNodeView) {
                         // Dynamo has already deleted this connection
                         conn.silentRemove = true;
                         this.model.disconnectPort(i, conn, true);
-                        this.model.trigger('request-remove-conn-from-collection').remove(conn);
+                        this.model.trigger('request-remove-conn-from-collection', conn);
                     }
                 }
             }

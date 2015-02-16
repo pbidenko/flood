@@ -52,7 +52,7 @@ define(['backbone', 'underscore', 'jquery', 'BaseNodeView', 'FLOOD'], function(B
           var conn = this.model.getConnectionAtIndex(inputConns.length - 1);
 
           if (conn != null){
-              this.model.trigger('request-remove-conn-from-collection').remove(conn);
+              this.model.trigger('request-remove-conn-from-collection', conn);
           }
 
           inputConns.pop();

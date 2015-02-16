@@ -19,19 +19,19 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'SaveUplo
                 this.fetchOptions = options;
             },
 
-            fetchCore : function fetchCore(options) {
+            fetchCore : function(options) {
                 this.login.fetch();
 
                 this.context.fetchWorkspaces()
                     .done(function (response) {
                         var result = this.parse(response);
-                        this.set(result, this.options);
-                        if (options.success){
+                        this.set(result, this.fetchOptions);
+                        if (options && options.success){
                             options.success(response);
                         }
                     }.bind(this))
                     .fail(function (response) {
-                      if (options.error){
+                      if (options && options.error){
                             options.error(response);
                         }
                     });

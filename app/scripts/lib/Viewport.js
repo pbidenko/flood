@@ -72,7 +72,7 @@ define(['backbone', 'Three', 'OrbitControls'], function (Backbone, THREE) {
 
         renderer.setSize(2 * windowHalfX, 2 * windowHalfY);
 
-        this.render();
+        render.call(this);
     };
 
     function animate() {
@@ -140,7 +140,7 @@ define(['backbone', 'Three', 'OrbitControls'], function (Backbone, THREE) {
 
             controls = new THREE.OrbitControls(camera, container);
 
-            window.addEventListener('resize', onWindowResize, false);
+            window.addEventListener('resize', onWindowResize.bind(this), false);
 
             animate.call(this);
         };
