@@ -8,7 +8,6 @@ define(['backbone'], function (Backbone) {
 
         initialize: function (atts, vals) {
 
-            this.app = vals.app;
             var ws = vals.workspace;
             this.workspace = ws;
 

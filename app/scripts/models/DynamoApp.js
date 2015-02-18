@@ -8,7 +8,14 @@ define(['backbone', 'models/App', 'SocketConnection', 'SearchElement', 'SaveUplo
                 this.listenTo(this, 'libraryItemsList-received:event', this.mapLibraryItems);
                 this.saveUploader = new SaveUploader({ app: this });
                 this.listenTo(this.saveUploader, 'request-workspace-browser-refresh', this.refreshWorkspaceBrowser);
+                this.listenTo(this, 'computation-completed:event', this.updateNodes);
                 App.prototype.initialize.call(this);
+            },
+
+            updateNodes: function(e){
+                this.get('workspaces').forEach(function(ws){
+                    ws.updateNodeValues(e);
+                });
             },
 
             fetch: function (options) {

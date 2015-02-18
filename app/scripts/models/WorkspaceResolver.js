@@ -6,7 +6,7 @@ define(['backbone', 'FLOOD'],
     initialize: function(atts, arr) {
 
       this.workspace = arr.workspace;
-      this.app = arr.app;
+      this.workspaces = arr.workspaces;
 
     },
 
@@ -19,7 +19,6 @@ define(['backbone', 'FLOOD'],
       if (depIds.length === 0 || !depIds ) {
         console.log(this.workspace.get('name') + " has no dependencies");
         this.workspace.initializeRunner();
-        this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
         return;
@@ -29,7 +28,7 @@ define(['backbone', 'FLOOD'],
 
       console.log(this.workspace.get('name') + " has dependencies: " + JSON.stringify( depIds) );
 
-      this.listenTo(this.app.get('workspaces'), 'add', this.resolveDependency);
+      this.listenTo(this.workspaces, 'add', this.resolveDependency);
 
       depIds.forEach(this.awaitOrResolveDependency.bind(this));
     },
@@ -40,7 +39,7 @@ define(['backbone', 'FLOOD'],
 
     awaitOrResolveDependency: function(id){
 
-      var ws = this.app.getLoadedWorkspace(id);
+      var ws = this.workspaces.get(id);
       if (ws) {
         this.workspace.sendDefinitionToRunner( id );
         this.watchOneDependency( ws );
@@ -49,7 +48,7 @@ define(['backbone', 'FLOOD'],
       }
  
       this.awaitedWorkspaceDependencyIds.push(id);
-      this.app.loadWorkspaceDependency( id ); 
+      this.workspace.trigger('loadWorkspaceDependency', id ); 
 
     },
 
@@ -74,10 +73,9 @@ define(['backbone', 'FLOOD'],
 
       if (this.awaitedWorkspaceDependencyIds.length === 0) {
         this.workspace.initializeRunner();
-        this.workspace.listenTo( this.app, 'computation-completed:event', this.workspace.updateNodeValues);
         this.workspace.runAllowed = true;
         this.workspace.trigger('requestRun');
-        this.app.get('workspaces').add(this.workspace);
+        this.workspaces.add(this.workspace);
         this.cleanupDependencies();
       }
 
@@ -85,7 +83,7 @@ define(['backbone', 'FLOOD'],
 
     addWorkspaceDependency: function( id, watch ){
 
-      var ws = this.app.getLoadedWorkspace(id);
+      var ws = this.workspaces.get(id);
 
       if (!ws)
           throw new Error("You tried to add an unloaded workspace as a dependency!");
@@ -102,7 +100,7 @@ define(['backbone', 'FLOOD'],
 
     watchDependency: function( id ){
 
-      var ws = this.app.getLoadedWorkspace(id);
+      var ws = this.workspaces.get(id);
 
       var allDepWorkspaces = ws.get('workspaceDependencyIds').concat( id );
 
@@ -117,7 +115,7 @@ define(['backbone', 'FLOOD'],
     watchOneDependency: function( customNodeWorkspace ) {
 
         if (!customNodeWorkspace.id) {
-            customNodeWorkspace = this.app.getLoadedWorkspace(customNodeWorkspace);
+            customNodeWorkspace = this.workspaces.get(customNodeWorkspace);
         }
 
         if (this.watchedDependencies[ customNodeWorkspace.id ]) return;
@@ -143,7 +141,7 @@ define(['backbone', 'FLOOD'],
 
     syncCustomNodesWithWorkspace: function(workspace){
 
-      if (typeof workspace === "string") workspace = this.app.getLoadedWorkspace(workspace);
+      if (typeof workspace === "string") workspace = this.workspaces.get(workspace);
 
       this.syncDependencies( workspace );
       this.syncDirectlyAffectedCustomNodesWithWorkspace( workspace );
@@ -160,7 +158,7 @@ define(['backbone', 'FLOOD'],
       var newDeps = _.difference( depDeps, currDeps );
 
       newDeps.forEach(function(id){
-        this.workspace.sendDefinitionToRunner( this.app.getLoadedWorkspace( id ) );
+        this.workspace.sendDefinitionToRunner( this.workspaces.get( id ) );
         this.addWorkspaceDependency( id, true );
       }.bind(this));
 
@@ -307,18 +305,17 @@ define(['backbone', 'FLOOD'],
 
       var cns = this.workspace.getCustomNodes();
 
-      var thisApp = this.app;
       return cns.filter(function(cn){
 
         var id = cn.get('type').functionId
-          , ws = thisApp.getLoadedWorkspace( id );
+          , ws = this.workspaces.get( id );
 
         if (!ws) return false;
 
         var wsd = ws.get('workspaceDependencyIds');
         return id != functionId && wsd.indexOf( functionId ) != -1;
 
-      });
+      }.bind(this));
 
     }
 

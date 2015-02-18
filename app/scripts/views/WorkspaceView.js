@@ -542,7 +542,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
 
     watchNodeViewEvents: function(nodeView) {
         this.listenTo(nodeView, 'send-array-message', function(message) {
-            this.model.app.socket.send(JSON.stringify(message));
+            this.model.socket.send(JSON.stringify(message));
         });
 
         this.listenTo(nodeView, 'end-port-conn', this.endPortConnection);
@@ -551,7 +551,7 @@ define(['backbone', 'Workspace', 'ConnectionView', 'MarqueeView', 'NodeViewTypes
         });
 
         this.listenTo(nodeView, 'request-open-definition', function(id) {
-            this.model.app.openWorkspace( id );
+            this.model.trigger('openWorkspace', id);
         });
 
         if (nodeView.changeVisibility) {

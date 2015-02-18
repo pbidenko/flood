@@ -17,7 +17,7 @@ define(['backbone', 'HasUnsavedChangesMessage'], function(Backbone, HasUnsavedCh
             this.app.get('workspaces').each(this.setWorkspaceProperty.bind(this));
             this.listenTo( this.app.get('workspaces'), 'add', this.setWorkspaceProperty);
 
-            this.listenTo( this.app, 'closing-request', this.closingRequest);
+            this.listenTo( this.app.get('workspaces'), 'closing-request', this.closingRequest);
             this.listenTo( attrs.saveUploader, 'clear-home-request', this.clearHomeRequest );
 
             this.listenTo( attrs.saveUploader, 'saving-is-done', this.continueAction );

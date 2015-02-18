@@ -39,6 +39,13 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
 
       this.listenTo(this, 'code-block-node-updated:event', this.updateCodeBlockNode);
       this.listenTo(this, 'array-items-received:event', this.processArrayItems);
+      this.listenTo(this.get('workspaces'), 'sync-workspace:event', this.syncWorkspace);
+      this.listenTo(this.get('workspaces'), 'loadWorkspaceDependency', this.loadWorkspaceDependency);
+      this.listenTo(this.get('workspaces'), 'loadWorkspace', this.loadWorkspace);
+      this.listenTo(this.get('workspaces'), 'openWorkspace', this.openWorkspace);
+      this.listenTo(this.get('workspaces'), 'setClipboard', function(cb){this.clipBoard = cb});
+      this.listenTo(this.get('workspaces'), 'pastFromClipboard', function(id){this.getLoadedWorkspace(id).pasteFromClipboard(this.clipBoard)});
+      this.listenTo(this.get('workspaces'), 'setCurrentWorkspace', function(id){this.set('currentWorkspace', id )});
     },
 
     workspaceIdsAwaitingParse : [],
@@ -48,7 +55,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       var old = this.get('workspaces').slice();
       this.workspaceIdsAwaitingParse = _.pluck( resp.workspaces, '_id');
 
-      this.get('workspaces').add(resp.workspaces, {app: this});
+      this.get('workspaces').add(resp.workspaces, {workspaces: this.get('workspaces'), searchElements: this.SearchElements, socket: this.socket});
       this.get('workspaces').remove(old);
 
       this.workspaceIdsAwaitingParse = [];
@@ -140,7 +147,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       this.context.createNewWorkspace().done(function(data){
 
         data.name = 'Home';
-        var ws = new Workspace(data, {app: this });
+        var ws = new Workspace(data, {workspaces: this.get('workspaces'), searchElements: this.SearchElements, socket: this.socket });
         this.get('workspaces').add( ws );
         this.set('currentWorkspace', ws.get('_id') );
         if (callback) callback( ws );
@@ -160,7 +167,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
         data.guid = this.makeId();
         data.name = customNodeName;
 
-        var attr = { app : this };
+        var attr = { workspaces: this.get('workspaces'), searchElements: this.SearchElements, socket: this.socket };
         // if we need to not send it to the dynamo
         if (lazyInit ) {
             data.notNotifyServer = true;
@@ -213,7 +220,7 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
             }
 
             ws = new Workspace(data, {
-                app: this
+                workspaces: this.get('workspaces'), searchElements: this.SearchElements, socket: this.socket
             });
 
             allWorkspaces.add(ws);
@@ -290,10 +297,13 @@ define(['backbone', 'Workspaces', 'Node', 'Login', 'Workspace', 'SearchElements'
       } 
 
       this.get('workspaces').get(this.get('currentWorkspace')).set('current', true);
+    },
+
+    syncWorkspace:function(ws){
+      this.context.syncWorkspace(ws.method, ws.model, ws.options);
     }
+
   });
-
-
 });
 
 

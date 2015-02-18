@@ -85,20 +85,18 @@ define(['backbone'], function(Backbone) {
     },
 
     click: function(e) {
-      this.model.app.set('currentWorkspace', this.model.get('_id'));
+      this.model.trigger('setCurrentWorkspace', this.model.get('_id'));
     },
 
     remove: function(e) {
-        var app = this.model.app;
-
         // don't remove Home workspace
         if (this.model.get('isCustomNode')) {
 
             if (this.model.get('askForUnsavedChanges')) {
-                app.trigger('closing-request', this.model);
+                this.model.trigger('closing-request', this.model);
             }
             else {
-                app.get('workspaces').trigger('hide', this.model);
+                this.model.trigger('hide', this.model);
             }
         }
         else {

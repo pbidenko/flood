@@ -3,6 +3,7 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
 
     var DynamoRunner =  AbstractRunner.extend({
         initialize: function (attrs, vals) {
+            this.socket = vals.socket;
             AbstractRunner.prototype.initialize.call(this, attrs, vals);
         },
 
@@ -10,7 +11,7 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
             if (commands.hasOwnProperty(data.kind)) {
                 var messages = commands[data.kind].call(this, data);
                 if (messages)
-                    this.app.socket.send(messages);
+                    this.socket.send(messages);
             }
 
             AbstractRunner.prototype.postMessage.call(this, data, quiet);
@@ -21,7 +22,7 @@ define(['AbstractRunner', 'commandsMap', 'RecordableCommandsMessage', 'CreateNod
         },
 
         updateNode: function (node) {
-            this.app.socket.send(createMessage.call(this, UpdateModelValueCommand.syncProperties({ full: true }, node.attributes)));
+            this.socket.send(createMessage.call(this, UpdateModelValueCommand.syncProperties({ full: true }, node.attributes)));
 
             AbstractRunner.prototype.updateNode.call(this, node);
         },

@@ -50,7 +50,7 @@ define([  'backbone',
         this.listenTo(this.model.login, 'change:isFirstExperience', this.showHelpOnFirstExperience);
 
         this.pendingRequestsCount = 0;
-        this.listenTo(this.model, 'requestGeometry', function(){
+        this.listenTo(this.model.get('workspaces'), 'requestGeometry', function(){
             if(this.pendingRequestsCount === 0)
                 this.showProgress();
             this.pendingRequestsCount++;
